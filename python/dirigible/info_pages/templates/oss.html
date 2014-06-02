@@ -1,0 +1,112 @@
+{% extends "info_page.html" %}
+
+{% block title %}
+    Thanks to Open Source Projects: Dirigible
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/info_page.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+
+{% block middle %}
+
+    <h1>Thanks!</h1>
+
+    <p>
+    It would have been much harder to create Dirigible without a bunch of great
+    Open Source projects, and we'd like to take this opportunity to say "thanks!"
+
+    <p>
+    The most visible projects we use are:
+
+    <ul>
+        <li>Michael Leibman's excellent <a href="https://github.com/mleibman/SlickGrid">SlickGrid</a>,
+            an essential part of a programmable cloud <i>spreadsheet</i>.
+        <li>Almost as important for the <i>programmable</i> part is the
+            <a href="http://ace.ajax.org/">Ajax.org Cloud9 Editor</a>, aka ACE.
+        <li>Dirigible is, of course, programmable in <a href="http://www.python.org/">Python</a>.
+    </ul>
+
+    <p>
+    There are tons of great Open Source libraries for Python, and we've made sure that some of the best
+    are pre-installed:
+
+    <ul>
+        <li><a href="http://numpy.scipy.org/">NumPy</a>, the fundamental package needed for scientific computing with Python.
+        <li><a href="http://gmpy.sourceforge.net/">GmPy</a>, provides multiprecision arithmetic
+        <li><a href="http://code.google.com/p/mpmath/">MpMath</a>, another library for multiprecision floating-point arithmetic.
+        <li>The <a href="http://www.scipy.org/">SciPy</a> library, providing scientific tools for mathematics, science, and engineering.
+        <li><a href="http://www.dlitz.net/software/pycrypto/">PyCrypto</a>, the Python cryptography toolkit.
+        <li><a href="http://www.sqlalchemy.org/">SqlAlchemy</a>, a Python SQL toolkit and object relational mapper.
+        <li><a href="http://codespeak.net/lxml/">LXML</a>, for working with XML and HTML.
+        <li><a href="http://pypi.python.org/pypi/xlrd">xlrd</a>, for reading Excel files.
+        <li><a href="http://www.rdflib.net/">RDFLib</a>, for working with <a href="http://www.w3.org/RDF/">RDF</a>.
+        <li><a href="http://code.google.com/p/geopy/">GeoPy</a>, a geocoding toolbox.
+        <li><a href="http://www.crummy.com/software/BeautifulSoup/">Beautiful Soup</a>, a forgiving HTML parser for real-world web pages.
+        <li><a href="http://wwwsearch.sourceforge.net/mechanize/">Mechanize</a>, stateful programmatic web browsing.
+    </ul>
+
+    <p>
+    Less directly visible to users, our server-side stack includes many
+    open source components, including:
+    <ul>
+        <li>
+        <a href="http://www.debian.org/">Debian</a> the GNU/Linux operating
+                    system on which it all runs.
+        </li>
+
+        <li>
+        <a href="http://httpd.apache.org/">Apache</a>, the world's most
+                    popular web-server.
+        </li>
+
+        <li>
+        <a href="http://code.google.com/p/modwsgi/">Modwsgi</a> for
+                    Apache, connecting our web server to Python.
+        </li>
+
+        <li>
+        <a href="http://pypi.python.org/pypi/Django/1.2.5">Django</a> a
+                    Python web framework.
+        </li>
+
+        <li>
+        <a href="http://pypi.python.org/pypi/django-registration/">
+                    Django-registration</a>, making it easy for users to sign up
+                    to Dirigible.
+        </li>
+
+        <li>
+        <a href="http://pypi.python.org/pypi/setuptools">setuptools</a>,
+                    The Python library to install Python libraries.
+        </li>
+    </ul>
+
+    <p>
+    Finally, back at the coal-face, our programmers use many development tools
+    and libraries, the most prominent of which are:
+
+    <ul>
+        <li>
+        <a href="http://pypi.python.org/pypi/unittest2">Unittest2</a> and
+        <a href="http://pypi.python.org/pypi/mock">Mock</a>,
+                indispensible Python testing libraries by eminent
+                Resolver Systems alumnus Michael Foord.
+        </li>
+
+        <li>
+        <a href="http://pypi.python.org/pypi/ply/3.1">Ply</a>, by David
+                Beazley, allows us to parse our customised Python grammer for cell
+                formulae.
+        </li>
+
+        <li>
+        <a href="http://pypi.python.org/pypi/chardet/">Chardet</a>, by Mark
+                Pilgrim, is a godsend for discerning unicode encodings.
+        </li>
+    </ul>
+
+{% endblock %}
+

@@ -1,0 +1,338 @@
+body {
+    /* prevents splitter resizing that sometimes leaves space for
+       scrollbars that are not there. This does mean that there
+       are no scrollbars when the grid, code pane and error console
+       are larger than the window */
+    overflow: hidden;
+}
+
+#id_header_and_toolbar {
+    /* We explicitly set the header height here so that Chrome
+       doesn't miscalculate the height and cause the bottom
+       of the grid to fall off the window */
+    height: 160px;
+}
+
+#id_ie_warning {
+    background: #444;
+    margin-top: 13px;
+    margin-right: 13px;
+    padding: 1px 2px;
+    float: right;
+}
+
+
+#id_copy_sheet_div {
+    padding-top: 45px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+    text-align: center;
+}
+
+
+#id_copy_sheet_div a {
+    text-decoration: underline;
+}
+
+
+#id_sheet_name_wrap {
+    width: 60%;
+    float: left;
+}
+
+#id_sheet_name {
+    margin-left: 10px;
+    font-size: 28pt;
+    margin-right: 10px;
+    margin-top: 20px;
+    overflow: hidden;
+    height: 32pt;
+}
+
+
+#edit-id_sheet_name {
+    margin-left: 6px;
+    margin-right: 10px;
+    margin-top: 17px;
+    font-size: 28pt;
+    width: 97%;
+}
+
+.jeip-mouseover {
+    background: #D1D2D4;
+}
+
+
+/* The icon toolbar */
+#id_toolbar_wrap {
+    width: 40%;
+    float: right;
+}
+
+#id_toolbar {
+    padding-left: 20px;
+    padding-right: 20px;
+    text-align: right;
+}
+
+/* Separators above and below the icon toolbar */
+.toolbar_line {
+    border: 0 none;
+    padding: 0 0 0 50px;
+    height: 1px;
+    background-color: #5cbee5;
+    color: #5cbee5;
+}
+
+#id_toolbar_buttons {
+    float: left;
+    margin-top: 32px;
+}
+
+#id_spinner_image {
+    float: right;
+}
+
+#id_buffering_message {
+    position: absolute;
+    font-weight: bold;
+    font-size: small;
+    left: 100px;
+    top: 70px;
+    font-family: monospace;
+}
+
+#id_grid_and_code {
+    /* splitter */
+    min-height: 400px;
+}
+
+#id_left_column a {
+    color: #49546A;
+}
+
+#id_left_column {
+    color: #49546a;
+    margin: 0;
+    width: 60%;
+    /* splitter */
+    overflow: hidden;
+}
+
+#id_right_column {
+    background: #009EE0;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    /* splitter */
+    overflow: hidden;
+}
+
+/* Usercode editor */
+#id_usercode_wrap {
+    position: absolute; 
+    top: 0; 
+    left: 10px; 
+    width: 100%; 
+    height: 100%;
+}
+
+#id_usercode {
+    background-color: white;
+    position: absolute; 
+    top: -12px; 
+    left: 10; 
+}
+
+.user_code .heading {
+    background: #2E82AE;
+}
+
+/* Error console */
+#id_console_wrap {
+    height: 100px;
+}
+
+#id_console {
+    white-space: pre;
+    overflow: auto;
+    background: white;
+    color: black;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.console_error_text {
+    color: #ff0000;
+}
+
+.console_output_text {
+    color: #000000;
+}
+
+.console_system_text {
+    font-style: italic;
+    color: #000000;
+}
+
+#id_formula_bar {
+    margin: 0 10px 10px 11px;
+    padding: 3px;
+    border: 1px solid #888888;
+}
+
+/* SlickGrid stuff */
+#id_grid {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.grid-canvas {
+    background: #ffffff;
+}
+
+.c0 {
+    color: #ffffff;
+    text-align: right;
+}
+
+.even .c0 {
+    background: #2E82AE;
+    border-color: #2E82AE;
+}
+
+.odd .c0 {
+    background: #1a6e9a;
+    border-color: #1a6e9a;
+}
+
+.slick-header-columns div {
+    background: #2E82AE;
+    color: #ffffff;
+    text-align: center;
+}
+
+.slick-header-column.ui-state-default {
+    border-right: 0 !important;
+}
+
+.slick-cell {
+    font-size: 12pt;
+}
+
+.slick-cell.active {
+    margin-left: 0;
+    margin-top: 0;
+    border: solid gray 1px;
+}
+
+.slick-cell.selected {
+    background-color : #C8E9F7;
+}
+
+.slick-cell.active.selected {
+    background-color : #FFFFFF;
+}
+
+input.editor-text {
+    background:none repeat scroll 0 0 transparent;
+    border:0 none;
+    height:100%;
+    margin:0;
+    outline:0 none;
+    padding:0;
+    width:100%;
+    font-size: 12pt; 
+}
+
+.grid_formula {
+    color: #BBBBBB;
+}
+
+/* Splitter */
+.vsplitbar {
+    width: 6px;
+    background: #80CFF0 url(/static/splitter/img/vgrabber.png) no-repeat center;
+}
+.hsplitbar {
+    height: 6px;
+    background: #80CFF0 url(/static/splitter/img/hgrabber.png) no-repeat center;
+}
+
+/* Copyright and "extra links" stuff at the bottom of the page */
+.column_footer {
+    position: absolute;
+    bottom: 0;
+    padding-left: 20px;
+}
+
+
+#id_tutorial_promo_dialog_close {
+    margin-top: 1ex;
+    font-size: large;
+}
+
+#id_import_form form {
+    text-align: right;
+}
+
+#id_import_form_upload_csv_button {
+    font-weight: bold;
+}
+
+#id_import_form_upload_xls_values_button {
+    font-weight: bold;
+}
+
+#id_security_form {
+}
+
+#id_security_form form {
+}
+
+#id_security_form_general_settings {
+    margin-bottom: 2ex;
+}
+
+#id_security_form_api_settings {
+    margin-bottom: 1ex;
+}
+
+#id_security_form_api_subsettings {
+    margin-top: 1ex;
+    margin-left: 2em;
+}
+
+#id_security_form_public_sheet_help {
+    font-size: smaller;
+    margin-left: 2em;
+}
+
+#id_security_form_json_help {
+    font-size: smaller;
+    margin-left: 2em;
+}
+
+#id_security_form_ok_button {
+    font-weight: bold;
+}
+
+#id_security_form_json_api_key {
+    width: 200px;
+}
+
+#id_security_form_json_api_url {
+    width: 200px;
+}
+
+#id_security_form_save_error {
+    font-size: smaller;
+    margin-top: 3ex;
+}
+
+
+td.label {
+}
+

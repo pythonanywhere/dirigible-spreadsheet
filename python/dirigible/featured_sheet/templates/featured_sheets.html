@@ -1,0 +1,39 @@
+{% extends "info_page.html" %}
+
+{% block title %}
+    Featured Sheets: Dirigible
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/info_page.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block middle %}
+
+  <h1>Featured sheets</h1>
+
+    {% for sheet in sheets %}
+      <div class="{{sheet.sheet.id}}">
+      <div class="featured_sheet_actions">
+          {% if sheet.more_info_url %}
+          <span class="featured_sheet_more_info">
+              <a href="{{sheet.more_info_url}}">More info</a>
+          </span>
+          {% endif %}
+          <span class="featured_sheet_view_link">
+              <a  href="{% url sheet_page sheet.sheet.owner.username sheet.sheet.id %}">View sheet</a>
+          </span>
+          <span class="featured_sheet_copy_link">
+              <a  href="{% url sheet_copy_sheet sheet.sheet.owner.username sheet.sheet.id %}">Get a copy</a>
+          </span>
+      </div>
+      <h2 class="featured_sheet_name">
+          <a href="{% url sheet_page sheet.sheet.owner.username sheet.sheet.id %}">{{sheet.sheet.name}}</a>
+      </h2>
+      <div class="featured_sheet_description">{{sheet.description}}</div>
+      </div>
+
+        {% endfor %}
+
+{% endblock %}

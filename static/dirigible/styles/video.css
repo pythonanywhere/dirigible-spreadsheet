@@ -1,0 +1,8 @@
+body {
+    background: #000000;
+}
+
+#id_video_div {
+    margin-left: -125px;
+    margin-top: 20px;
+}

@@ -1,0 +1,61 @@
+{% extends "non_sheet_page_small_logo.html" %}
+
+{% block title %}
+    Welcome to Project Dirigible
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/registration.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="/static/dirigible/styles/login.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block content %}
+    <div class="clear"> </div>
+
+    <div id="id_signup_vwrap" class="centered-block">
+        <div id="id_signup_hwrap" class="grey_rounded_corner_box">
+            {% if account %}
+                <h3>Welcome to Dirigible!</h3>
+
+                <p>
+                    Thank you for signing up, you're ready to go.  Just log in below
+                    using the username and password you registered with.
+                </p>
+
+                <div id="id_login_form">
+                    <form action="{% url login %}" method="post">
+
+                        <div id="id_username_wrap">
+                            <span id="id_username_label"><label for="id_username">Username</label>:</span>
+
+                            <input id="id_username" type="text" name="username" maxlength="30" />
+                        </div>
+                        <div id="id_password_wrap">
+                            <span id="id_password_label"><label for="id_password">Password</label>:</span>
+                            <input type="password" name="password" id="id_password" />
+                        </div>
+
+                        <input type="hidden" name="next" value="" />
+
+                        <div class="clear"> </div>
+
+                        <input type="submit" class="blue_button" id="id_login" value="Login" />
+
+                    </form>
+                </div>
+            {% else %}
+                <h3>Unrecognised activation code</h3>
+
+                <p>
+                    Sorry, the activation link you used was not recognised, or has already been used.
+                    Please check it and try again; if you think your account might already be activated,
+                    try <a href="{% url login %}">logging in</a>.
+                </p>
+
+            {% endif %}
+        </div>
+
+    </div>
+{% endblock %}
+

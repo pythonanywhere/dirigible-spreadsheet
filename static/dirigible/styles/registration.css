@@ -1,0 +1,88 @@
+#id_signup_vwrap {
+    margin-top: 3em;
+}
+
+
+#id_signup_hwrap {
+    width: 30em;
+    clear: both;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1.5em 2em;
+}
+
+#id_register_intro_text {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+td.label {
+    font-size: 20px;
+    text-align: right;
+    width: 35%;
+    padding-right: 5px;
+}
+
+
+td.input {
+    width: 60%;
+}
+td.input input{
+    font-size: 20px;
+    border: 1px solid #888888;
+    width: 95%;
+    padding: 4px;
+}
+
+#id_signup_button {
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    height: 31pt;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#id_signup_table {
+    width: 100%;
+}
+
+td {
+    text-align: right;
+}
+
+ul.errorlist {
+    list-style-type: none;
+    margin: 1em 0 0 0;
+    color: #880000;
+}
+
+#id_password1.error, #id_password2.error {
+    background-color: #FFDDDD;
+}
+
+#id_signup_form {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+#id_signup_hwrap p#id_link_home_para {
+    margin-top: 1em; !important
+}
+
+#id_link_home {
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+#id_login_form {
+    text-align: center;
+}
+
+#id_we_dont_spam {
+    text-align: center;
+    margin-top: 20px;
+}
+

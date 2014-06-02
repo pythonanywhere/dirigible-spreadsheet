@@ -1,0 +1,26 @@
+{% extends "non_sheet_page_small_logo.html" %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/info_page.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+
+{% block content %}
+
+    <div id="id_extra_banner_spacing"></div>
+
+    <div id="id_main_background">
+        <div id="id_content_background" class="centered-block">
+
+            <div id="id_text">
+
+                {% block middle %}
+                {% endblock %}
+
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}

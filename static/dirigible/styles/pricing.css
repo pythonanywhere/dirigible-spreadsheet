@@ -1,0 +1,50 @@
+#id_beta_free_splash {
+    background-color: #FFEB8C;
+}
+
+
+#id_price_plan_table {
+    border-spacing: 20px;
+}
+
+#id_price_plan_table td {
+    background-color: #99DDFF;
+    border-radius: 12px;
+    -moz-border-radius: 12px;
+    border: 2px solid #009EE0;
+    padding: 20px;
+    font-size: 12px;
+}
+
+#id_tax {
+    font-size: smaller;
+}
+
+
+.plan_cell {
+    width: 25%;
+    vertical-align: top;
+}
+
+
+.plan_cell ul {
+    padding-left: 15px;
+    margin: 0;
+}
+
+
+.plan_header {
+    margin-bottom: 7px;
+}
+
+
+.plan_name {
+    font-size: 18px;
+}
+
+
+.plan_price {
+    margin-top: 4px;
+    font-size: 14px;
+    float: right;
+}

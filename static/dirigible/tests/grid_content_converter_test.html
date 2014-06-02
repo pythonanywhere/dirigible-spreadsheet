@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+      <script src="yuitest/yuitest-combo.js"></script>
+      <script src="jsmock.js"></script>
+
+      <script src="../../json/json2.js"></script>
+      <script src="../../jquery/jquery-1.4.2.min.js"></script>
+      <script src="../../slickgrid/slick.editors.js"></script>
+
+      <script src="../scripts/grid_content_converter.js"></script>
+
+      <script src="test_utils.js"></script>
+      <link rel="stylesheet" type="text/css" href="logger.css" />
+      <link rel="stylesheet" type="text/css" href="testlogger.css" />
+
+
+  </head>
+
+  <body>
+    <div id="id_results">Please wait</div>
+
+    <script type="text/javascript">
+
+        tests = [
+
+            new YAHOO.tool.TestCase({
+
+                name: "testSlickGridCellDataToPostParams",
+
+                testConvertWithPopulatedCell : function () {
+                    var mockControl = new MockControl();
+                    var mockGrid = mockControl.createMock({
+                        getCellFormula: function() {}
+                    });
+
+                    var slickCellLocation = { row: 3, cell: 24 };
+                    mockGrid.expects().getCellFormula(slickCellLocation).andReturn(
+                        "the changed formula"
+                    );
+
+                    var postData = slickGridCellDataToPostParams(mockGrid, slickCellLocation);
+
+                    mockControl.verify();
+
+                    var expectedPostData = {
+                        formula: "the changed formula",
+                        column: 24,
+                        row: 4
+                    };
+                    assertDeepAreSame(expectedPostData, postData);
+                }
+
+            }),
+
+            new YAHOO.tool.TestCase({
+
+                name: "testGetGridCellFormula",
+
+                setUp: function() {
+                    this.mockControl = new MockControl();
+                    this.mockGrid = this.mockControl.createMock({
+                        getDataItem: function() {},
+                        getColumns: function() {}
+                    });
+                },
+
+                testGetGridCellFormulaShouldReturnFormulaIfThereIsOne: function () {
+                    var slickCellLocation = { row: 4, cell: 16 };
+
+                    this.mockGrid.expects().getColumns().andReturn(
+                        { 16: { field: "column_field" } }
+                    );
+                    this.mockGrid.expects().getDataItem(4).andReturn(
+                        { column_field: { formula: "=A1", formatted_value: "22323" } } 
+                    );
+
+                    var result = getGridCellFormula(this.mockGrid, slickCellLocation);
+
+                    this.mockControl.verify();
+
+                    YAHOO.util.Assert.areSame("=A1", result);
+                },
+
+                testGetGridCellFormulaShouldReturnEmptyStringIfGridModelHasNoDataForRow: function () {
+                    var slickCellLocation = { row: 4, cell: 16 };
+
+                    this.mockGrid.expects().getColumns().andReturn(
+                        { 16: { field: "column_field" } }
+                    );
+                    this.mockGrid.expects().getDataItem(4).andReturn(
+                        undefined
+                    );
+
+                    var result = getGridCellFormula(this.mockGrid, slickCellLocation);
+
+                    this.mockControl.verify();
+
+                    YAHOO.util.Assert.areSame("", result);
+                },
+
+                testGetGridCellFormulaShouldReturnEmptyStringIfGridModelHasNoDataForColumnInThatRow: function () {
+                    var slickCellLocation = { row: 4, cell: 16 };
+
+                    this.mockGrid.expects().getColumns().andReturn(
+                        { 16: { field: "column_field" } }
+                    );
+                    this.mockGrid.expects().getDataItem(4).andReturn(
+                        { }
+                    );
+
+                    var result = getGridCellFormula(this.mockGrid, slickCellLocation);
+
+                    this.mockControl.verify();
+
+                    YAHOO.util.Assert.areSame("", result);
+                },
+
+                testGetGridCellFormulaShouldReturnEmptyStringIfFormulaNotPresentInCell: function () {
+                    var slickCellLocation = { row: 4, cell: 16 };
+
+                    this.mockGrid.expects().getColumns().andReturn(
+                        { 16: { field: "column_field" } }
+                    );
+                    this.mockGrid.expects().getDataItem(4).andReturn(
+                        { column_field: { formatted_value: "23232323" } } 
+                    );
+
+                    var result = getGridCellFormula(this.mockGrid, slickCellLocation);
+
+                    this.mockControl.verify();
+
+                    YAHOO.util.Assert.areSame("", result);
+                }
+
+            })
+
+        ];
+    </script>
+    <script src="yuirunner.js"></script>
+  </body>
+
+</html>

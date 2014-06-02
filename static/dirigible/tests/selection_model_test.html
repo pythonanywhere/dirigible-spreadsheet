@@ -1,0 +1,430 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.caret.1.02.min.js"></script>
+
+    <script type="text/javascript" src="yuitest/yuitest-combo.js"></script>
+    <script type="text/javascript" src="jsmock.js"></script>
+    <script type="text/javascript" src="test_utils.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+
+    <script type="text/javascript" src="/static/jquery/jquery.event.drag-2.0.min.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.core.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.grid.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.cellrangedecorator.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.cellrangeselector.js"></script>
+
+    <script type="text/javascript" src="/static/dirigible/scripts/keyboard_cellrange_selector.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/selection_model.js"></script>
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testSelectionModel",
+
+            setUp: function() {
+                this.mockControl = new MockControl();
+                this.mockGrid = this.mockControl.createMock({
+                    registerPlugin: function() {},
+                    unregisterPlugin: function() {},
+                    setActiveCell: function() {},
+                    getActiveCell: function() {},
+                    getEditController: function() {},
+                    canCellBeSelected: function() {}
+                });
+                this.eventHandlerPattern = {
+                    subscribe : function() {},
+                    unsubscribe : function() {},
+                    notify :  function() {}
+                };
+                this.mockGrid.onActiveCellChanged = this.mockControl.createMock(this.eventHandlerPattern);
+            },
+
+
+            testConstructorShouldCreateSelector: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                YAHOO.util.Assert.areSame(2, selectionModel.selectors.length);
+                YAHOO.util.Assert.isTrue(
+                            selectionModel.selectors[0] instanceof Slick.CellRangeSelector
+                );
+                YAHOO.util.Assert.isTrue(
+                            selectionModel.selectors[1] instanceof Dirigible.KeyboardCellRangeSelector
+                );
+            },
+
+
+            testConstructorShouldCreateSelectedRangesChangedEvent: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                YAHOO.util.Assert.isTrue(selectionModel.onSelectedRangesChanged instanceof Slick.Event);
+            },
+
+
+            testConstructorShouldCreateEmptyRangesAttribute: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                assertDeepAreSame([], selectionModel.ranges);
+            },
+
+
+            testInitMethodShouldSubscribeToGridEventsRegisterPluginAndSubscribeToSelectorEvents: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                for (var i=0; i<2; i++) {
+                    selectionModel.selectors[i] = this.mockControl.createMock({});
+                    selectionModel.selectors[i].onBeforeCellRangeSelected = this.mockControl.createMock({subscribe: function() {}});
+                    selectionModel.selectors[i].onCellRangeSelected = this.mockControl.createMock({subscribe: function() {}});
+                }
+                selectionModel.getHandleActiveCellChanged = function() {return 'ActiveCellChanged handler';};
+                selectionModel.getHandleBeforeCellRangeSelected = function() {return 'HandleBeforeCellRangeSelected handler';};
+                selectionModel.getHandleCellRangeSelected = function() {return 'HandleCellRangeSelected handler';};
+
+                this.mockControl.reset();
+                this.mockGrid.onActiveCellChanged.expects().subscribe(
+                    'ActiveCellChanged handler'
+                );
+                for (var i=0; i<2; i++) {
+                    this.mockGrid.expects().registerPlugin(selectionModel.selectors[i]);
+                    selectionModel.selectors[i].onBeforeCellRangeSelected.expects().subscribe(
+                    'HandleBeforeCellRangeSelected handler'
+                    );
+                    selectionModel.selectors[i].onCellRangeSelected.expects().subscribe(
+                    'HandleCellRangeSelected handler'
+                    );
+                }
+                selectionModel.init(this.mockGrid);
+
+                this.mockControl.verify();
+
+                YAHOO.util.Assert.areSame(selectionModel.handleActiveCellChanged, 'ActiveCellChanged handler');
+                YAHOO.util.Assert.areSame(selectionModel.handleBeforeCellRangeSelected, 'HandleBeforeCellRangeSelected handler');
+                YAHOO.util.Assert.areSame(selectionModel.handleCellRangeSelected, 'HandleCellRangeSelected handler');
+            },
+
+
+            testDestroyMethodShouldUnsubscribeFromGridEventsUnregisterPluginAndUnsubscribeFromSelectorEvents: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                selectionModel.init(this.mockGrid);
+                this.mockControl.reset();
+
+                this.mockGrid.onActiveCellChanged = this.mockControl.createMock(this.eventHandlerPattern);
+                this.mockGrid.onActiveCellChanged.expects().unsubscribe(
+                    selectionModel.handleActiveCellChanged
+                );
+
+                for (var i=0; i<selectionModel.selectors.length; i++) {
+                    selectionModel.selectors[i].onBeforeCellRangeSelected = this.mockControl.createMock(this.eventHandlerPattern);
+                    selectionModel.selectors[i].onBeforeCellRangeSelected.expects().unsubscribe(
+                        selectionModel.handleBeforeCellRangeSelected
+                    );
+
+                    selectionModel.selectors[i].onCellRangeSelected = this.mockControl.createMock(this.eventHandlerPattern);
+                    selectionModel.selectors[i].onCellRangeSelected.expects().unsubscribe(
+                        selectionModel.handleCellRangeSelected
+                    );
+
+                    this.mockGrid.expects().unregisterPlugin(selectionModel.selectors[i]);
+                }
+
+                selectionModel.destroy();
+
+                this.mockControl.verify();
+            },
+
+
+            testGetSelectedRangesShouldReturnInternalAttribute : function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                selectionModel.ranges = "Something completely different";
+                YAHOO.util.Assert.areSame(selectionModel.ranges, selectionModel.getSelectedRanges());
+            },
+
+
+            testSetSelectedRangesShouldSetInternalAttributeAndFireEvent : function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                var newRanges = [
+                    {
+                        fromRow : 1, toRow : 5,
+                        fromCell : 12, toCell : 24
+                    },
+                    {
+                        fromRow : 2, toRow : 6,
+                        fromCell : 11, toCell : 22
+                    }
+                ];
+
+                selectionModel.onSelectedRangesChanged = this.mockControl.createMock(this.eventHandlerPattern);
+                selectionModel.onSelectedRangesChanged.expects().notify(newRanges);
+
+                selectionModel.setSelectedRanges(newRanges);
+                assertDeepAreSame(newRanges, selectionModel.ranges);
+                this.mockControl.verify();
+            },
+
+
+            testHandleCellRangeSelectedShouldCallSetSelectedRangesWithListContainingNewRange : function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                selectionModel.init(this.mockGrid);
+                this.mockControl.reset();
+
+                var newRange = {
+                    fromRow : 1, toRow : 5,
+                    fromCell : 12, toCell : 24
+                };
+
+                var mockSetSelectedRangesParams = undefined;
+                selectionModel.setSelectedRanges = function (newSelectedRanges) {
+                    mockSetSelectedRangesParams = newSelectedRanges;
+                };
+
+                selectionModel.handleCellRangeSelected({}, { range: newRange });
+
+                assertDeepAreSame([newRange], mockSetSelectedRangesParams);
+            },
+
+            testHandleBeforeCellRangeSelectedShouldSetActiveCellOnGridAndCommitsCurrentEditIfCellIsSelectable: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                selectionModel.init(this.mockGrid);
+                this.mockControl.reset();
+
+                var mockController = this.mockControl.createMock({
+                    commitCurrentEdit: function() {}
+                });
+                this.mockGrid.expects().canCellBeSelected(4, 8).andReturn(true);
+                this.mockGrid.expects().getEditController().andReturn(mockController);
+                mockController.expects().commitCurrentEdit();
+                this.mockGrid.expects().setActiveCell(4, 8);
+
+                result = selectionModel.handleBeforeCellRangeSelected(
+                    {}, {row: 4, cell: 8}
+                );
+
+                YAHOO.util.Assert.isTrue(result);
+                this.mockControl.verify();
+            },
+
+            testHandleBeforeCellRangeSelectedShouldNotSetActiveCellOnGridOrCommitCurrentEditIfCellIsNotSelectable: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                selectionModel.init(this.mockGrid);
+                this.mockControl.reset();
+
+                var mockController = this.mockControl.createMock({
+                    commitCurrentEdit: function() {}
+                });
+                this.mockGrid.expects().canCellBeSelected(4, 8).andReturn(false);
+
+                result = selectionModel.handleBeforeCellRangeSelected(
+                    {}, {row: 4, cell: 8}
+                );
+
+                YAHOO.util.Assert.isTrue(result);
+                this.mockControl.verify();
+            },
+
+            testHandleActiveCellChangedClearsCurrentSelection: function () {
+                var selectionModel = new Dirigible.SelectionModel();
+                selectionModel.init(this.mockGrid);
+                selectionModel.ranges = ['some selected ranges before'];
+                this.mockControl.reset();
+                var cell = {row: 1, cell: 1};
+                this.mockGrid.expects().getActiveCell().andReturn(cell);
+
+                result = selectionModel.handleActiveCellChanged(null, {});
+
+                var expected_range = new Slick.Range(
+                    cell.row, cell.cell,
+                    cell.row, cell.cell);
+                assertDeepAreSame([expected_range], selectionModel.ranges);
+
+            }
+        }),
+
+        new YAHOO.tool.TestCase({
+
+            name: "testKeyboardSelector",
+
+            setUp: function() {
+                this.mockControl = new MockControl();
+                this.mockSelectionModel = this.mockControl.createMock({});
+                this.mockGrid = this.mockControl.createMock({
+                    registerPlugin: function() {},
+                    unregisterPlugin: function() {},
+                    setActiveCell: function() {},
+                    getActiveCell: function() {}
+                });
+                this.eventHandlerPattern = {
+                    subscribe : function() {},
+                    unsubscribe : function() {},
+                    notify :  function() {}
+                };
+                this.mockGrid.onActiveCellChanged = this.mockControl.createMock(this.eventHandlerPattern);
+                this.mockGrid.onKeyDown = this.mockControl.createMock(this.eventHandlerPattern);
+            },
+
+            testConstructor: function () {
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+                YAHOO.util.Assert.isFalse(selector.isShiftDown);
+                YAHOO.util.Assert.areSame(null, selector.startCell);
+            },
+
+
+            testInitStoresGridAndSubscribesToGridKeyDownAndOnActiveCellChangedAndWindowKeyUp: function () {
+                var handler_called = false;
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+                selector.getKeyDownHandler = function () { return 'handlie'; };
+                selector.getKeyUpHandler = function () { return function () {handler_called = true;}; };
+                selector.getActiveCellChangedHandler = function () { return 'handlie 2'; };
+
+                this.mockGrid.onKeyDown.expects().subscribe('handlie');
+                this.mockGrid.onActiveCellChanged.expects().subscribe('handlie 2');
+                selector.init(this.mockGrid);
+
+                this.mockControl.verify();
+                $(window.document).trigger('keyup');
+                YAHOO.util.Assert.isTrue(handler_called);
+                YAHOO.util.Assert.areSame(selector.grid, this.mockGrid);
+
+
+                //YAHOO.util.Assert.isTrue(selector.decorator instanceof Slick.CellRangeDecorator);
+                //this.decorator = new Slick.CellRangeDecorator(grid);
+
+            },
+
+            testKeyDownHandlerSavesActiveCellandSetsKeyDownFlag: function() {
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+                selector.init(this.mockGrid);
+                this.mockControl.reset();
+
+                YAHOO.util.Assert.isFalse(selector.isShiftDown);
+
+                var handler = selector.getKeyDownHandler();
+                var some_event = {which: 35};
+
+                handler(some_event);
+
+                YAHOO.util.Assert.isFalse(selector.isShiftDown);
+
+                var some_event = {which: 16};
+                this.mockGrid.expects().getActiveCell().andReturn('active cell');
+
+                handler(some_event);
+
+                this.mockControl.verify();
+                YAHOO.util.Assert.isTrue(selector.isShiftDown);
+                YAHOO.util.Assert.areSame('active cell', selector.startCell);
+            },
+
+            testKeyDownHandler_TabClearsSelectionAndNavigates: function ()
+            {
+                var TAB = 9;
+
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+                selector.init(this.mockGrid);
+                selector.isShiftDown = true;
+                selector.startCell = {row: 1, cell: 2};
+                this.mockControl.reset();
+
+                var handler = selector.getKeyDownHandler();
+                var some_event = {which: TAB};
+
+                handler(some_event);
+
+                YAHOO.util.Assert.isFalse(selector.isShiftDown);
+                YAHOO.util.Assert.areSame(null, selector.startCell);
+            },
+
+            testKeyUpHandlerShouldClearStartCellAndShiftFlag: function() {
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+
+                selector.isShiftDown = true;
+                var start_cell = {row: 1, cell: 2};
+                var some_other_cell = {row: 2, cell: 3};
+
+                selector.startCell = start_cell;
+                var handler = selector.getKeyUpHandler();
+
+                var not_shift = 35;
+                var shift = 16;
+
+                var some_event = {which: not_shift};
+                handler(some_event, some_other_cell);
+                YAHOO.util.Assert.isTrue(selector.isShiftDown);
+                YAHOO.util.Assert.areSame(start_cell, selector.startCell);
+
+                var some_event = {which: shift};
+                handler(some_event, some_other_cell);
+                YAHOO.util.Assert.isFalse(selector.isShiftDown);
+                YAHOO.util.Assert.areSame(null, selector.startCell);
+            },
+
+            testActiveCellChangedHandlerExtendsSelectionIfKeyDownByNotifyingEvent: function() {
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+                var handler = selector.getActiveCellChangedHandler();
+
+                var actual_range;
+                selector.onCellRangeSelected.notify = function (range_object) {
+                    actual_range = range_object.range;
+                };
+
+                selector.isShiftDown = true;
+                selector.startCell = {row: 5, cell: 5};
+                var some_event = {};
+                var new_cell = {row: 4, cell: 6};
+
+                var expected_range = new Slick.Range(5, 5, 4, 6);
+
+                handler(some_event, new_cell);
+
+                assertDeepAreSame(expected_range, actual_range);
+            },
+
+            testActiveCellChangedHandlerDoesNothingIfstartCellNull: function() {
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+                var handler = selector.getActiveCellChangedHandler();
+
+                selector.onCellRangeSelected.notify = function (range_object) {
+                    YAHOO.util.Assert.fail('should not have notified if start cell null');
+                };
+
+                selector.isShiftDown = true;
+                var some_event = {};
+                var new_cell = {row: 4, cell: 6};
+
+                selector.startCell = null;
+                handler(some_event, new_cell);
+            },
+
+            testActiveCellChangedHandlerDoesNothingIfShiftNotDown: function() {
+                var selector = new Dirigible.KeyboardCellRangeSelector();
+                var handler = selector.getActiveCellChangedHandler();
+
+                selector.onCellRangeSelected.notify = function (range_object) {
+                    YAHOO.util.Assert.fail('should not have notified if shiftdown false');
+                };
+
+                var some_event = {};
+                var new_cell = {row: 4, cell: 6};
+                selector.isShiftDown = false;
+                selector.startCell = new_cell;
+
+                handler(some_event, new_cell);
+
+            }
+        })
+    ];
+</script>
+<script src="yuirunner.js"></script>
+
+<div id="id_grid"></div>
+
+</body>
+
+</html>

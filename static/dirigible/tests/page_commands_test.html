@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.core.js"></script>
+    <script type="text/javascript" src="yuitest/yuitest-combo.js"></script>
+    <script type="text/javascript" src="jsmock.js"></script>
+
+    <script type="text/javascript" src="../scripts/page_commands.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+tests = [
+
+    new YAHOO.tool.TestCase({
+
+        name: "testPageCommands",
+
+        testRecalculateSavesUsercodeAndCommitsCurrentCellEditsAndQueuesRecalc: function () {
+            var mockControl = new MockControl();
+            Dirigible.SheetUtils = mockControl.createMock( {
+                abortOtherRecalculations: function () {},
+                queueRecalculation: function () {}
+            } );
+            var editorCommands = mockControl.createMock( {
+                saveUsercode: function () {}
+            } );
+            var gridCommands = mockControl.createMock( {
+                commitCurrentEdit: function () {}
+            } );
+
+            var pageCommands = new Dirigible.PageCommands(gridCommands, editorCommands);
+            editorCommands.expects().saveUsercode();
+            gridCommands.expects().commitCurrentEdit();
+            Dirigible.SheetUtils.expects().abortOtherRecalculations();
+            Dirigible.SheetUtils.expects().queueRecalculation();
+
+            pageCommands.recalculate();
+
+            mockControl.verify();
+        }
+
+    })
+
+];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

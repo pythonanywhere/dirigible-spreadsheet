@@ -1,0 +1,67 @@
+#id_extra_banner_spacing {
+    clear: both; 
+    margin-bottom: 10px;
+}
+
+h1 {
+    padding-top: 0px;
+    margin-top: 0px;
+}
+
+#id_main_background {
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+
+#id_content_background {
+    width: 630px;
+    background-color: #FFFFFF;
+    padding: 40px;
+}
+
+#id_text {
+    color: #4B576D;
+}
+
+#id_text a {
+    color: #009EE0;
+}
+
+img.screenshot {
+    text-align: center;
+    margin: 10px 42px 0px 42px;
+}
+
+hr {
+    width: 5em;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Featured sheet page-specific class styles */
+h2.featured_sheet_name {
+    margin-bottom: 0;
+}
+
+.featured_sheet_actions {
+    float:right;
+    text-align: center;
+    font-size: smaller;
+    padding-top: 5px;
+}
+
+#id_text .featured_sheet_actions a {
+    color: #006AA0;
+}
+
+.featured_sheet_actions span {
+    background-color: #D1D2D4;
+    padding: 5px;
+    margin-left: 5px;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+}
+
+.featured_sheet_description {
+    margin-bottom: 1.5em;
+}

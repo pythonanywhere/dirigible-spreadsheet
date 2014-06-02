@@ -1,0 +1,18 @@
+p.address {
+    margin-left: 2ex;
+}
+
+
+p.regulatory {
+    clear: both; 
+    padding-top: 20px; 
+    font-size: smaller;
+}
+
+
+div.map {
+    float: right; 
+    margin: 0 2em 0.5em 0.5em; 
+    padding: 0.3em; 
+    border: 1px solid lightgray;
+}

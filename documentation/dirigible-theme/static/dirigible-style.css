@@ -1,0 +1,29 @@
+@import "default.css";
+
+/* for the layout of table in 'spreadsheet-functions.html' */
+
+td p {
+    margin: 0px;
+}
+.line-block {
+    margin: 0px;
+}
+
+
+/* for pygments code appearing in table in 'spreadsheet-functions.html' */
+
+td div.highlight-python div.highlight pre {
+    margin: 2px;
+    padding: 4px;
+    border-style: none;
+}
+
+td div.highlight-python pre {
+    margin: 2px;
+    padding: 4px;
+    border-style: none;
+}
+
+img {
+    margin-left: 50px;
+}

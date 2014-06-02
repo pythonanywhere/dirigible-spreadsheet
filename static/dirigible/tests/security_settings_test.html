@@ -1,0 +1,552 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.caret.1.02.min.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="/static/dirigible/scripts/security_settings.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<input id="id_test" />
+
+<script type="text/javascript">
+
+tests = [
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "testSecuritySettingsModel",
+
+        setUp: function() {
+            this.mockControl = new MockControl();
+
+            this.mockJQuery = this.mockControl.createMock({
+                find: function() {}
+            });
+
+            this.mockJQueryPoster  = this.mockControl.createMock({
+                ajax: function() {}
+            });
+            this.mockJQuery.find.ajax = this.mockJQueryPoster.ajax;
+
+            this.urls = {
+                setSecuritySettings: "set security settings URL",
+            }
+
+            this.model = new Dirigible.SecuritySettings.Model(this.mockJQuery.find, this.urls);
+        },
+
+
+        testUpdatePageUIShouldUpdateToolbarButtonTitleAndAltForEnabledAndPrivate: function() {
+            var mockSecurityButton = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_button').andReturn(mockSecurityButton);
+
+            mockSecurityButton.expects().attr('alt', 'Sheet security settings (Sheet is private. JSON API enabled)');
+            mockSecurityButton.expects().attr('title', 'Sheet security settings (Sheet is private. JSON API enabled)');
+
+            this.model.enabled = true;
+            this.model.isPublic = false;
+            this.model.updatePageUI();
+
+            this.mockControl.verify();
+        },
+
+
+        testUpdatePageUIShouldUpdateToolbarButtonTitleAndAltForDisabledAndPrivate: function() {
+            var mockSecurityButton = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_button').andReturn(mockSecurityButton);
+
+            mockSecurityButton.expects().attr('alt', 'Sheet security settings (Sheet is private. JSON API disabled)');
+            mockSecurityButton.expects().attr('title', 'Sheet security settings (Sheet is private. JSON API disabled)');
+
+            this.model.enabled = false;
+            this.model.isPublic = false;
+            this.model.updatePageUI();
+
+            this.mockControl.verify();
+        },
+
+
+        testUpdatePageUIShouldUpdateToolbarButtonTitleAndAltForEnabledAndPublic: function() {
+            var mockSecurityButton = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_button').andReturn(mockSecurityButton);
+
+            mockSecurityButton.expects().attr('alt', 'Sheet security settings (Sheet is public. JSON API enabled)');
+            mockSecurityButton.expects().attr('title', 'Sheet security settings (Sheet is public. JSON API enabled)');
+
+            this.model.enabled = true;
+            this.model.isPublic = true;
+            this.model.updatePageUI();
+
+            this.mockControl.verify();
+        },
+
+
+        testUpdatePageUIShouldUpdateToolbarButtonTitleAndAltForDisabledAndPublic: function() {
+            var mockSecurityButton = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_button').andReturn(mockSecurityButton);
+
+            mockSecurityButton.expects().attr('alt', 'Sheet security settings (Sheet is public. JSON API disabled)');
+            mockSecurityButton.expects().attr('title', 'Sheet security settings (Sheet is public. JSON API disabled)');
+
+            this.model.enabled = false;
+            this.model.isPublic = true;
+            this.model.updatePageUI();
+
+            this.mockControl.verify();
+        },
+
+
+        testUpdateServerStateShouldSendGivenStateToServerWithDataAndCallbacksCurriedIntoPostSuccessHandlerAndErrorCallbackAsErrorHandler: function() {
+            var ajaxSettings;
+            this.mockJQueryPoster.expects().ajax(
+                TypeOf.isA(Object)
+            ).andStub(
+                function () {
+                    ajaxSettings = arguments[0];
+                }
+            )
+
+            var mockHandleServerUpdateResponse = this.mockControl.createMock({
+                handleServerUpdateResponse: function() {}
+            });
+            this.model.handleServerUpdateResponse = mockHandleServerUpdateResponse.handleServerUpdateResponse;
+
+            this.model.updateServerState(
+                'public sheet state',
+                'enabled checkbox state',
+                'api key',
+                'mock success handler function',
+                'mock error handler function'
+            );
+
+            this.mockControl.verify();
+            var postSuccessHandler = ajaxSettings.success;
+            delete ajaxSettings.success;
+            assertDeepAreSame(
+                {
+                    type: "POST",
+                    url: this.urls.setSecuritySettings,
+                    data: {
+                        'is_public': 'public sheet state',
+                        'allow_json_api_access': 'enabled checkbox state',
+                        'api_key': 'api key'},
+                    error: 'mock error handler function'
+                },
+                ajaxSettings
+            );
+
+            this.mockControl.reset();
+            mockHandleServerUpdateResponse.expects().handleServerUpdateResponse(
+                'mock response data',
+                'public sheet state',
+                'enabled checkbox state',
+                'api key',
+                'mock success handler function',
+                'mock error handler function'
+            );
+            postSuccessHandler('mock response data');
+            this.mockControl.verify();
+        },
+
+
+        testHandleServerUpdateResponseShouldCallSuccessHandlerSaveSettingsFromParamsAndUpdatePageUIIfSuccessful: function() {
+            var mockSuccessHandler = this.mockControl.createMock({
+                onSuccess: function() {}
+            });
+            mockSuccessHandler.expects().onSuccess();
+
+            var mockFailureHandler = this.mockControl.createMock({
+                onFailure: function() {}
+            });
+
+            var mockPageUIUpdater = this.mockControl.createMock({
+                updatePageUI: function() {}
+            });
+            this.model.updatePageUI = mockPageUIUpdater.updatePageUI;
+            var that = this;
+            mockPageUIUpdater.expects().updatePageUI().andStub(
+                function() {
+                    YAHOO.util.Assert.areSame('public sheet state', that.model.isPublic);
+                    YAHOO.util.Assert.areSame('enabled checkbox state', that.model.enabled);
+                    YAHOO.util.Assert.areSame('api key', that.model.apiKey);
+                }
+            );
+
+            this.model.handleServerUpdateResponse(
+                'OK',
+                'public sheet state',
+                'enabled checkbox state',
+                'api key',
+                mockSuccessHandler.onSuccess,
+                mockFailureHandler.onFailure
+            );
+
+            this.mockControl.verify();
+        },
+
+
+        testHandleServerUpdateResponseShouldCallFailureHandlerIfUnsuccessful: function() {
+            var mockSuccessHandler = this.mockControl.createMock({
+                onSuccess: function() {}
+            });
+
+            var mockFailureHandler = this.mockControl.createMock({
+                onFailure: function() {}
+            });
+            mockFailureHandler.expects().onFailure();
+
+            this.model.handleServerUpdateResponse(
+                'FAIL',
+                'public sheet checkbox state',
+                'enabled checkbox state',
+                'api key',
+                mockSuccessHandler.onSuccess,
+                mockFailureHandler.onFailure
+            );
+
+            this.mockControl.verify();
+        }
+
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "testSecuritySettingsDialog",
+
+        setUp: function() {
+            this.mockControl = new MockControl();
+
+            this.mockJQuery = this.mockControl.createMock({
+                find: function() {}
+            });
+
+            //this.mockJQueryPoster  = this.mockControl.createMock({
+            //    : function() {}
+            //});
+            //this.mockJQuery.find.ajax = this.mockJQueryPoster.ajax;
+
+            this.urls = {
+                apiBase: "API base"
+            }
+            this.dialog = new Dirigible.SecuritySettings.Dialog(this.mockJQuery.find, this.urls);
+        },
+
+
+        testShowShouldStashAwayModelAndUpdateDialogUIAndShow: function() {
+            var mockModel = {
+                isPublic: "model public state",
+                enabled: "model enabled state",
+                apiKey: "model api key"
+            };
+
+            var mockErrorDiv = this.mockControl.createMock({
+                addClass: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_save_error').andReturn(mockErrorDiv);
+            mockErrorDiv.expects().addClass('hidden');
+
+            var mockDialogUpdater = this.mockControl.createMock({
+                updateDialogUI: function() {}
+            });
+            this.dialog.updateDialogUI = mockDialogUpdater.updateDialogUI;
+            mockDialogUpdater.expects().updateDialogUI(mockModel.isPublic, mockModel.enabled, mockModel.apiKey);
+
+            var mockDialogDiv = this.mockControl.createMock({
+                dialog: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form').andReturn(mockDialogDiv);
+            var dialogOptions;
+            mockDialogDiv.expects().dialog(
+                TypeOf.isA(Object)
+            ).andStub(
+                function() {
+                    dialogOptions = arguments[0]
+                }
+            );
+
+            this.dialog.show(mockModel);
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(mockModel, this.dialog.model__);
+            assertDeepAreSame(
+                { width: 400 },
+                dialogOptions
+            );
+        },
+
+
+        testUpdateDialogUIShouldEnableJSONAPIFieldsIfAPIEnabledAndSheetPublicAndUpdateCheckboxes: function() {
+            var mockJSONCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_enabled_checkbox').andReturn(mockJSONCheckbox);
+            mockJSONCheckbox.expects().attr('checked', true);
+
+            var mockPublicCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_public_sheet_checkbox').andReturn(mockPublicCheckbox);
+            mockPublicCheckbox.expects().attr('checked', true);
+
+            var mockAPIKeyField = this.mockControl.createMock({
+                attr: function() {},
+                val: function() {}
+            });
+            var mockAPIURLField = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_api_key').andReturn(mockAPIKeyField);
+            this.mockJQuery.expects().find('#id_security_form_json_api_url').andReturn(mockAPIURLField);
+
+            mockAPIKeyField.expects().attr('disabled', '');
+            mockAPIURLField.expects().attr('disabled', '');
+            mockAPIKeyField.expects().val('newapikey');
+
+            var mockUpdateApiURL = this.mockControl.createMock({
+                updateAPIURL: function() {}
+            });
+            this.dialog.updateAPIURL = mockUpdateApiURL.updateAPIURL;
+            mockUpdateApiURL.expects().updateAPIURL();
+
+            this.dialog.updateDialogUI(true, true, 'newapikey');
+
+            this.mockControl.verify();
+        },
+
+
+        testUpdateDialogUIShouldDisableJSONAPIFieldsIfAPIDisabledAndSheetNotPublic: function() {
+            var mockJSONCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_enabled_checkbox').andReturn(mockJSONCheckbox);
+            mockJSONCheckbox.expects().attr('checked', false);
+
+            var mockPublicCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_public_sheet_checkbox').andReturn(mockPublicCheckbox);
+            mockPublicCheckbox.expects().attr('checked', false);
+
+            var mockAPIKeyField = this.mockControl.createMock({
+                attr: function() {},
+                val: function() {}
+            });
+            var mockAPIURLField = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_api_key').andReturn(mockAPIKeyField);
+            this.mockJQuery.expects().find('#id_security_form_json_api_url').andReturn(mockAPIURLField);
+
+            mockAPIKeyField.expects().attr('disabled', 'disabled');
+            mockAPIURLField.expects().attr('disabled', 'disabled');
+            mockAPIKeyField.expects().val('newapikey');
+
+            var mockUpdateApiURL = this.mockControl.createMock({
+                updateAPIURL: function() {}
+            });
+            this.dialog.updateAPIURL = mockUpdateApiURL.updateAPIURL;
+            mockUpdateApiURL.expects().updateAPIURL();
+
+            this.dialog.updateDialogUI(false, false, 'newapikey');
+
+            this.mockControl.verify();
+        },
+
+
+        testOnOKShouldUpdateServerStateOnModelWithDialogValuesCloseFunctionAsSuccessHandlerAndErrorFunctionAsFailureHandler: function() {
+            var mockPublicCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_public_sheet_checkbox').andReturn(mockPublicCheckbox);
+            mockPublicCheckbox.expects().attr('checked').andReturn('public checkbox state');
+
+            var mockJSONCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_enabled_checkbox').andReturn(mockJSONCheckbox);
+            mockJSONCheckbox.expects().attr('checked').andReturn('enabled checkbox state');
+
+            var mockAPIKeyField = this.mockControl.createMock({
+                val: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_api_key').andReturn(mockAPIKeyField);
+            mockAPIKeyField.expects().val().andReturn('api key');
+
+            this.dialog.model__ = this.mockControl.createMock({
+                updateServerState: function() {}
+            });
+            this.dialog.model__.expects().updateServerState(
+                'public checkbox state',
+                'enabled checkbox state',
+                'api key',
+                this.dialog.close,
+                this.dialog.handleSaveError
+            );
+
+            var onResult = this.dialog.onOK();
+
+            this.mockControl.verify();
+
+            YAHOO.util.Assert.isFalse(onResult,
+                'onOK should return false to abort default form submission'
+            );
+        },
+
+
+        testCloseShouldCloseDialog: function() {
+            var mockForm = this.mockControl.createMock({
+                dialog: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form').andReturn(mockForm);
+            mockForm.expects().dialog('close');
+
+            this.dialog.close();
+
+            this.mockControl.verify();
+        },
+
+
+        testHandleSaveErrorShouldShowErrorMessage: function() {
+            var mockErrorDiv = this.mockControl.createMock({
+                removeClass: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_save_error').andReturn(mockErrorDiv);
+            mockErrorDiv.expects().removeClass('hidden');
+
+            this.dialog.handleSaveError();
+
+            this.mockControl.verify();
+        },
+
+
+        testUpdateAPIUrlShouldBuildURLFromAPIKey: function() {
+            var mockAPIKeyField = this.mockControl.createMock({
+                val: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_api_key').andReturn(mockAPIKeyField);
+            mockAPIKeyField.expects().val().andReturn('api key');
+
+            var mockAPIURLLink  = this.mockControl.createMock({
+                attr: function() {},
+                val: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_api_url').andReturn(mockAPIURLLink);
+            server = window.location.host;
+            mockAPIURLLink.expects().val('http://' + server + 'API base?api_key=api key');
+
+            this.dialog.updateAPIURL();
+
+            this.mockControl.verify();
+        },
+
+        testBindShouldAttachEventsForFormElements: function() {
+            var mockOKButton = this.mockControl.createMock({
+                click: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_ok_button').andReturn(mockOKButton);
+            mockOKButton.expects().click(this.dialog.onOK);
+
+            var mockCancelbutton = this.mockControl.createMock({
+                click: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_cancel_button').andReturn(mockCancelbutton);
+            mockCancelbutton.expects().click(this.dialog.close);
+
+            var mockAPIKeyInput = this.mockControl.createMock({
+                bind: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_api_key').andReturn(mockAPIKeyInput);
+            mockAPIKeyInput.expects().bind(
+                'keyup mouseup change select',
+                this.dialog.updateAPIURL
+            );
+
+            var mockCheckbox = this.mockControl.createMock({
+                click: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_enabled_checkbox').andReturn(mockCheckbox);
+            mockCheckbox.expects().click(this.dialog.updateDialogUIFromCheckboxes);
+
+
+            var mockAPIURLInput = this.mockControl.createMock({
+                click: function() {}
+            });
+            var mockAPIKeyInput = this.mockControl.createMock({
+                click: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_api_url').andReturn(mockAPIURLInput);
+            mockAPIURLInput.expects().click(this.dialog.selectFullURL_);
+            this.mockJQuery.expects().find('#id_security_form_json_api_key').andReturn(mockAPIKeyInput);
+            mockAPIKeyInput.expects().click(this.dialog.selectFullURL_);
+
+            this.dialog.bind();
+
+            this.mockControl.verify();
+        },
+
+        testUpdateDialogUIFromCheckboxesShouldPassCheckboxStates: function() {
+            var mockJSONCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_json_enabled_checkbox').andReturn(mockJSONCheckbox);
+            mockJSONCheckbox.expects().attr('checked').andReturn('api checkboxstate');
+            var mockPublicCheckbox = this.mockControl.createMock({
+                attr: function() {}
+            });
+            this.mockJQuery.expects().find('#id_security_form_public_sheet_checkbox').andReturn(mockPublicCheckbox);
+            mockPublicCheckbox.expects().attr('checked').andReturn('public checkboxstate');
+
+            mockDialog = this.mockControl.createMock({
+                enableJsonApiFields_: function() {}
+            });
+            this.dialog.enableJsonApiFields_ = mockDialog.enableJsonApiFields_;
+            mockDialog.expects().enableJsonApiFields_('api checkboxstate');
+
+            this.dialog.updateDialogUIFromCheckboxes();
+
+            this.mockControl.verify();
+        },
+
+        testSelectFullURL: function() {
+            var dialog = new Dirigible.SecuritySettings.Dialog($, this.urls);
+            $test_input = $('#id_test');
+            $test_input.caret(2, 3);
+            $test_input.val('contents');
+            $test_input.click(dialog.selectFullURL_);
+
+            $test_input.trigger('click');
+
+            var caretAfter = $test_input.caret();
+            YAHOO.util.Assert.areSame( 0, caretAfter.start);
+            YAHOO.util.Assert.areSame('contents'.length, caretAfter.end);
+        }
+
+    })
+];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

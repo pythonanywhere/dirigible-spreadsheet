@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="/static/dirigible/scripts/console_view.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testConsoleView",
+
+            setUp: function() {
+                this.mockControl = new MockControl();
+                this.consoleDiv = this.mockControl.createMock({
+                    html: function() {}
+                });
+                this.consoleView = new Dirigible.ConsoleView(this.consoleDiv);
+            },
+
+            testUpdateMetaDataWithNoTextShouldClear: function () {
+                this.consoleDiv.expects().html('');
+                this.consoleView.updateMetaData({});
+                this.mockControl.verify();
+            },
+
+            testUpdateMetaDataWithTextShouldShowText: function () {
+                this.consoleDiv.expects().html('some testy text');
+                this.consoleView.updateMetaData({'console_text': 'some testy text'});
+                this.mockControl.verify();
+            }
+        })
+
+    ];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

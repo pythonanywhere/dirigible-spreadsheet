@@ -1,0 +1,533 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.caret.1.02.min.js"></script>
+
+    <script type="text/javascript" src="yuitest/yuitest-combo.js"></script>
+    <script type="text/javascript" src="test_utils.js"></script>
+
+    <script type="text/javascript" src="../scripts/cell_editor.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+  </head>
+
+  <body>
+    <div id="id_results">Please wait</div>
+
+    <script type="text/javascript">
+
+        function create_div_and_editor_for(args) {
+            var $test_container = $("<div>", { id: args.test_name + "-div" })
+                .appendTo($("#test-divs"));
+            var formula_bar_id = args.test_name + "-formula-bar";
+            $test_container.append($("<input>", { id: formula_bar_id }));
+            var formula_bar = $("#" + formula_bar_id);
+
+            CellEditor = CellEditorFactory(formula_bar);
+
+            var editorArgs = jQuery.extend({ container : $test_container }, args.editor_args);
+            var cell_editor = new CellEditor(editorArgs);
+            return { test_container: $test_container, cell_editor: cell_editor, formula_bar: formula_bar };
+        }
+
+
+        function assertLoadValueCallsValWithFormulaAndSetsDefaultValueOnThisAndUnderlyingDOMElement(testName, item, expectedEditValue) {
+            var target = create_div_and_editor_for({
+                test_name: testName,
+                editor_args: {
+                    column: {
+                        field: "column_field"
+                    }
+                }
+            });
+            var valArgument = undefined;
+            target.cell_editor.$input.val = function(argument) {
+                if (argument !== undefined) {
+                    // We only care about cases when val was called with a parameter (ie. as a setter);
+                    // if our argument is undefined, then it was called as a getter and we don't really
+                    // care.
+                    valArgument = argument;
+                }
+            };
+
+            target.cell_editor.loadValue(item);
+            YAHOO.util.Assert.areSame(expectedEditValue, target.cell_editor.defaultValue, "expected value not set as object's defaultValue");
+            YAHOO.util.Assert.areSame(expectedEditValue, valArgument, "val not called with expected value");
+            YAHOO.util.Assert.areSame(
+                expectedEditValue,
+                target.cell_editor.$input[0].defaultValue,
+                "defaultValue not set to expected value"
+            );
+        }
+
+        tests = [
+
+            new YAHOO.tool.TestCase({
+
+                name: "test_cell_editor",
+
+
+                testConstructorAppendsDOMInputToProvidedContainer: function () {
+                    var target = create_div_and_editor_for({ test_name: "testInitAppendsDOMInputToProvidedContainer"});
+                    YAHOO.util.Assert.areSame("INPUT", target.cell_editor.$input[0].tagName, "Wrong tag name");
+                    YAHOO.util.Assert.areSame("text", target.cell_editor.$input[0].type, "Wrong element type");
+                    YAHOO.util.Assert.areSame("editor-text", target.cell_editor.$input[0].className, "Wrong class");
+                    YAHOO.util.Assert.areSame(target.test_container[0], target.cell_editor.$input.parent()[0], "Wrong parent");
+                },
+
+
+                testConstructorSetsColumnField: function() {
+                    var expectedColumn = "test stuff";
+                    var target = create_div_and_editor_for({
+                        test_name: "testConstructorSetsColumnField",
+                        editor_args: {
+                            column: expectedColumn
+                        }
+                    });
+                    YAHOO.util.Assert.areSame(expectedColumn, target.cell_editor.column);
+                },
+
+
+                testConstructorBindsKeydownEvent : function () {
+                    var target = create_div_and_editor_for({ test_name: "testConstructorBindsKeydownEvent" });
+                    YAHOO.util.Assert.isFunction(target.cell_editor.$input.data('events').keydown[0].handler);
+                    YAHOO.util.Assert.areSame('keydown', target.cell_editor.$input.data('events').keydown[0].type);
+
+                    var stopImmediatePropagationCalled = false;
+                    e = {};
+                    e.stopImmediatePropagation = function () {
+                        stopImmediatePropagationCalled = true;
+                    };
+
+                    keydown_handler = target.cell_editor.$input.data('events').keydown[0].handler;
+
+                    LEFT = 37;
+                    stopImmediatePropagationCalled = false;
+                    e.keyCode = LEFT;
+                    keydown_handler(e);
+                    YAHOO.util.Assert.isTrue(stopImmediatePropagationCalled, 'event propagation not stopped for LEFT');
+
+                    RIGHT = 39;
+                    stopImmediatePropagationCalled = false;
+                    e.keyCode = RIGHT;
+                    keydown_handler(e);
+                    YAHOO.util.Assert.isTrue(stopImmediatePropagationCalled, 'event propagation not stopped for RIGHT');
+                },
+
+                testConstructorSetsFocusOnInputBoxIfFormulaBarNotFocussed: function () {
+                    var target = create_div_and_editor_for({ test_name: "testConstructorSetsFocusOnInputBoxIfFormulaBarNotFocussed" });
+                    YAHOO.util.Assert.areSame(
+                            target.cell_editor.$input[0],
+                            document.activeElement,
+                            "Focus not set to input element on creation");
+                },
+
+                testConstructorDoesntSetFocusOnInputBoxIfFormulaBarIsFocussed: function () {
+
+                    var formula_bar_id;
+
+                    function local_create_div_and_editor_for(args) {
+                        var $test_container = $("<div>", { id: args.test_name + "-div" })
+                            .appendTo($("#test-divs"));
+
+                        // our local customisations to this function
+                        formula_bar_id = args.test_name + "-formula-bar";
+                        $test_container.append($("<input>", { id: formula_bar_id }));
+                        var formula_bar = $("#" + formula_bar_id);
+                        formula_bar.focus();
+
+                        CellEditor = CellEditorFactory(formula_bar);
+
+                        var editorArgs = jQuery.extend({ container : $test_container }, args.editor_args);
+                        var cell_editor = new CellEditor(editorArgs);
+                        return { test_container: $test_container, cell_editor: cell_editor, formula_bar: formula_bar };
+                    }
+
+                    var target = local_create_div_and_editor_for(
+                        { test_name: "testConstructorDoesntSetFocusOnInputBoxIfFormulaBarIsFocussed" }
+                    );
+                    var formula_bar = $("#" + formula_bar_id);
+                    YAHOO.util.Assert.areSame(
+                            formula_bar[0],
+                            document.activeElement,
+                            "Focus should still be set to formula bar");
+                },
+
+                testDestroyDelegatesToElementRemove: function () {
+                    var target = create_div_and_editor_for({ test_name: "testDestroyRemovesElement" });
+                    var remove_called = false;
+                    target.cell_editor.$input.remove = function() {
+                        remove_called = true;
+                    };
+                    target.cell_editor.destroy();
+                    YAHOO.util.Assert.isTrue(remove_called, "Remove not called on underlying element");
+                },
+
+
+                testLoadValueCallsValWithFormulaAndSetsDefaultValueOnUnderlyingDOMElement: function () {
+                    var expectedEditValue = "this is the value to edit";
+                    assertLoadValueCallsValWithFormulaAndSetsDefaultValueOnThisAndUnderlyingDOMElement(
+                        "testLoadValueCallsValWithFormulaAndSetsDefaultValueOnUnderlyingDOMElement",
+                        {
+                            column_field: {
+                                formula: expectedEditValue,
+                                formatted_value: "this should never be seen"
+                            }
+                        },
+                        expectedEditValue
+                    );
+                },
+
+
+                testLoadValueHandlesUndefinedObject : function () {
+                    var expectedEditValue = "";
+                    assertLoadValueCallsValWithFormulaAndSetsDefaultValueOnThisAndUnderlyingDOMElement(
+                        "testLoadValueHandlesUndefinedObject",
+                        undefined,
+                        expectedEditValue
+                    );
+                },
+
+
+                testLoadValueHandlesEmptyObject : function () {
+                    var expectedEditValue = "";
+                    assertLoadValueCallsValWithFormulaAndSetsDefaultValueOnThisAndUnderlyingDOMElement(
+                        "testLoadValueHandlesEmptyObject",
+                        {},
+                        expectedEditValue
+                    );
+                },
+
+
+                testLoadValueSetsFormulaBar : function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testLoadValueSetsFormulaBar",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+
+                    var formula_bar_val_params = undefined;
+                    target.formula_bar.val = function(params) {
+                        if (params !== undefined) {
+                            // Ignore get-style calls to the formula bar's val function, we only
+                            // care about sets.
+                            formula_bar_val_params = params;
+                        }
+                    };
+
+                    var expectedEditValue = "this is the value to edit";
+                    target.cell_editor.loadValue({
+                        column_field: {
+                            formula: expectedEditValue,
+                            formatted_value: "this should never be seen"
+                        }
+                    });
+
+                    YAHOO.util.Assert.areSame(expectedEditValue, formula_bar_val_params);
+                },
+
+
+                testLoadValueCallsUpdateFormulaBarIfChanged: function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testLoadValueCallsUpdateFormulaBarIfChanged",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+                    var uficCalled = false;
+                    target.cell_editor.updateFormulaBarIfChanged = function() {
+                        uficCalled = true;
+                    };
+
+                    target.cell_editor.loadValue({
+                        column_field: {
+                            formula: "foo",
+                            formatted_value: "this should never be seen"
+                        }
+                    });
+
+                    YAHOO.util.Assert.isTrue(uficCalled, 'loadValue should call updateFormulaBarIfChanged');
+                },
+
+                testSetInputElementValuesSetsInputValueAndCaretPositionAndCallsUpdateFormulaBarIfChanged: function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testSetInputElementValuesSetsInputValueAndCaretPositionAndCallsUpdateFormulaBarIfChanged",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+                    var uficCalled = false;
+                    target.cell_editor.updateFormulaBarIfChanged = function() {
+                        uficCalled = true;
+                    };
+                    var caretStart = -1;
+                    var caretEnd = -1;
+                    target.cell_editor.$input.caret = function(start, end) {
+                        caretStart = start;
+                        caretEnd = end;
+                    };
+                    target.cell_editor.setInputElementValues('some stuff');
+
+                    YAHOO.util.Assert.areSame('some stuff', target.cell_editor.$input.val());
+
+                    YAHOO.util.Assert.areSame(10, caretStart);
+                    YAHOO.util.Assert.areSame(10, caretEnd);
+
+                    YAHOO.util.Assert.isTrue(uficCalled, 'setInputElementValues should call updateFormulaBarIfChanged');
+                },
+
+                testOnInputBoundFunctionCallsUpdateFormulaBarIfChanged: function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testUpdateFormulaBarCallsUpdateFormulaBarIfChanged",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+                    var uficCalled = false;
+                    target.cell_editor.updateFormulaBarIfChanged = function() {
+                        uficCalled = true;
+                    };
+                    target.cell_editor._updateFormulaBar();
+                    YAHOO.util.Assert.isTrue(uficCalled, '_updateFormulaBar should call updateFormulaBarIfChanged');
+                },
+
+
+                testUpdateFormulaBarIfChangedWorks: function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testUpdateFormulaBarIfChangedWorks",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                        });
+
+                    var call_count = 0;
+                    target.cell_editor.$formula_bar.val = function(arg){
+                        if (arg !== undefined) {
+                            call_count = call_count + 1;
+                        } else {
+                            return 'old value';
+                        }
+                    };
+                    YAHOO.util.Assert.areSame(0, call_count);
+                    target.cell_editor.updateFormulaBarIfChanged('old value');
+                    YAHOO.util.Assert.areSame(0, call_count);
+
+                    target.cell_editor.updateFormulaBarIfChanged('changed value');
+                    YAHOO.util.Assert.areSame(1, call_count);
+                },
+
+
+                testSerializeValueReturnsCellDict : function () {
+                    var target = create_div_and_editor_for({
+                        test_name: "testSerializeValueReturnsCellDict",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+                    var expected_val = {
+                        column_field: {
+                            formula: "expected formula",
+                            formatted_value: ""
+                        }
+                    };
+                    target.cell_editor.loadValue(expected_val);
+                    assertDeepAreSame(
+                        { formula: 'expected formula' },
+                        target.cell_editor.serializeValue(),
+                        "serializeValue did not return val"
+                    );
+                },
+
+                testApplyValueDoes : function () {
+                    var target = create_div_and_editor_for({
+                        test_name: "testApplyValueDoes",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+                    var expected_item = {
+                        column_field: {
+                            formula: "new formula",
+                            formatted_value: "new value"
+                        }
+                    };
+                    var item = {};
+                    target.cell_editor.applyValue(item, {formula: 'new formula', formatted_value: 'new value'});
+                    assertDeepAreSame(expected_item, item, "applyValue didn't");
+                },
+
+                testIsValueChanged : function () {
+                    var target = create_div_and_editor_for({
+                        test_name: "testIsValueChanged",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+                    target.cell_editor.loadValue({
+                        column_field: {
+                            formula: "expected formula",
+                            formatted_value: ""
+                        }
+                    });
+
+                    YAHOO.util.Assert.isFalse(target.cell_editor.isValueChanged(), 'isValueChanged incorrect');
+                    target.cell_editor.$input.val('something');
+                    YAHOO.util.Assert.isTrue(target.cell_editor.isValueChanged(), 'isValueChanged incorrect');
+                },
+
+                testValidate: function () {
+                    var target = create_div_and_editor_for({
+                        test_name: "testValidate",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+                    assertDeepAreSame({valid: true, msg: null}, target.cell_editor.validate());
+                },
+
+
+                testEditorUpdatesAssociatedFormulaBarOnImportantEvents : function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testEditorUpdatesAssociatedFormulaBarOnImportantEvents",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+
+                    // Firefox and Chrome
+                    YAHOO.util.Assert.areSame('', target.formula_bar.val());
+                    target.cell_editor.$input.val('s');
+                    target.cell_editor.$input.trigger('input');
+                    YAHOO.util.Assert.areSame('s', target.formula_bar.val());
+
+                    // Internet Explorer
+                    target.cell_editor.$input.val('u');
+                    target.cell_editor.$input.trigger('propertychange');
+                    YAHOO.util.Assert.areSame('u', target.formula_bar.val());
+                },
+
+
+                testFormulaBarUpdatesAssociatedEditorOnImportantEvents : function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testFormulaBarUpdatesAssociatedEditorOnImportantEvents",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+
+                    // Firefox and Chrome
+                    YAHOO.util.Assert.areSame('', target.cell_editor.$input.val());
+                    target.formula_bar.val('s');
+                    target.formula_bar.trigger('input');
+                    YAHOO.util.Assert.areSame('s', target.cell_editor.$input.val());
+
+                    // Internet Explorer
+                    target.formula_bar.val('u');
+                    target.formula_bar.trigger('propertychange');
+                    YAHOO.util.Assert.areSame('u', target.cell_editor.$input.val());
+                },
+
+
+                testCellEditorUnbindsFromFormulaBarWhenDestroyed : function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testFormulaBarUpdatesAssociatedEditorOnImportantEvents",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+
+                    var unbindArgs = [];
+                    target.formula_bar.unbind = function(eventType, handler) {
+                        unbindArgs.push([eventType, handler]);
+                    };
+                    target.cell_editor.destroy();
+
+                    assertDeepAreSame(
+                        [
+                            ["input", target.cell_editor.updateInput],
+                            ["propertychange", target.cell_editor.updateInput],
+                            ["keydown", target.cell_editor.forwardReturnsToEditor]
+                        ],
+                        unbindArgs,
+                        'events not unbound on formula bar destroy'
+                    );
+                },
+
+
+                testEnterKeyDownInFormulaBarForwardedToEditorInput : function() {
+                    var target = create_div_and_editor_for({
+                        test_name: "testEnterKeyDownInFormulaBarForwardedToEditorInput",
+                        editor_args: {
+                            column: {
+                                field: "column_field"
+                            }
+                        }
+                    });
+
+                    var keyDownFiredOnEditor = false;
+                    target.cell_editor.$input.bind(
+                        "keydown",
+                        function() {
+                            keyDownFiredOnEditor = true;
+                        }
+                    );
+
+                    var evt = $.Event("keydown");
+
+                    evt.which = 65;
+                    keyDownFiredOnEditor = false;
+                    target.formula_bar.trigger(evt);
+                    YAHOO.util.Assert.isFalse(keyDownFiredOnEditor, 'Editor keydown unexpectedly fired');
+
+                    evt.which = 13;
+                    keyDownFiredOnEditor = false;
+                    target.formula_bar.trigger(evt);
+                    YAHOO.util.Assert.isTrue(keyDownFiredOnEditor, 'Editor keydown not fired');
+
+                    target.cell_editor.destroy();
+                    evt.which = 13;
+                    keyDownFiredOnEditor = false;
+                    target.formula_bar.trigger(evt);
+                    YAHOO.util.Assert.isFalse(keyDownFiredOnEditor, 'Editor keydown unexpectedly fired after destruction');
+                }
+            })
+
+        ];
+    </script>
+    <script src="yuirunner.js"></script>
+
+    <div id="test-divs"></div>
+
+  </body>
+
+</html>
+

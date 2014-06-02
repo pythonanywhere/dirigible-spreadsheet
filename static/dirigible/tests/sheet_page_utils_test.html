@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="../scripts/sheet_page_utils.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "RecalculationQueueFunctionsTest",
+
+            setUp : function () {
+                this.mockControl = new MockControl();
+                this.mockJQuery = this.mockControl.createMock({
+                    ajaxq: function() {}
+                });
+                $.extend(true, $, { ajaxq: this.mockJQuery.ajaxq });
+
+                this.initURLs = {
+                    calculate: 'calculateURL'
+                };
+                this.mockPageView = {
+                    updateMetaData: function () {}
+                };
+                Dirigible.SheetUtils.Initialise(this.initURLs, this.mockPageView);
+            },
+
+
+            testQueueRecalculation: function () {
+                var params;
+                this.mockJQuery.expects().ajaxq(
+                    'recalculation_queue',
+                    TypeOf.isA(Object)
+                ).andStub(
+                    function() { params = arguments[1]; }
+                );
+
+                Dirigible.SheetUtils.queueRecalculation();
+
+                this.mockControl.verify();
+
+                assertDeepAreSame(
+                    {
+                        type: 'get',
+                        url: this.initURLs.calculate,
+                        success: Dirigible.SheetUtils.getMetaData
+                    },
+                    params
+                );
+            },
+
+
+            testAbortOtherRecalculations: function () {
+                this.mockJQuery.expects().ajaxq('recalculation_queue');
+
+                Dirigible.SheetUtils.abortOtherRecalculations();
+
+                this.mockControl.verify();
+            }
+
+        }),
+
+
+        new YAHOO.tool.TestCase({
+
+            name: "GetMetaDataTest",
+
+            setUp : function () {
+                this.ajaxqParamsList = [];
+                var that = this;
+                $.extend(true, $, {
+                    'ajaxq': function (queueName, params) {
+                        that.ajaxqParamsList.push({ queueName: queueName, params: params });
+                    }
+                });
+
+                this.initURLs = {
+                    getJSONMetaData: 'getJSONMetaDataURL'
+                };
+                this.mockPageView = {
+                    updateMetaData: function () {}
+                };
+                Dirigible.SheetUtils.Initialise(this.initURLs, this.mockPageView);
+            },
+
+
+            testGetMetaDataDoesNothingIfContentNotOK: function () {
+                Dirigible.SheetUtils.getMetaData('NotOK');
+
+                assertDeepAreSame(undefined, this.ajaxqParamsList[0]);
+                assertDeepAreSame(undefined, this.ajaxqParamsList[1]);
+            },
+
+
+            testGetMetaDataUpdatesMetaDataIfContentOK: function () {
+                Dirigible.SheetUtils.getMetaData('OK');
+
+                var firstCallArgs = { queueName: 'get_json_queue' };
+                assertDeepAreSame(firstCallArgs, this.ajaxqParamsList[0]);
+
+                var secondCallArgs = {
+                    queueName: 'get_json_queue',
+                    params: {
+                        type: 'get',
+                        dataType: 'json',
+                        url: this.initURLs.getJSONMetaData,
+                        success: this.mockPageView.updateMetaData
+                    }
+                };
+                assertDeepAreSame(secondCallArgs, this.ajaxqParamsList[1]);
+            }
+
+        })
+
+
+    ];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

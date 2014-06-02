@@ -1,0 +1,87 @@
+#id_login_form_wrap {
+    width: 29em;
+    clear: both;
+    margin-top: 4em;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 1.5em;
+    padding-bottom: 1em;
+    font-size: 14pt;
+}
+
+#id_login_form_header {
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 30px;
+}
+
+
+#id_login_signup_blurb {
+    font-size: 12pt;
+}
+
+
+#id_login_signup_blurb a {
+    text-decoration: underline;
+}
+
+#id_login_form {
+    text-align: center;
+}
+
+#id_username_wrap {
+    clear: both;
+}
+
+#id_username_label {
+    text-align: right;
+    vertical-align: baseline;
+    margin-right: 0.5em;
+    width: 6em;
+    font-weight: bold;
+}
+
+#id_username {
+    text-align: left;
+    vertical-align: baseline;
+    width: 20em;
+    margin-bottom: 1ex;
+    font-size: 14pt;
+}
+
+#id_password_wrap {
+    clear: both;
+}
+
+#id_password_label {
+    text-align: right;
+    vertical-align: baseline;
+    margin-right: 0.5em;
+    width: 6em;
+    font-weight: bold;
+}
+
+#id_password {
+    text-align: left;
+    vertical-align: baseline;
+    width: 20em;
+    margin-bottom: 1ex;
+    font-size: 14pt;
+}
+
+#id_login {
+    clear: both;
+    margin-top: 1em;
+    padding: 0.5em;
+    font-weight: bold;
+    font-size: 14pt;
+}
+
+#id_login_error {
+    margin-top: 0px;
+}
+
+h1 {
+    text-align: left;
+    margin-top: 0px;
+}

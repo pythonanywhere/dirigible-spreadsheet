@@ -1,0 +1,35 @@
+{% extends "non_sheet_page_small_logo.html" %}
+
+{% block title %}
+    Project Dirigible Beta Sign-up
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/registration.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block content %}
+    <div class="clear"> </div>
+
+    <div id="id_signup_vwrap" class="centered-block">
+        <div id="id_signup_hwrap" class="grey_rounded_corner_box">
+            <h3>Thank you!</h3>
+
+            <p>
+                We have sent a confirmation email to
+                {% if email_address %}
+                    <b>{{ email_address }}</b>
+                {% else %}
+                    the email address that you provided
+                {% endif %}
+            </p>
+            <p>
+                Please click the link in the email to complete the sign-up.
+            </p>
+
+            <p id="id_link_home_para"><a id="id_link_home" href="/">Return to Dirigible home</a>
+        </div>
+    </div>
+{% endblock %}
+

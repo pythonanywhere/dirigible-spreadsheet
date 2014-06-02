@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.core.js"></script>
+    <script type="text/javascript" src="yuitest/yuitest-combo.js"></script>
+    <script type="text/javascript" src="jsmock.js"></script>
+
+    <script type="text/javascript" src="../scripts/editor_commands.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+tests = [
+
+    new YAHOO.tool.TestCase({
+
+        name: "testEditorCommands",
+
+        testSaveUsercodeSavesUsercodeWhenEditorDirtyAndClearsFlag: function () {
+            var mockControl = new MockControl();
+            Dirigible.SheetUtils = mockControl.createMock( {
+                abortOtherRecalculations: function () {},
+                queueRecalculation: function () {}
+            } );
+            Dirigible.SheetUtils.expects().abortOtherRecalculations();
+
+            var mockEditor = mockControl.createMock( { getSession: function() {} } );
+            var mockSession = mockControl.createMock( { getValue: function(){} } );
+            mockEditor.expects().getSession().andReturn( mockSession );
+            mockSession.expects().getValue().andReturn( 'some usercode' );
+
+            var post_url = null;
+            var post_params = null;
+            var post_callback = null;
+            var urls = {
+                setSheetUsercode: "set_usercode_url"
+            };
+            var commands = new Dirigible.EditorCommands(urls, mockEditor);
+            $.post = function(url, params, callback) {
+                post_url = url;
+                post_params = params;
+                post_callback = callback;
+            };
+
+            mockEditor.usercodeDirty = true;
+            commands.saveUsercode();
+
+            mockControl.verify();
+            YAHOO.util.Assert.areSame(urls.setSheetUsercode, post_url);
+            assertDeepAreSame({ 'usercode': 'some usercode' }, post_params);
+            YAHOO.util.Assert.areSame(Dirigible.SheetUtils.queueRecalculation, post_callback);
+            YAHOO.util.Assert.isFalse(mockEditor.usercodeDirty);
+        },
+
+        testSaveUsercodeDoesntSaveIfEditorNotDirty: function () {
+            var mockControl = new MockControl();
+            Dirigible.SheetUtils = mockControl.createMock({});
+
+            var mockEditor = mockControl.createMock({});
+
+            var urls = {};
+            var commands = new Dirigible.EditorCommands(urls, mockEditor);
+            mockEditor.usercodeDirty = false;
+            commands.saveUsercode();
+
+            mockControl.verify();
+            YAHOO.util.Assert.isFalse(mockEditor.usercodeDirty);
+        }
+
+
+    })
+
+];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

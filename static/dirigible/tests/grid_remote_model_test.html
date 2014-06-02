@@ -1,0 +1,484 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.core.js"></script>
+    <script type="text/javascript" src="yuitest/yuitest-combo.js"></script>
+    <script type="text/javascript" src="jsmock.js"></script>
+
+    <script type="text/javascript" src="/static/dirigible/scripts/grid_remote_model.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testGridRemoteModel",
+
+            setUp: function () {
+                this.mockControl = new MockControl();
+                this.mockGrid = this.mockControl.createMock({});
+                this.urls = { getJSONGridData: 'get_json_url' };
+ 
+            },
+
+            testInitialisation: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                assertDeepAreSame({}, remoteModel.patches);
+                assertDeepAreSame({}, remoteModel.pending);
+            },
+
+            testGetDataGetsJsonForRangeAndUsesCurriedOnSuccess: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+
+                var mockJQuery = this.mockControl.createMock({
+                    getJSON : function () {}
+                });
+                $.extend(true, jQuery, mockJQuery);
+
+                var mockRemoteModel = this.mockControl.createMock({
+                    getSuccessHandlerForPatch : function () {}
+                });
+                $.extend(true, remoteModel, mockRemoteModel);
+
+                var patch = 'patch';
+                mockRemoteModel.expects().getSuccessHandlerForPatch(patch).andReturn('curried handler');
+
+                var called_with = {};
+                mockJQuery.expects().getJSON(
+                    TypeOf.isA(String),
+                    TypeOf.isA(Object),
+                    'curried handler'
+                ).andStub(
+                    function () {
+                        called_with = [
+                            arguments[0], arguments[1]
+                        ];
+                    }
+                );
+
+                var left = 1;
+                var topmost = 2;
+                var right = 3;
+                var bottom = 4;
+                remoteModel.getData(left, topmost, right, bottom, patch);
+
+                this.mockControl.verify();
+
+                var expected_call = [
+                    this.urls.getJSONGridData,
+                    {range: left + ', ' + topmost + ', ' + right + ', ' + bottom},
+                ];
+
+                assertDeepAreSame(expected_call, called_with);
+            },
+
+
+            testCellToPatch: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+
+                expected_results = {
+                    '-1, -1': {patchCol: 0, patchRow: 0},
+                    '0, 0': {patchCol: 0, patchRow: 0},
+                    '1, 1': {patchCol: 0, patchRow: 0},
+                    '26, 1': {patchCol: 0, patchRow: 0},
+                    '1, 100': {patchCol: 0, patchRow: 0},
+                    '26, 100': {patchCol: 0, patchRow: 0},
+                    '26, 101': {patchCol: 0, patchRow: 1},
+                    '27, 100': {patchCol: 1, patchRow: 0},
+                    '52, 100': {patchCol: 1, patchRow: 0},
+                    '27, 200': {patchCol: 1, patchRow: 1},
+                    '52, 200': {patchCol: 1, patchRow: 1},
+                    '27, 101': {patchCol: 1, patchRow: 1},
+                    '52, 201': {patchCol: 1, patchRow: 2}
+                }
+                for(var key in expected_results) {
+                    var coords = key.split(', ');
+                    col = parseInt(coords[0]);
+                    row = parseInt(coords[1]);
+                    assertDeepAreSame(
+                        expected_results[key],
+                        remoteModel.cellToPatch(col, row),
+                        'incorrect for ' + key
+                    );
+                }
+            },
+
+            testPatchToCells: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+
+                expected_results = {
+                    '0, 0': {left:1, topmost:1, right:26, bottom:100},
+                    '1, 0': {left:27, topmost:1, right:52, bottom:100},
+                    '0, 1': {left:1, topmost:101, right:26, bottom:200},
+                    '1, 1': {left:27, topmost:101, right:52, bottom:200},
+                    '2, 2': {left:53, topmost:201, right:78, bottom:300}
+                };
+                for(var key in expected_results) {
+                    var coords = key.split(', ');
+                    col = parseInt(coords[0]);
+                    row = parseInt(coords[1]);
+                    assertDeepAreSame(
+                        expected_results[key],
+                        remoteModel.patchToCells( {patchCol:col, patchRow:row} ),
+                        'incorrect for ' + key
+                    );
+                };
+            },
+
+
+            testChoosePatchesToLoad: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+
+                expected_results = {
+                    '1, 1, 1, 1': [{patchCol: 0, patchRow: 0}],
+                    '1, 1, 26, 100': [{patchCol: 0, patchRow: 0}],
+                    '26, 100, 27, 101': [
+                        {patchCol: 0, patchRow: 0},
+                        {patchCol: 0, patchRow: 1},
+                        {patchCol: 1, patchRow: 0},
+                        {patchCol: 1, patchRow: 1}
+                    ],
+                    '10, 230, 52, 600': [
+                        {patchCol: 0, patchRow: 2},
+                        {patchCol: 0, patchRow: 3},
+                        {patchCol: 0, patchRow: 4},
+                        {patchCol: 0, patchRow: 5},
+                        {patchCol: 1, patchRow: 2},
+                        {patchCol: 1, patchRow: 3},
+                        {patchCol: 1, patchRow: 4},
+                        {patchCol: 1, patchRow: 5},
+                    ]
+                }
+
+                for(var key in expected_results) {
+                    var coords = key.split(', ');
+                    left = parseInt(coords[0]);
+                    topmost = parseInt(coords[1]);
+                    right = parseInt(coords[2]);
+                    bottom = parseInt(coords[3]);
+                    assertDeepAreSame(
+                        expected_results[key],
+                        remoteModel.choosePatchesToLoad(left, topmost, right, bottom),
+                        'incorrect for ' + key
+                    );
+                }
+            },
+
+            testIsPatchLoadedOrPending: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                $.extend(true, remoteModel.patches, {
+                      0: {
+                        0: true,
+                        5: true,
+                        6: true
+                      }
+                    }
+                );
+                $.extend(true, remoteModel.pending, {
+                      0: {
+                        1: true
+                      },
+                      2: {
+                        2: true
+                      }
+                    }
+                );
+
+                expected_results = {
+                    '0, 0': true,
+                    '0, 1': true,
+                    '0, 2': false,
+                    '1, 15': false,
+                    '2, 2': true,
+                    '2, 3': false
+                }
+                for(var key in expected_results) {
+                    var coords = key.split(', ');
+                    var col = parseInt(coords[0]);
+                    var row = parseInt(coords[1]);
+                    var patch = {patchCol : col, patchRow: row};
+                    YAHOO.util.Assert.areSame(
+                        expected_results[key],
+                        remoteModel.isPatchLoadedOrPending(patch),
+                        'incorrect for ' + key
+                    );
+                }
+            },
+
+            testLoadPatchIfNecessary: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                var mockPatches = { 0: { 0: true } };
+                $.extend(true, remoteModel.patches, mockPatches);
+                var remoteModelMockMixins = this.mockControl.createMock({
+                    getData: function () {}
+                });
+                $.extend(true, remoteModel, remoteModelMockMixins);
+
+                var mockOnDataLoading = this.mockControl.createMock(
+                    {notify: function() {}}
+                );
+                remoteModel.onDataLoading = mockOnDataLoading;
+
+                remoteModel.loadPatchIfNecessary( {patchCol:0, patchRow:0} );
+                this.mockControl.verify();
+
+                assertDeepAreSame({}, remoteModel.pending, 'pending not correct after not loading');
+
+                var newPatch =  {patchCol:1, patchRow:1};
+                mockOnDataLoading.expects().notify();
+                remoteModelMockMixins.expects().getData(27, 101, 52, 200, newPatch);
+
+                remoteModel.loadPatchIfNecessary(newPatch);
+
+                this.mockControl.verify();
+
+                assertDeepAreSame({1: {1: true}}, remoteModel.pending, 'pending not correct after loading');
+            },
+
+            testAddData: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                var previousData = [
+                    { header : 1 },
+                    { header : 2,
+                        3:{formula : '=C2', formatted_value : 'old'}
+                    },
+                    { header : 3,
+                        2:{formula : '=B3', formatted_value : 'old'},
+                        3:{formula : '=C3', formatted_value : 'old'},
+                        4:{formula : '=D3', formatted_value : 'old'}
+                    },
+                    { header : 4 }, 
+                    { header : 5 }, 
+                    { header : 6 }, 
+                    { header : 7, 
+                        1: {formula : '=A7', formatted_value : 'old'},
+                        2: {formula : '=B7', formatted_value : 'old'},
+                        3: {formula : '=C7', formatted_value : 'old'}
+                    }
+                ]
+
+                var newData = {
+                    "width": 52,
+                    "console_text": "Took 0.00s", 
+                    "3": {
+                        "3":{formula: '=C3', formatted_value: 'replaced'}
+                    },
+                    "6": {
+                        "2": {formula: '=B6', formatted_value: 'new cell'},
+                        "3": {formula : '=C6', formatted_value: 'new cell'}
+                    },
+                    "8": {
+                        "2": {formula: '=B8', formatted_value: 'new row'}
+                    },
+                    'left': 2,
+                    'topmost': 3,
+                    'right': 3,
+                    'bottom': 8
+                }
+
+                var expectedData =[
+                    { header : 1 },
+                    { header : 2,
+                        3:{formula : '=C2', formatted_value : 'old'}
+                    },
+                    { header : 3,
+                        3:{formula : '=C3', formatted_value : 'replaced'},
+                        4:{formula : '=D3', formatted_value : 'old'}
+                    },
+                    { header : 4 }, 
+                    { header : 5 }, 
+                    { header : 6, 
+                        2: {formula : '=B6', formatted_value : 'new cell'},
+                        3: {formula : '=C6', formatted_value : 'new cell'}
+                    },
+                    { header : 7, 
+                        1: {formula : '=A7', formatted_value : 'old'}
+                    },
+                    { header : 8, 
+                        2: {formula : '=B8', formatted_value : 'new row'}
+                    }
+                ]; 
+
+                remoteModel.data = previousData;
+                remoteModel.addData(newData);
+
+                assertDeepAreSame(expectedData, remoteModel.data);
+            },
+
+            testOnSuccessAddsDataAndNotifiesOnDataLoadedEvent: function () {
+                var subscriberCalled = false;
+                var addDataArgs;
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                var mockRemoteModel = this.mockControl.createMock({
+                        'addData': function() {}
+                });
+
+                $.extend(true, remoteModel, mockRemoteModel);
+                mockRemoteModel.expects().addData(TypeOf.isA(Object)).andStub(
+                        function() {
+                        addDataArgs = arguments[0];
+                   }
+                        );
+               remoteModel.onDataLoaded.subscribe(
+                   function(e , range) {
+                       subscriberCalled = true;
+                       YAHOO.util.Assert.areSame(20, range.left, 'left not passed');
+                       YAHOO.util.Assert.areSame(30, range.topmost, 'topmost not passed');
+                       YAHOO.util.Assert.areSame(40, range.right, 'right not passed');
+                       YAHOO.util.Assert.areSame(50, range.bottom, 'bottom not passed');
+               });
+               var jsonData = {
+                   'left': 20,
+                   'topmost': 30,
+                   'right': 40,
+                   'bottom': 50
+               };
+               remoteModel.onSuccess( jsonData );
+
+               this.mockControl.verify();
+
+               YAHOO.util.Assert.isTrue(subscriberCalled, 'dataloaded subscriber not notified');
+               
+               assertDeepAreSame(jsonData, addDataArgs);
+
+            },
+
+            testGetSuccessHandlerForPatchCurriesPatchIntoOnSuccess: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+
+                var mockRemoteModel = this.mockControl.createMock({
+                         'onSuccess': function() {}
+                 });
+
+                $.extend(true, remoteModel, mockRemoteModel);
+
+                remoteModel.patches = {0: {1: true}};
+                remoteModel.pending = {1: {2: true}, 3: {5: true}};
+                var forPatch = {patchCol: 1, patchRow: 2};
+                var curriedOnSuccess = remoteModel.getSuccessHandlerForPatch(forPatch);
+                assertDeepAreSame({0: {1: true}}, remoteModel.patches,
+                    'patches updated at curry-time (too early! need to wait til success function actually called');
+
+                var jsonData = {'foo': 1};
+                mockRemoteModel.expects().onSuccess(jsonData);
+
+                curriedOnSuccess(jsonData);
+
+                this.mockControl.verify();
+                assertDeepAreSame(
+                    {
+                        0: {1: true},
+                        1: {2: true}
+                    },
+                    remoteModel.patches
+                );
+                assertDeepAreSame({1: {}, 3: {5: true}}, remoteModel.pending);
+            },
+
+            testCurriedSuccessHandlerChecksJsonDataCoversItsWholeExpectedPatch: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                remoteModel.addData = function () {};
+
+                var patchesBefore = {0: {1: true}};
+                var patchesAfter = {0: {1: true}, 1: {2: true}};
+
+                var forPatch = {patchCol: 1, patchRow: 2};
+                var expectedJson = {left:27, topmost:201, right:52, bottom:300};
+                var curriedOnSuccess = remoteModel.getSuccessHandlerForPatch(forPatch);
+
+                var smallJson = {left: 27, topmost:202, right:52, bottom:300};
+                var bigJson = {left: 0, topmost:55, right:52, bottom:300};
+                var cases = [smallJson, expectedJson, bigJson];
+                var results = [
+                    patchesBefore,
+                    patchesAfter,
+                    patchesAfter
+                ];
+                for (var i=0; i<cases.length; i++){
+                    remoteModel.patches = $.extend(true, {}, patchesBefore);
+                    curriedOnSuccess(cases[i]);
+                    assertDeepAreSame(results[i], remoteModel.patches);
+                }
+            },
+
+            testResetReplaceDataAndClearPatches: function () {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                remoteModel.data = {'some':'stuff'};
+                remoteModel.patches = {0: {1: true}};
+                remoteModel.pending = {0: {1: true}};
+                var reset_to_this = {'some': 'new stuff'};
+
+                remoteModel.reset(reset_to_this);
+                
+                YAHOO.util.Assert.areSame(reset_to_this, remoteModel.data);
+                assertDeepAreSame({}, remoteModel.patches);
+                assertDeepAreSame({}, remoteModel.pending);
+            },
+
+            testGetLengthShouldReturnDataLength: function() {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                remoteModel.data = [1, 2, 3];
+                
+                YAHOO.util.Assert.areSame(3, remoteModel.getLength());
+            },
+
+            testGetItemShouldReturnDataItem: function() {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                remoteModel.data = [1, 2, 3];
+                
+                YAHOO.util.Assert.areSame(2, remoteModel.getItem(1));
+            },
+
+            testEnsureDataChoosesPatchesToLoadAndLoadsThemIfNecessay: function() {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                remoteModel.choosePatchesToLoad = function() {
+                    return [ 1, 2, 3 ];
+                }
+                var calls = [];
+                remoteModel.loadPatchIfNecessary = function(arg){
+                    calls.push(arg)
+                }
+
+                remoteModel.ensureData(1, 101, 51, 122);
+
+                assertDeepAreSame([1,2,3], calls);
+
+            },
+            
+            testEnsureDataDoesntPassGarbageToLoadPatchIfNecessary: function() {
+                var remoteModel = new Dirigible.GridRemoteModel(this.urls);
+                remoteModel.loadPatchIfNecessary = function (arg) {
+                    YAHOO.util.Assert.isFalse(
+                        arg.patchCol === undefined, 
+                        'loadPatchIfNecessary args should have patchCol'
+                    );
+                    YAHOO.util.Assert.isFalse(
+                        arg.patchRow === undefined,
+                        'loadPatchIfNecessary args should have patchRow'
+                    );
+                };
+
+                remoteModel.ensureData(1, 101, 51, 122);
+            }
+
+        })
+
+    ];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

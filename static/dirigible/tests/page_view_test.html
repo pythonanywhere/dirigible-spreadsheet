@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="/static/dirigible/scripts/page_view.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<div id="id_sheet_name"></div>
+
+
+<script type="text/javascript">
+
+tests = [
+
+    new YAHOO.tool.TestCase({
+
+        name: "testPageView",
+
+        setUp: function() {
+            this.mockControl = new MockControl();
+            this.mockConsoleView = this.mockControl.createMock({
+                updateMetaData: function() {}
+            });
+            this.mockUsercodeView = this.mockControl.createMock({
+                updateMetaData: function() {}
+            });
+            this.mockGridView = this.mockControl.createMock({
+                updateMetaData: function() {}
+            });
+            this.pageView = new Dirigible.PageView(
+                'test username',
+                this.mockConsoleView,
+                this.mockUsercodeView,
+                this.mockGridView
+            );
+        },
+
+        testUpdateMetaDataWithNoServerDataShouldDoNothing: function() {
+            this.pageView.updateMetaData(null);
+            this.mockControl.verify();
+        },
+
+        testUpdateMetaDataWithUndefinedServerDataShouldDoNothing: function() {
+            this.pageView.updateMetaData();
+            this.mockControl.verify();
+        },
+
+        testUpdateMetaDataWithServerDataShouldDelegateAndSetSheetNameAndCallUpdatePageTitle: function() {
+            $('#id_sheet_name').text("Old name");
+            var mockData = {
+                hello: 1,
+                name: "New name"
+            };
+
+            var titleUpdater = this.mockControl.createMock({
+                updatePageTitle: function() {}
+            });
+            this.pageView.updatePageTitle = titleUpdater.updatePageTitle;
+
+            this.mockConsoleView.expects().updateMetaData(mockData);
+            this.mockUsercodeView.expects().updateMetaData(mockData);
+            this.mockGridView.expects().updateMetaData(mockData);
+            titleUpdater.expects().updatePageTitle();
+
+            this.pageView.updateMetaData(mockData);
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(
+                "New name",
+                $('#id_sheet_name').text()
+            );
+        },
+
+        testUpdatePageTitleShouldUpdateTitleOfPage: function() {
+            $('#id_sheet_name').text("test sheet name");
+            this.pageView.updatePageTitle();
+            YAHOO.util.Assert.areSame("test username's test sheet name: Dirigible", document.title);
+        }
+
+    })
+
+];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="/static/dirigible/scripts/feedback_dialog.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<a href="" id="make_me_a_feedback" class="feedback_link" >feedback link</a>
+
+<div id="id_feedback_dialog" style="display:none">
+    <input type="button" id="id_feedback_dialog_ok_button" />
+    <input type="button" id="id_feedback_dialog_cancel_button" />
+    <textarea id="id_feedback_dialog_text"></textarea>
+    <input type="text" id="id_feedback_dialog_email_address" />
+    <div id="id_feedback_dialog_error"></div>
+    <div id="id_feedback_dialog_spinner"></div>
+</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testFeedbackDialog",
+
+            setUp: function() {
+                this.urls = {feedback: 'feedback url'};
+            },
+
+            tearDown: function () {
+                $('#id_feedback_dialog').hide();
+            },
+
+            testClickingFeedbackLinkShouldOpenAndHideErrorAndSpinnerAndEnableButtons: function () {
+                Dirigible.FeedbackDialog.Initialise(this.urls);
+
+                // Sanity check
+                elementVisible($('#id_feedback_dialog'), false, 'initial dialog visibility wrong');
+
+                // setup dialog visibility and button enabled so we can assert that
+                // showing the form assigns to them
+                $('#id_feedback_dialog_error').removeClass('hidden');
+                $('#id_feedback_dialog_spinner').removeClass('hidden');
+                $('#id_feedback_dialog_ok_button').attr('disabled', 'disabled');
+                $('#id_feedback_dialog_cancel_button').attr('disabled', 'disabled');
+
+                var event = new jQuery.Event('click');
+                $('#make_me_a_feedback').trigger(event);
+
+                elementVisible($('#id_feedback_dialog'), true, 'dialog did not appear');
+                YAHOO.util.Assert.isTrue(event.isDefaultPrevented());
+                YAHOO.util.Assert.areSame(600, $('#id_feedback_dialog').parent().width());
+                YAHOO.util.Assert.areSame(0, $('.ui-widget-overlay').length, 'dialog should not be modal');
+                YAHOO.util.Assert.isTrue($('#id_feedback_dialog_error').hasClass('hidden'), 'ajax error visible');
+                YAHOO.util.Assert.isTrue($('#id_feedback_dialog_spinner').hasClass('hidden'), 'spinner visible');
+
+                YAHOO.util.Assert.isFalse(
+                    $('#id_feedback_dialog_ok_button').attr('disabled'),
+                    'ok should be enabled'
+                );
+                YAHOO.util.Assert.isFalse(
+                    $('#id_feedback_dialog_cancel_button').attr('disabled'),
+                    'cancel should be enabled'
+                );
+            },
+
+            testClickingOKShouldHideErrorMessageShowSpinnerAndSubmitWithCallbacks: function () {
+                Dirigible.FeedbackDialog.Initialise(this.urls, 'user name');
+                $('#make_me_a_feedback').trigger('click');
+                $("#id_feedback_dialog_text").val('some text');
+                $("#id_feedback_dialog_email_address").val('user email');
+                $('#id_feedback_dialog_error').removeClass('hidden')
+                $('#id_feedback_dialog_spinner').addClass('hidden')
+
+                var ajaxParams;
+                function mockAjax(params) {
+                    ajaxParams = params;
+                }
+                var originalAjax = $.ajax;
+                $.ajax = mockAjax;
+                try {
+                    $('#id_feedback_dialog_ok_button').trigger('click');
+                } finally {
+                    $.ajax = originalAjax;
+                }
+                YAHOO.util.Assert.areSame('POST', ajaxParams.type, 'wrong method');
+                YAHOO.util.Assert.areSame(this.urls.feedback, ajaxParams.url, 'wrong url');
+                YAHOO.util.Assert.areSame('some text', ajaxParams.data.message, 'wrong message');
+                YAHOO.util.Assert.areSame('user email', ajaxParams.data.email_address, 'wrong email address');
+                YAHOO.util.Assert.areSame('user name', ajaxParams.data.username, 'wrong username');
+
+                YAHOO.util.Assert.isTrue(
+                    $('#id_feedback_dialog_ok_button').attr('disabled'),
+                    'ok not disabled'
+                );
+                YAHOO.util.Assert.isTrue(
+                    $('#id_feedback_dialog_cancel_button').attr('disabled'),
+                    'cancel not disabled'
+                );
+                YAHOO.util.Assert.isTrue($('#id_feedback_dialog_error').hasClass('hidden'), 'ajax error visible too soon');
+                YAHOO.util.Assert.isFalse($('#id_feedback_dialog_spinner').hasClass('hidden'), 'spinner not visible');
+
+                ajaxParams.error();
+                elementVisible($('#id_feedback_dialog'), true, 'ajax error closed dialog');
+                YAHOO.util.Assert.isFalse($('#id_feedback_dialog_error').hasClass('hidden'), 'ajax error not visible');
+                YAHOO.util.Assert.isTrue($('#id_feedback_dialog_spinner').hasClass('hidden'), 'spinner visible on error');
+                YAHOO.util.Assert.isFalse(
+                    $('#id_feedback_dialog_ok_button').attr('disabled'),
+                    'ok should be re-enabled'
+                );
+                YAHOO.util.Assert.isFalse(
+                    $('#id_feedback_dialog_cancel_button').attr('disabled'),
+                    'cancel should be re-enabled'
+                );
+
+                ajaxParams.success();
+                elementVisible($('#id_feedback_dialog'), false, 'ajax success did not close dialog');
+            },
+
+            testClickingCancelShouldClose: function () {
+                Dirigible.FeedbackDialog.Initialise(this.urls);
+                $('#make_me_a_feedback').trigger('click');
+                $('#id_feedback_dialog_cancel_button').trigger('click');
+
+                elementVisible($('#id_feedback_dialog'), false, 'cancel did not close dialog');
+            },
+
+            testEmailAddressPromptShouldHaveCorrectDefaultsAndBehaviourWhenUsernameIsEmpty: function () {
+                Dirigible.FeedbackDialog.Initialise(this.urls, '');
+                $('#make_me_a_feedback').trigger('click');
+
+                YAHOO.util.Assert.areSame(
+                    "Email address (optional - only necessary if you would like us to contact you)",
+                    $('#id_feedback_dialog_email_address').val()
+                );
+                YAHOO.util.Assert.isTrue(
+                    $('#id_feedback_dialog_email_address').hasClass("email_prompt"),
+                    'before click email address has wrong class'
+                );
+
+                $('#id_feedback_dialog_email_address').trigger('focus');
+                YAHOO.util.Assert.areSame(
+                    "",
+                    $('#id_feedback_dialog_email_address').val(),
+                    'email address prompt not cleared on click'
+                );
+                YAHOO.util.Assert.isFalse(
+                    $('#id_feedback_dialog_email_address').hasClass("email_prompt"),
+                    'after click email address has wrong class'
+                );
+
+                $('#id_feedback_dialog_email_address').val("Harold@here.com");
+                $('#id_feedback_dialog_email_address').trigger('click');
+                YAHOO.util.Assert.areSame(
+                    "Harold@here.com",
+                    $('#id_feedback_dialog_email_address').val(),
+                    'changed email address prompt not maintained on click'
+                );
+                YAHOO.util.Assert.isFalse(
+                    $('#id_feedback_dialog_email_address').hasClass("email_prompt"),
+                    'after second click email address has wrong class'
+                );
+
+                $('#id_feedback_dialog').dialog('close');
+                $('#make_me_a_feedback').trigger('click');
+                YAHOO.util.Assert.areSame(
+                    "Harold@here.com",
+                    $('#id_feedback_dialog_email_address').val(),
+                    'changed email address prompt not maintained close and re-open'
+                );
+                YAHOO.util.Assert.isFalse(
+                    $('#id_feedback_dialog_email_address').hasClass("email_prompt"),
+                    'after close and re-open email address has wrong class'
+                );
+
+            },
+
+            testEmailAddressPromptShouldBeInvisibleWhenUsernameIsNonEmpty: function () {
+                Dirigible.FeedbackDialog.Initialise(this.urls, 'a user name');
+                $('#make_me_a_feedback').trigger('click');
+
+                elementVisible($('#id_feedback_dialog'), true, 'dialog not visible');
+                elementVisible($('#id_feedback_dialog_email_address'), false, 'email address not hidden');
+            }
+
+        })
+
+    ];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

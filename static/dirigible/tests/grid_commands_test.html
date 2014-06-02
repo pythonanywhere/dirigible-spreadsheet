@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.core.js"></script>
+    <script type="text/javascript" src="yuitest/yuitest-combo.js"></script>
+    <script type="text/javascript" src="jsmock.js"></script>
+
+    <script type="text/javascript" src="../scripts/grid_commands.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+    <div id="id_results">Please wait</div>
+
+<script type="text/javascript">
+
+tests = [
+
+    new YAHOO.tool.TestCase({
+
+        name: "testCreateSelectionCommand",
+
+        testCreateSelectionCommand_WhenNotEditing_PerformsServerCommandAndReturnsTrue: function () {
+            Dirigible.SheetUtils = {
+                queueRecalculation: "a mock recalculation function"
+            };
+            var selectedRange = new Slick.Range(1, 3, 5, 7);
+            var mockControl = new MockControl();
+            var mockSelectionModel = mockControl.createMock({
+                getSelectedRanges: function() {}
+            });
+            var mockGrid = mockControl.createMock({
+                getCellEditor: function() {},
+                getSelectionModel: function() {}
+            });
+            var sentStartCol, sentStartRow, sentEndCol, sentEndRow;
+            var serverCommand = function(startCol, startRow, endCol, endRow) {
+                sentStartCol = startCol;
+                sentStartRow = startRow;
+                sentEndCol = endCol;
+                sentEndRow = endRow;
+            };
+
+            mockGrid.expects().getCellEditor().andReturn(null);
+            mockGrid.expects().getSelectionModel().andReturn(mockSelectionModel);
+            mockSelectionModel.expects().getSelectedRanges().andReturn([selectedRange]);
+
+            commands = new Dirigible.GridCommands(null, mockGrid);
+            var gridSelectionAjaxAction = Dirigible.GridCommands.createSelectionCommand__(
+                mockGrid, serverCommand
+            );
+            var result = gridSelectionAjaxAction();
+
+            mockControl.verify();
+            YAHOO.util.Assert.areSame(3, sentStartCol);
+            YAHOO.util.Assert.areSame(2, sentStartRow);
+            YAHOO.util.Assert.areSame(7, sentEndCol);
+            YAHOO.util.Assert.areSame(6, sentEndRow);
+            YAHOO.util.Assert.isTrue(result);
+        },
+
+        testCreateSelectionCommand_WhenEditing_DoesNothingAndReturnsFalse: function (modifier) {
+            Dirigible.SheetUtils = {
+                queueRecalculation: "a mock recalculation function"
+            };
+            var mockControl = new MockControl();
+            var mockSelectionModel = mockControl.createMock({
+                getSelectedRanges: function() {}
+            });
+            var mockGrid = mockControl.createMock({
+                getSelectionModel: function() {},
+                getCellEditor: function() {}
+            });
+            var serverCommandCalled = false;
+            var serverCommand = function() {
+                serverCommandCalled = true;
+            };
+
+            mockGrid.expects().getCellEditor().andReturn(true);
+
+            commands = new Dirigible.GridCommands(null, mockGrid);
+            var gridSelectionAjaxAction = Dirigible.GridCommands.createSelectionCommand__(
+                mockGrid, serverCommand
+            );
+            var result = gridSelectionAjaxAction();
+
+            mockControl.verify();
+            YAHOO.util.Assert.isFalse(serverCommandCalled);
+            YAHOO.util.Assert.isFalse(result);
+        }
+
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "testClipboardAjaxMethods",
+
+        setUp : function () {
+            this.post_url = null;
+            this.post_params = null;
+            this.post_callback = null;
+            this.urls = {
+                cut: 'cut_url',
+                copy: 'copy_url',
+                paste: 'paste_url'
+            };
+            Dirigible.SheetUtils = {
+                queueRecalculation: "a mock recalculation function"
+            };
+            this.commands = new Dirigible.GridCommands(this.urls, null);
+            var that = this;
+            $.post = function(url, params, callback) {
+                that.post_url = url;
+                that.post_params = params;
+                that.post_callback = callback;
+            };
+        },
+
+        testSendCopyToServer: function () {
+            this.commands.sendCopyToServer__(1, 2, 3, 4);
+            YAHOO.util.Assert.areSame(this.urls.copy, this.post_url);
+            assertDeepAreSame({range: '1,2,3,4'}, this.post_params);
+        },
+
+        testSendCutToServer: function () {
+            this.commands.sendCutToServer__(1, 2, 3, 4);
+            YAHOO.util.Assert.areSame(this.urls.cut, this.post_url);
+            assertDeepAreSame({range: '1,2,3,4'}, this.post_params);
+            YAHOO.util.Assert.areSame(
+                Dirigible.SheetUtils.queueRecalculation,
+                this.post_callback
+            );
+        },
+
+        testSendPasteToServer: function () {
+            this.commands.sendPasteToServer__(1, 2, 3, 4);
+            YAHOO.util.Assert.areSame(this.urls.paste, this.post_url);
+            assertDeepAreSame({range: '1,2,3,4'}, this.post_params);
+            YAHOO.util.Assert.areSame(
+                Dirigible.SheetUtils.queueRecalculation,
+                this.post_callback
+            );
+        }
+
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "testAjaxClearMethod",
+
+        setUp : function () {
+            this.post_url = null;
+            this.post_params = null;
+            this.post_callback = null;
+            this.urls = {
+                clearCells: 'clear_cells_url'
+            };
+            var callbacks = {
+                    update_grid_and_show_errors : 'update_grid_and_show_errors'
+            };
+            this.commands = new Dirigible.GridCommands(this.urls, null);
+            var that = this;
+            $.post = function(url, params, callback) {
+                that.post_url = url;
+                that.post_params = params;
+                that.post_callback = callback;
+            };
+        },
+
+        testSendClearToServer: function () {
+            this.commands.sendClearToServer__(1, 2, 3, 4);
+            YAHOO.util.Assert.areSame(this.urls.clearCells, this.post_url);
+            assertDeepAreSame({range: '1,2,3,4'}, this.post_params);
+            YAHOO.util.Assert.areSame(
+                Dirigible.SheetUtils.queueRecalculation,
+                this.post_callback
+            );
+        }
+
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "testClipboardActions",
+
+        testCutCopyPasteAndClear_AreGridSelectionAjaxActions_Calling_RelevantAjaxActions: function () {
+            var mockControl = new MockControl();
+            var mockGrid = mockControl.createMock({});
+
+            var orig = Dirigible.GridCommands.createSelectionCommand__;
+            try {
+                Dirigible.GridCommands.createSelectionCommand__ = function(grid, ajaxAction) {
+                    YAHOO.util.Assert.areSame(grid, mockGrid);
+                    return { "wrapped": ajaxAction };
+                };
+
+                var commands = new Dirigible.GridCommands(null, mockGrid);
+                YAHOO.util.Assert.areSame(
+                    commands.sendCutToServer__,
+                    commands.cut.wrapped,
+                    'bad cut'
+                );
+                YAHOO.util.Assert.areSame(
+                    commands.sendCopyToServer__,
+                    commands.copy.wrapped,
+                    'bad copy'
+                );
+                YAHOO.util.Assert.areSame(
+                    commands.sendPasteToServer__,
+                    commands.paste.wrapped,
+                    'bad paste'
+                );
+                YAHOO.util.Assert.areSame(
+                    commands.sendClearToServer__,
+                    commands.clear.wrapped,
+                    'bad clear'
+                );
+
+            } finally {
+                Dirigible.GridCommands.createSelectionCommand__ = orig;
+            }
+        }
+
+    }),
+
+   new YAHOO.tool.TestCase({
+
+        name: "testColumnResizing",
+        setUp: function () {
+           this.gridColumns = [
+                {width: 100, previousWidth: 100},
+                {width: 101, previousWidth: 100},
+                {width: 100, previousWidth: 100},
+                {width: 200, previousWidth: 300}
+            
+            ];
+            this.expectedJson = '{"1":101,"3":200}';
+        },
+
+        testGridColumnsToJSON: function() {
+            var commands = new Dirigible.GridCommands(null, null);
+        
+            var json = commands.convertGridColumnsToJSON__(this.gridColumns);
+
+
+            assertDeepAreSame(this.expectedJson, json);
+        },
+
+        testColumnResizing: function() {
+            var mockControl = new MockControl();
+
+            var mockGrid = mockControl.createMock({
+                getColumns: function() {}
+            });
+            var mockJquery = mockControl.createMock({
+                post: function() {}
+            });
+            $.extend(true, $, mockJquery);
+
+            mockGrid.expects().getColumns().andReturn(this.gridColumns);
+            var postArgs
+
+            mockJquery.expects().post('url', TypeOf.isA(Object)).andStub(
+                function () {
+                    postArgs = arguments[1];
+                }
+            );
+
+            var urls = {setColumnWidths : 'url'};
+            var expectedPostArgs = { column_widths: this.expectedJson};
+
+            var commands = new Dirigible.GridCommands(urls, mockGrid);
+            var event;
+            var data;
+            
+            commands.resizeColumns(event, data);
+
+            mockControl.verify();
+            assertDeepAreSame(expectedPostArgs, postArgs);
+        }
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "testSendCellChangeToServer",
+
+        testSendCellChangeToServer: function() {
+            var mockControl = new MockControl();
+            var mockJquery = mockControl.createMock({
+                post: function() {}
+            });
+            $.extend(true, $, mockJquery);
+
+            var post_url, post_params, post_callback;
+            var urls = {setCellFormula: 'set cell formula url'};
+
+            Dirigible.SheetUtils = mockControl.createMock({
+                abortOtherRecalculations: function () {}
+            });
+
+            Dirigible.SheetUtils.expects().abortOtherRecalculations();
+            mockJquery.expects().post(
+                'set cell formula url', 
+                TypeOf.isA(Array),
+                TypeOf.isA(Function)
+            ).andStub(
+                function(url, params, callback) {
+                    post_url = url;
+                    post_params = params;
+                    post_callback = callback;
+                }
+            );
+            var commands = new Dirigible.GridCommands(urls, 'mockGrid');
+            slickGridCellDataToPostParams = function(grid, gridLocation) {
+                return [grid, gridLocation];
+            };
+
+            commands.sendCellChangeToServer(null, 'gridLocation');
+
+            mockControl.verify();
+
+            assertDeepAreSame(
+                post_params,  ['mockGrid', 'gridLocation']
+            );
+
+            // test post callback
+            var setCellFormulaAndUpdateSheetCallCount = 0;
+            var setCellFormulaAndUpdateSheetLocation;
+            commands.setCellFormulaAndUpdateSheet__ = function(gridLocation) {
+                setCellFormulaAndUpdateSheetCallCount++;
+                setCellFormulaAndUpdateSheetLocation = gridLocation;
+            };
+            post_callback('OK');
+            YAHOO.util.Assert.areSame(
+                1, setCellFormulaAndUpdateSheetCallCount
+            );
+            YAHOO.util.Assert.areSame(
+                'gridLocation',
+                setCellFormulaAndUpdateSheetLocation
+            );
+        },
+
+        testSetCellFormulaAndUpateSheet: function() {
+            var mockControl = new MockControl();
+
+            var mockGrid = mockControl.createMock({
+                updateCell: function() {}
+            });
+            mockGrid.expects().updateCell(2, 3);
+
+            mockSheetUtils = mockControl.createMock({
+                queueRecalculation: function() {}
+            });
+            mockSheetUtils.expects().queueRecalculation();
+            Dirigible.SheetUtils = mockSheetUtils;
+
+            var commands = new Dirigible.GridCommands(null, mockGrid);
+            commands.setCellFormulaAndUpdateSheet__( {row:2, column:3} );
+
+            mockControl.verify();
+        }
+
+    }),
+    new YAHOO.tool.TestCase({
+
+        name: "testCommitCurrentEdit",
+
+        setUp: function() {
+            this.mockControl = new MockControl();
+            this.mockEditController = this.mockControl.createMock({
+                commitCurrentEdit: function() {}
+            });
+            this.mockGrid = this.mockControl.createMock({
+                getEditController: function() {}
+            });
+        },
+
+        testCommitCurrentEditShouldCommitEditOnGrid: function() {
+            var urls = {};
+            var commands = new Dirigible.GridCommands(urls, this.mockGrid);
+
+            this.mockControl.reset();
+
+            this.mockGrid.expects().getEditController().andReturn(this.mockEditController);
+            this.mockEditController.expects().commitCurrentEdit();
+
+            commands.commitCurrentEdit();
+
+            this.mockControl.verify();
+        }
+    })
+];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

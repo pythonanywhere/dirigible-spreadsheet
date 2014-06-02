@@ -1,0 +1,86 @@
+#id_dashboard_wrap {
+    margin-top: 2em;
+}
+
+
+#id_sheets {
+    width: 413px;
+    float: left;
+}
+
+#id_right_column {
+    float: right;
+}
+
+#id_account_details {
+    width: 187px;
+    border: 5px solid #4B576D;
+    border-radius: 12px;
+    -moz-border-radius: 12px;
+    background-color: #AEAFAF;
+    color: #4B576D;
+    padding: 15px;
+}
+
+#id_example_sheets {
+    width: 187px;
+    border: 5px solid #4B576D;
+    border-radius: 12px;
+    -moz-border-radius: 12px;
+    background-color: #AEAFAF;
+    color: #4B576D;
+    padding: 15px;
+    margin-top: 1em;
+}
+
+#id_create_new_sheet {
+    font-weight: bold;
+    float: right;
+}
+
+.section-title {
+    font-size: 14pt;
+    margin-top: 0px;
+}
+
+#id_sheets_title {
+    display: inline;
+}
+
+#id_sheets_body {
+    clear: both;
+}
+
+#id_no_sheets_message {
+    font-style: italic;
+    margin-left: 1em;
+}
+
+#id_change_password_button {
+    font-weight: bold;
+    margin-left: 2ex;
+}
+
+#id_change_password_form {
+    display: none;
+}
+
+#id_change_password_success {
+    display: none;
+    margin-top: 1em;
+    color: #008000;
+}
+
+#id_change_password_error {
+    margin-top: 1em;
+    color: #800000;
+}
+
+#id_change_password_buttons {
+    margin-top: 1em;
+    float: right;
+}
+
+#id_change_password_form input[type='password'] {
+    margin-bottom: 0.5em;
+}

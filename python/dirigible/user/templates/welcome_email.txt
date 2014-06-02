@@ -1,0 +1,4 @@
+Dear {{user.username}}
+
+Welcome to Dirigible!
+

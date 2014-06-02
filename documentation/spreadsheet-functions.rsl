@@ -1,0 +1,2868 @@
+<!--
+
+-->
+<document currentResultWorksheet="main table" verticalSplitterRatio="0.80390625" horizontalSplitterRatio="0.734640522876" splitterOrientation="Horizontal" suspendRecalculations="True" license="Personal non-commercial use" copyrightOwner="None" resolverVersion="1.8" resolverBuild="5104" documentVersion="13">
+    <foldState license="True" imports="True" worksheetCreation="True" preConstantsUserCode="False" constants="True" preFormulaeUserCode="False" generated="True" postFormulaeUserCode="False"/>
+    <traitDefaults>
+
+    </traitDefaults>
+    <preConstantsUserCode><![CDATA[from itertools import izip_longest
+from os.path import dirname, join
+import time
+from urllib import urlopen
+
+from BeautifulSoup import BeautifulSoup
+
+microsoft_excel_functions_www_page = 'http://office.microsoft.com/en-us/excel-help/list-of-worksheet-functions-by-category-HP005204211.aspx'
+
+
+class FunctionDef(object):
+    def __repr__(self):
+        return '<def %s>' % (self.excel_function_name,)
+    
+    @property
+    def category(self):
+        getcat = lambda r: mt.Cols['category'][r] and mt.Cols['category'][r] or getcat(r-1)
+        return getcat(self._row)
+
+
+]]></preConstantsUserCode>
+    <preFormulaeUserCode><![CDATA[mt = workbook['main table']
+
+    
+def fetch_syntaxes_from_web():
+    main_doc_page = BeautifulSoup(urlopen(microsoft_excel_functions_www_page).read())
+    all_links = main_doc_page.findAll('a', href=True)
+    
+    def find_link_for_formula(formula_name):
+        for link in all_links:
+            if link.string == formula_name:
+                return link['href']
+
+    def get_syntax_from_page(href, formula_name):
+        try:
+            page = BeautifulSoup(urlopen(href).read())
+            elements = page.find('div',{'class':'cdArticleBody'}).find('b',text=formula_name).parent.parent.contents
+            return ''.join(e.string for e in elements)
+        except:
+            return ''
+
+    def get_syntax(name, formula_page):
+        print name,
+        syntax = get_syntax_from_page(formula_page, cell.Value)
+        retries = 3
+        while not syntax and retries > 0:
+            time.sleep(1)
+            retries = retries - 1
+            print retries,
+        print syntax
+        return syntax
+    
+    for cell in mt.Cols['function'].Cells:
+        if cell.Value and cell.Row > 1:
+            formula_page = find_link_for_formula(cell.Value)
+            mt.Cells[cell.Col, cell.Row].Href = formula_page
+            syntax = get_syntax(cell.Value, formula_page)
+            if syntax:
+                mt.Cells[cell.Col+1, cell.Row].Formula = syntax
+
+b = Button('Fetch Syntaxes from web')
+b.Click += fetch_syntaxes_from_web
+mt.C2 = b
+            
+]]></preFormulaeUserCode>
+    <names />
+    <viewStates>
+        <viewState worksheet="main table">
+            <currentCell col="3" row="345" />
+            <scrollPos col="3" row="2" />
+            <virtualGridSize width="23" height="383" />
+        </viewState>
+    </viewStates>
+    <worksheetOrder>
+        <orderentry name="main table" />
+    </worksheetOrder>
+    <worksheet name="main table" value="" showGrid="True" showBounds="False" headerWidth="-1" headerHeight="-1" headerRow="1" freezeRows="1" freezeCols="2">
+        <trait name="FontSize">
+            <traitentry col="0" row="0" value="11.0" />
+        </trait>
+        <trait name="BorderBottom">
+        </trait>
+        <trait name="ShowNegativeSymbol">
+        </trait>
+        <trait name="Unit">
+        </trait>
+        <trait name="ColWidth">
+            <traitentry col="2" row="0" value="114" />
+            <traitentry col="3" row="0" value="347" />
+            <traitentry col="4" row="0" value="247" />
+            <traitentry col="5" row="0" value="179" />
+            <traitentry col="6" row="0" value="124" />
+            <traitentry col="7" row="0" value="214" />
+            <traitentry col="7" row="346" value="179" />
+            <traitentry col="7" row="360" value="179" />
+        </trait>
+        <trait name="Alignment">
+        </trait>
+        <trait name="BorderTop">
+        </trait>
+        <trait name="WebEditable">
+        </trait>
+        <trait name="Italic">
+        </trait>
+        <trait name="FontFamily">
+            <traitentry col="0" row="0" value="Calibri" />
+        </trait>
+        <trait name="ShowSeparators">
+        </trait>
+        <trait name="VerticalAlignment">
+        </trait>
+        <trait name="Formatter">
+        </trait>
+        <trait name="Underline">
+        </trait>
+        <trait name="Color">
+            <traitentry col="0" row="0" value="ARGB color: 255, 0, 0, 0" />
+        </trait>
+        <trait name="RowHidden">
+        </trait>
+        <trait name="BorderLeft">
+        </trait>
+        <trait name="StripZeros">
+        </trait>
+        <trait name="ColHidden">
+        </trait>
+        <trait name="Wrap">
+            <traitentry col="4" row="0" value="True" />
+        </trait>
+        <trait name="NegativeTextColor">
+            <traitentry col="0" row="0" value="named color: Black" />
+        </trait>
+        <trait name="BorderRight">
+        </trait>
+        <trait name="RowHeight">
+            <traitentry col="0" row="0" value="20" />
+            <traitentry col="0" row="190" value="40" />
+            <traitentry col="0" row="2" value="60" />
+            <traitentry col="0" row="11" value="40" />
+            <traitentry col="0" row="12" value="40" />
+            <traitentry col="0" row="13" value="40" />
+            <traitentry col="0" row="202" value="40" />
+            <traitentry col="0" row="208" value="60" />
+            <traitentry col="0" row="22" value="103" />
+            <traitentry col="0" row="24" value="120" />
+            <traitentry col="0" row="26" value="40" />
+            <traitentry col="0" row="216" value="40" />
+            <traitentry col="0" row="221" value="40" />
+            <traitentry col="0" row="222" value="60" />
+            <traitentry col="0" row="223" value="40" />
+            <traitentry col="0" row="37" value="136" />
+            <traitentry col="0" row="41" value="40" />
+            <traitentry col="0" row="230" value="140" />
+            <traitentry col="0" row="232" value="40" />
+            <traitentry col="0" row="46" value="131" />
+            <traitentry col="0" row="238" value="40" />
+            <traitentry col="0" row="239" value="40" />
+            <traitentry col="0" row="240" value="40" />
+            <traitentry col="0" row="241" value="40" />
+            <traitentry col="0" row="242" value="40" />
+            <traitentry col="0" row="243" value="40" />
+            <traitentry col="0" row="244" value="40" />
+            <traitentry col="0" row="56" value="40" />
+            <traitentry col="0" row="245" value="40" />
+            <traitentry col="0" row="246" value="40" />
+            <traitentry col="0" row="58" value="40" />
+            <traitentry col="0" row="59" value="40" />
+            <traitentry col="0" row="60" value="40" />
+            <traitentry col="0" row="249" value="40" />
+            <traitentry col="0" row="251" value="40" />
+            <traitentry col="0" row="252" value="40" />
+            <traitentry col="0" row="253" value="40" />
+            <traitentry col="0" row="66" value="112" />
+            <traitentry col="0" row="255" value="40" />
+            <traitentry col="0" row="67" value="52" />
+            <traitentry col="0" row="256" value="40" />
+            <traitentry col="0" row="257" value="40" />
+            <traitentry col="0" row="69" value="40" />
+            <traitentry col="0" row="258" value="40" />
+            <traitentry col="0" row="70" value="40" />
+            <traitentry col="0" row="71" value="40" />
+            <traitentry col="0" row="260" value="40" />
+            <traitentry col="0" row="261" value="40" />
+            <traitentry col="0" row="262" value="40" />
+            <traitentry col="0" row="263" value="40" />
+            <traitentry col="0" row="265" value="40" />
+            <traitentry col="0" row="266" value="40" />
+            <traitentry col="0" row="267" value="40" />
+            <traitentry col="0" row="268" value="60" />
+            <traitentry col="0" row="82" value="40" />
+            <traitentry col="0" row="83" value="40" />
+            <traitentry col="0" row="272" value="40" />
+            <traitentry col="0" row="85" value="58" />
+            <traitentry col="0" row="279" value="40" />
+            <traitentry col="0" row="280" value="40" />
+            <traitentry col="0" row="97" value="40" />
+            <traitentry col="0" row="98" value="40" />
+            <traitentry col="0" row="293" value="40" />
+            <traitentry col="0" row="105" value="40" />
+            <traitentry col="0" row="296" value="40" />
+            <traitentry col="0" row="109" value="40" />
+            <traitentry col="0" row="110" value="40" />
+            <traitentry col="0" row="111" value="40" />
+            <traitentry col="0" row="300" value="40" />
+            <traitentry col="0" row="112" value="40" />
+            <traitentry col="0" row="301" value="40" />
+            <traitentry col="0" row="302" value="40" />
+            <traitentry col="0" row="303" value="40" />
+            <traitentry col="0" row="117" value="40" />
+            <traitentry col="0" row="306" value="40" />
+            <traitentry col="0" row="119" value="40" />
+            <traitentry col="0" row="308" value="40" />
+            <traitentry col="0" row="311" value="40" />
+            <traitentry col="0" row="124" value="40" />
+            <traitentry col="0" row="317" value="40" />
+            <traitentry col="0" row="318" value="40" />
+            <traitentry col="0" row="319" value="60" />
+            <traitentry col="0" row="131" value="40" />
+            <traitentry col="0" row="320" value="40" />
+            <traitentry col="0" row="132" value="40" />
+            <traitentry col="0" row="133" value="40" />
+            <traitentry col="0" row="134" value="40" />
+            <traitentry col="0" row="135" value="40" />
+            <traitentry col="0" row="136" value="40" />
+            <traitentry col="0" row="325" value="40" />
+            <traitentry col="0" row="137" value="40" />
+            <traitentry col="0" row="138" value="40" />
+            <traitentry col="0" row="327" value="40" />
+            <traitentry col="0" row="139" value="40" />
+            <traitentry col="0" row="140" value="40" />
+            <traitentry col="0" row="329" value="40" />
+            <traitentry col="0" row="141" value="40" />
+            <traitentry col="0" row="142" value="40" />
+            <traitentry col="0" row="143" value="60" />
+            <traitentry col="0" row="144" value="60" />
+            <traitentry col="0" row="146" value="40" />
+            <traitentry col="0" row="147" value="40" />
+            <traitentry col="0" row="336" value="60" />
+            <traitentry col="0" row="148" value="40" />
+            <traitentry col="0" row="337" value="40" />
+            <traitentry col="0" row="338" value="40" />
+            <traitentry col="0" row="151" value="40" />
+            <traitentry col="0" row="340" value="40" />
+            <traitentry col="0" row="152" value="40" />
+            <traitentry col="0" row="341" value="107" />
+            <traitentry col="0" row="153" value="40" />
+            <traitentry col="0" row="342" value="40" />
+            <traitentry col="0" row="154" value="40" />
+            <traitentry col="0" row="155" value="40" />
+            <traitentry col="0" row="344" value="40" />
+            <traitentry col="0" row="156" value="40" />
+            <traitentry col="0" row="345" value="64" />
+            <traitentry col="0" row="157" value="60" />
+            <traitentry col="0" row="346" value="60" />
+            <traitentry col="0" row="160" value="60" />
+            <traitentry col="0" row="161" value="40" />
+            <traitentry col="0" row="350" value="40" />
+            <traitentry col="0" row="162" value="40" />
+            <traitentry col="0" row="351" value="40" />
+            <traitentry col="0" row="163" value="40" />
+            <traitentry col="0" row="352" value="40" />
+            <traitentry col="0" row="164" value="40" />
+            <traitentry col="0" row="166" value="40" />
+            <traitentry col="0" row="167" value="40" />
+            <traitentry col="0" row="356" value="40" />
+            <traitentry col="0" row="168" value="40" />
+            <traitentry col="0" row="169" value="40" />
+            <traitentry col="0" row="172" value="40" />
+            <traitentry col="0" row="173" value="40" />
+            <traitentry col="0" row="174" value="40" />
+            <traitentry col="0" row="363" value="63" />
+            <traitentry col="0" row="175" value="40" />
+            <traitentry col="0" row="176" value="40" />
+            <traitentry col="0" row="178" value="60" />
+            <traitentry col="0" row="179" value="40" />
+            <traitentry col="0" row="180" value="40" />
+            <traitentry col="0" row="181" value="40" />
+            <traitentry col="0" row="182" value="40" />
+            <traitentry col="0" row="183" value="40" />
+            <traitentry col="0" row="186" value="40" />
+            <traitentry col="0" row="188" value="40" />
+            <traitentry col="7" row="21" value="40" />
+            <traitentry col="7" row="19" value="40" />
+            <traitentry col="7" row="83" value="20" />
+            <traitentry col="6" row="11" value="20" />
+            <traitentry col="6" row="12" value="20" />
+            <traitentry col="6" row="26" value="20" />
+            <traitentry col="6" row="41" value="20" />
+        </trait>
+        <trait name="BackColor">
+            <traitentry col="0" row="0" value="named color: White" />
+            <traitentry col="3" row="0" value="ARGB color: 255, 255, 255, 128" />
+        </trait>
+        <trait name="Bold">
+        </trait>
+        <trait name="Strikethrough">
+        </trait>
+        <trait name="ImagePlacement">
+        </trait>
+        <trait name="DecimalPlaces">
+        </trait>
+        <cell name="B194" value="ISNA" type="general">
+        </cell>
+        <cell name="E7" value="math.asin(number)" type="general">
+        </cell>
+        <cell name="F7" value="import math" type="general">
+        </cell>
+        <cell name="D180" value="Returns the net present value for a schedule of cash flows that is not necessarily periodic" type="general">
+        </cell>
+        <cell name="B5" value="ACOS" type="general">
+        </cell>
+        <cell name="D321" value="Returns the Student&apos;s t-distribution" type="general">
+        </cell>
+        <cell name="C4" value="ABS(number)" type="general">
+        </cell>
+        <cell name="B177" value="TBILLYIELD" type="general">
+        </cell>
+        <cell name="C176" value="TBILLPRICE(settlement,maturity,discount)" type="general">
+        </cell>
+        <cell name="B324" value="TRIMMEAN" type="general">
+        </cell>
+        <cell name="C325" value="TTEST(array1,array2,tails,type)" type="general">
+        </cell>
+        <cell name="D101" value="Converts a decimal number to octal" type="general">
+        </cell>
+        <cell name="D306" value="Returns the number of permutations for a given number of objects" type="general">
+        </cell>
+        <cell name="G99" value="bin(n) without the slice returns a string prepended with &apos;0b&apos;, whereas excel just returns raw binary." type="general">
+        </cell>
+        <cell name="D137" value="Returns the number of days from the settlement date to the next coupon date" type="general">
+        </cell>
+        <cell name="B96" value="BIN2OCT" type="general">
+        </cell>
+        <cell name="C97" value="COMPLEX(real_num,i_num,suffix)" type="general">
+        </cell>
+        <cell name="B311" value="RSQ" type="general">
+        </cell>
+        <cell name="C310" value="RANK(number,ref,order)" type="general">
+        </cell>
+        <cell name="B140" value="COUPPCD" type="general">
+        </cell>
+        <cell name="C141" value="CUMIPMT(rate,nper,pv,start_period,end_period,type)" type="general">
+        </cell>
+        <cell name="D122" value="Returns the sine of a complex number" type="general">
+        </cell>
+        <cell name="D279" value="Returns the inverse of the gamma cumulative distribution" type="general">
+        </cell>
+        <cell name="D238" value="Extracts from a database a single record that matches the specified criteria" type="general">
+        </cell>
+        <cell name="B127" value="OCT2DEC" type="general">
+        </cell>
+        <cell name="C126" value="OCT2BIN(number,places)" type="general">
+        </cell>
+        <cell name="B274" value="FISHERINV" type="general">
+        </cell>
+        <cell name="C275" value="FORECAST(x,known_y&apos;s,known_x&apos;s)" type="general">
+        </cell>
+        <cell name="D47" value="Returns the sign of a number" type="general">
+        </cell>
+        <cell name="B235" value="DAVERAGE" type="general">
+        </cell>
+        <cell name="E40" value="random.random()" type="general">
+        </cell>
+        <cell name="F40" value="import random" type="general">
+        </cell>
+        <cell name="G41" value="Note minor difference between randint and randrange, &lt;bottom and &lt;=bottom" type="general">
+        </cell>
+        <cell name="B42" value="ROMAN" type="general">
+        </cell>
+        <cell name="C43" value="ROUND(number,num_digits)" type="general">
+        </cell>
+        <cell name="D95" value="Converts a binary number to hexadecimal" type="general">
+        </cell>
+        <cell name="D195" value="Returns TRUE if the value is not text" type="general">
+        </cell>
+        <cell name="B90" value="BESSELI" type="general">
+        </cell>
+        <cell name="C91" value="BESSELJ(x,n)" type="general">
+        </cell>
+        <cell name="D12" value="Rounds a number to the nearest integer or to the nearest multiple of significance" type="general">
+        </cell>
+        <cell name="B198" value="ISREF" type="general">
+        </cell>
+        <cell name="E11" value="math.atanh(number)" type="general">
+        </cell>
+        <cell name="F11" value="import math" type="general">
+        </cell>
+        <cell name="D176" value="Returns the price per $100 face value for a Treasury bill" type="general">
+        </cell>
+        <cell name="B9" value="ATAN" type="general">
+        </cell>
+        <cell name="C8" value="ASINH(number)" type="general">
+        </cell>
+        <cell name="D329" value="Calculates variance based on the entire population, including numbers, text, and logical values" type="general">
+        </cell>
+        <cell name="B181" value="YIELD" type="general">
+        </cell>
+        <cell name="C180" value="XNPV(rate,values,dates)" type="general">
+        </cell>
+        <cell name="B328" value="VARP" type="general">
+        </cell>
+        <cell name="C329" value="VARPA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="D97" value="Converts real and imaginary coefficients into a complex number" type="general">
+        </cell>
+        <cell name="E102" value="number1 == number2" type="general">
+        </cell>
+        <cell name="D318" value="Calculates standard deviation based on the entire population" type="general">
+        </cell>
+        <cell name="G103" value="NB. scipy version takes complex number as only parameter. not equivalent" type="general">
+        </cell>
+        <cell name="G312" value="See scipy.stats.skew" type="general">
+        </cell>
+        <cell name="D149" value="Returns the effective annual interest rate" type="general">
+        </cell>
+        <cell name="B100" value="DEC2HEX" type="general">
+        </cell>
+        <cell name="C101" value="DEC2OCT(number, places)" type="general">
+        </cell>
+        <cell name="B315" value="STANDARDIZE" type="general">
+        </cell>
+        <cell name="C314" value="SMALL(array,k)" type="general">
+        </cell>
+        <cell name="B144" value="DDB" type="general">
+        </cell>
+        <cell name="C145" value="DISC(settlement,maturity,pr,redemption,basis)" type="general">
+        </cell>
+        <cell name="D70" value="the serial number of the date that is the indicated number of months before or after the start date" type="general">
+        </cell>
+        <cell name="D275" value="Returns a value along a linear trend" type="general">
+        </cell>
+        <cell name="B67" value="DATEVALUE" type="general">
+        </cell>
+        <cell name="C66" value="DATE(year,month,day)" type="general">
+        </cell>
+        <cell name="B278" value="GAMMADIST" type="general">
+        </cell>
+        <cell name="C279" value="GAMMAINV(probability,alpha,beta)" type="general">
+        </cell>
+        <cell name="D43" value="Rounds a number to a specified number of digits" type="general">
+        </cell>
+        <cell name="B239" value="DMAX" type="general">
+        </cell>
+        <cell name="C238" value="DGET(database,field,criteria)" type="general">
+        </cell>
+        <cell name="B46" value="SERIESSUM" type="general">
+        </cell>
+        <cell name="C47" value="SIGN(number)" type="general">
+        </cell>
+        <cell name="D91" value="Returns the Bessel function Jn(x)" type="general">
+        </cell>
+        <cell name="E92" value="special.kn(n,x)" type="general">
+        </cell>
+        <cell name="F92" value="from scipy import special" type="general">
+        </cell>
+        <cell name="G93" value="Note arg order is swapped" type="general">
+        </cell>
+        <cell name="D207" value="Specifies a logical test to perform" type="general">
+        </cell>
+        <cell name="B94" value="BIN2DEC" type="general">
+        </cell>
+        <cell name="E200" value="float(value)" type="general">
+        </cell>
+        <cell name="C95" value="BIN2HEX(number,places)" type="general">
+        </cell>
+        <cell name="D8" value="Returns the inverse hyperbolic sine of a number" type="general">
+        </cell>
+        <cell name="B202" value="TYPE" type="general">
+        </cell>
+        <cell name="E15" value="math.cosh(number)" type="general">
+        </cell>
+        <cell name="D293" value="Returns the maximum value in a list of arguments, including numbers, text, and logical values" type="general">
+        </cell>
+        <cell name="F15" value="import math" type="general">
+        </cell>
+        <cell name="D188" value="Returns information about the current operating environment" type="general">
+        </cell>
+        <cell name="B13" value="COMBIN" type="general">
+        </cell>
+        <cell name="B288" value="LINEST" type="general">
+        </cell>
+        <cell name="C12" value="CEILING(number,significance)" type="general">
+        </cell>
+        <cell name="C289" value="LOGEST(known_y&apos;s,known_x&apos;s,const,stats)" type="general">
+        </cell>
+        <cell name="D341" value="Joins several text items into one text item" type="general">
+        </cell>
+        <cell name="A185" value="Information functions" type="general">
+        </cell>
+        <cell name="E338" value="chr(i)" type="general">
+        </cell>
+        <cell name="B189" value="ISBLANK" type="general">
+        </cell>
+        <cell name="C188" value="INFO(type_text)" type="general">
+        </cell>
+        <cell name="B336" value="ASC" type="general">
+        </cell>
+        <cell name="C337" value="BAHTTEXT(number)" type="general">
+        </cell>
+        <cell name="D109" value="Returns the absolute value (modulus) of a complex number" type="general">
+        </cell>
+        <cell name="D314" value="Returns the k-th smallest value in a data set" type="general">
+        </cell>
+        <cell name="D145" value="Returns the discount rate for a security" type="general">
+        </cell>
+        <cell name="B104" value="ERFC" type="general">
+        </cell>
+        <cell name="C105" value="GESTEP(number,step)" type="general">
+        </cell>
+        <cell name="B319" value="STDEVPA" type="general">
+        </cell>
+        <cell name="C318" value="STDEVP(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B148" value="DURATION" type="general">
+        </cell>
+        <cell name="C149" value="EFFECT(nominal_rate,npery)" type="general">
+        </cell>
+        <cell name="D66" value="the serial number of a particular date" type="general">
+        </cell>
+        <cell name="D287" value="Returns the k-th largest value in a data set" type="general">
+        </cell>
+        <cell name="D246" value="Calculates variance based on the entire population of selected database entries" type="general">
+        </cell>
+        <cell name="B71" value="EOMONTH" type="general">
+        </cell>
+        <cell name="C70" value="EDATE(start_date,months)" type="general">
+        </cell>
+        <cell name="B282" value="GROWTH" type="general">
+        </cell>
+        <cell name="C283" value="HARMEAN(number1,number2,...)" type="general">
+        </cell>
+        <cell name="D55" value="Adds the cells in a range that meet multiple criteria" type="general">
+        </cell>
+        <cell name="B243" value="DSTDEVP" type="general">
+        </cell>
+        <cell name="E48" value="math.sin(number)" type="general">
+        </cell>
+        <cell name="C242" value="DSTDEV(database,field,criteria)" type="general">
+        </cell>
+        <cell name="F48" value="import math" type="general">
+        </cell>
+        <cell name="D51" value="Returns the square root of (number * pi)" type="general">
+        </cell>
+        <cell name="B50" value="SQRT" type="general">
+        </cell>
+        <cell name="C51" value="SQRTPI(number)" type="general">
+        </cell>
+        <cell name="D167" value="Returns the price per $100 face value of a security that pays periodic interest" type="general">
+        </cell>
+        <cell name="B54" value="SUMIF" type="general">
+        </cell>
+        <cell name="B162" value="ODDFYIELD" type="general">
+        </cell>
+        <cell name="C163" value="ODDLPRICE(settlement,maturity,last_interest,rate,yld,redemption,frequency,basis)" type="general">
+        </cell>
+        <cell name="D20" value="Returns the double factorial of a number" type="general">
+        </cell>
+        <cell name="B206" value="=&apos;FALSE&apos;" type="general">
+        </cell>
+        <cell name="E19" value="math.factorial(number)" type="general">
+        </cell>
+        <cell name="D289" value="Returns the parameters of an exponential trend" type="general">
+        </cell>
+        <cell name="C207" value="IF(logical_test,value_if_true,value_if_false)" type="general">
+        </cell>
+        <cell name="F19" value="import math" type="general">
+        </cell>
+        <cell name="B17" value="EVEN" type="general">
+        </cell>
+        <cell name="C16" value="DEGREES(angle)" type="general">
+        </cell>
+        <cell name="B292" value="MAX" type="general">
+        </cell>
+        <cell name="D132" value="Returns the accrued interest for a security that pays interest at maturity" type="general">
+        </cell>
+        <cell name="C293" value="MAXA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="D337" value="Converts a number to text, using the (baht) currency format" type="general">
+        </cell>
+        <cell name="C128" value="OCT2HEX(number,places)" type="general">
+        </cell>
+        <cell name="B340" value="CODE" type="general">
+        </cell>
+        <cell name="C341" value="CONCATENATE (text1,text2,...)" type="general">
+        </cell>
+        <cell name="D105" value="Tests whether a number is greater than a threshold value" type="general">
+        </cell>
+        <cell name="E110" value="inumber.imag" type="general">
+        </cell>
+        <cell name="D262" value="Counts how many numbers are in the list of arguments" type="general">
+        </cell>
+        <cell name="D157" value="Returns the internal rate of return where positive and negative cash flows are financed at different rates" type="general">
+        </cell>
+        <cell name="B108" value="HEX2OCT" type="general">
+        </cell>
+        <cell name="C109" value="IMABS(inumber)" type="general">
+        </cell>
+        <cell name="B259" value="CHITEST" type="general">
+        </cell>
+        <cell name="D153" value="Returns the interest payment for an investment for a given period" type="general">
+        </cell>
+        <cell name="C258" value="CHIINV(probability,degrees_freedom)" type="general">
+        </cell>
+        <cell name="B152" value="INTRATE" type="general">
+        </cell>
+        <cell name="C153" value="IPMT(rate,per,nper,pv,fv,type)" type="general">
+        </cell>
+        <cell name="B156" value="MDURATION" type="general">
+        </cell>
+        <cell name="C157" value="MIRR(values,finance_rate,reinvest_rate)" type="general">
+        </cell>
+        <cell name="D78" value="the serial number of a particular time" type="general">
+        </cell>
+        <cell name="D283" value="Returns the harmonic mean" type="general">
+        </cell>
+        <cell name="D242" value="Estimates the standard deviation based on a sample of selected database entries" type="general">
+        </cell>
+        <cell name="B75" value="NETWORKDAYS" type="general">
+        </cell>
+        <cell name="B286" value="KURT" type="general">
+        </cell>
+        <cell name="C74" value="MONTH(serial_number)" type="general">
+        </cell>
+        <cell name="C287" value="LARGE(array,k)" type="general">
+        </cell>
+        <cell name="C246" value="DVARP(database,field,criteria)" type="general">
+        </cell>
+        <cell name="D63" value="Truncates a number to an integer" type="general">
+        </cell>
+        <cell name="D163" value="Returns the price per $100 face value of a security with an odd last period" type="general">
+        </cell>
+        <cell name="B58" value="SUMX2MY2" type="general">
+        </cell>
+        <cell name="C59" value="SUMX2PY2(array_x,array_y)" type="general">
+        </cell>
+        <cell name="B166" value="PPMT" type="general">
+        </cell>
+        <cell name="C167" value="PRICE(settlement,maturity,rate,yld,redemption,frequency,basis)" type="general">
+        </cell>
+        <cell name="D16" value="Converts radians to degrees" type="general">
+        </cell>
+        <cell name="B210" value="OR" type="general">
+        </cell>
+        <cell name="E23" value="int(number)" type="general">
+        </cell>
+        <cell name="D301" value="Returns the standard normal cumulative distribution" type="general">
+        </cell>
+        <cell name="D297" value="Returns the most common value in a data set" type="general">
+        </cell>
+        <cell name="B21" value="FLOOR" type="general">
+        </cell>
+        <cell name="C20" value="FACTDOUBLE(number)" type="general">
+        </cell>
+        <cell name="B296" value="MINA" type="general">
+        </cell>
+        <cell name="D128" value="Converts an octal number to hexadecimal" type="general">
+        </cell>
+        <cell name="C297" value="MODE(number1,number2,...)" type="general">
+        </cell>
+        <cell name="D349" value="Returns the number of characters in a text string" type="general">
+        </cell>
+        <cell name="B300" value="NORMINV" type="general">
+        </cell>
+        <cell name="C301" value="NORMSDIST(z)" type="general">
+        </cell>
+        <cell name="B133" value="AMORDEGRC" type="general">
+        </cell>
+        <cell name="C132" value="ACCRINTM(issue,settlement,rate,par,basis)" type="general">
+        </cell>
+        <cell name="B344" value="EXACT" type="general">
+        </cell>
+        <cell name="D117" value="Returns the base-10 logarithm of a complex number" type="general">
+        </cell>
+        <cell name="D258" value="Returns the inverse of the one-tailed probability of the chi-squared distribution" type="general">
+        </cell>
+        <cell name="B112" value="IMCONJUGATE" type="general">
+        </cell>
+        <cell name="C113" value="IMCOS(inumber)" type="general">
+        </cell>
+        <cell name="B263" value="COUNTA" type="general">
+        </cell>
+        <cell name="C262" value="COUNT(value1,value2,...)" type="general">
+        </cell>
+        <cell name="D229" value="Returns the number of rows in a reference" type="general">
+        </cell>
+        <cell name="E226" value="lookup_array.index( lookup_value )" type="general">
+        </cell>
+        <cell name="D38" value="Returns the integer portion of a division" type="general">
+        </cell>
+        <cell name="B224" value="INDIRECT" type="general">
+        </cell>
+        <cell name="C225" value="LOOKUP(lookup_value,lookup_vector,result_vector)" type="general">
+        </cell>
+        <cell name="D74" value="a serial number to a month" type="general">
+        </cell>
+        <cell name="B35" value="PI" type="general">
+        </cell>
+        <cell name="D359" value="Converts its arguments to text" type="general">
+        </cell>
+        <cell name="C34" value="ODD(number)" type="general">
+        </cell>
+        <cell name="G76" value="Instead of a serial number, returns a datetime object, with properties such as &apos;.hour&apos;." type="general">
+        </cell>
+        <cell name="D254" value="Returns the beta cumulative distribution function" type="general">
+        </cell>
+        <cell name="B79" value="TIMEVALUE" type="general">
+        </cell>
+        <cell name="C78" value="TIME(hour,minute,second)" type="general">
+        </cell>
+        <cell name="B354" value="REPLACE, REPLACEB" type="general">
+        </cell>
+        <cell name="C355" value="REPT(text,number_times)" type="general">
+        </cell>
+        <cell name="B251" value="AVERAGEA" type="general">
+        </cell>
+        <cell name="C250" value="AVERAGE(number1,number2,...)" type="general">
+        </cell>
+        <cell name="D59" value="Returns the sum of the sum of squares of corresponding values in two arrays" type="general">
+        </cell>
+        <cell name="D175" value="Returns the bond-equivalent yield for a Treasury bill" type="general">
+        </cell>
+        <cell name="B62" value="TANH" type="general">
+        </cell>
+        <cell name="D324" value="Returns the mean of the interior of a data set" type="general">
+        </cell>
+        <cell name="C63" value="TRUNC(number,num_digits)" type="general">
+        </cell>
+        <cell name="D211" value="Returns the logical value TRUE" type="general">
+        </cell>
+        <cell name="B170" value="PV" type="general">
+        </cell>
+        <cell name="C171" value="RATE(nper,pmt,pv,fv,type,guess)" type="general">
+        </cell>
+        <cell name="B321" value="TDIST" type="general">
+        </cell>
+        <cell name="C320" value="STEYX(known_y&apos;s,known_x&apos;s)" type="general">
+        </cell>
+        <cell name="D28" value="Returns the matrix determinant of an array" type="general">
+        </cell>
+        <cell name="E27" value="math.log10(number)" type="general">
+        </cell>
+        <cell name="F27" value="import math" type="general">
+        </cell>
+        <cell name="D24" value="Returns the least common multiple" type="general">
+        </cell>
+        <cell name="E31" value="number % divisor" type="general">
+        </cell>
+        <cell name="D309" value="Returns the quartile of a data set" type="general">
+        </cell>
+        <cell name="E306" value="len( itertools.permutations( my_list, r ) )" type="general">
+        </cell>
+        <cell name="B25" value="LN" type="general">
+        </cell>
+        <cell name="C24" value="LCM(number1,number2, ...)" type="general">
+        </cell>
+        <cell name="D140" value="Returns the previous coupon date before the settlement date" type="general">
+        </cell>
+        <cell name="B29" value="MINVERSE" type="general">
+        </cell>
+        <cell name="D345" value="Finds one text value within another (case-sensitive)" type="general">
+        </cell>
+        <cell name="E350" value="text.lower()" type="general">
+        </cell>
+        <cell name="C28" value="MDETERM(array)" type="general">
+        </cell>
+        <cell name="B304" value="PERCENTILE" type="general">
+        </cell>
+        <cell name="C305" value="PERCENTRANK(array,x,significance)" type="general">
+        </cell>
+        <cell name="B137" value="COUPDAYSNC" type="general">
+        </cell>
+        <cell name="C136" value="COUPDAYS(settlement,maturity,frequency,basis)" type="general">
+        </cell>
+        <cell name="B348" value="LEFT, LEFTB" type="general">
+        </cell>
+        <cell name="D113" value="Returns the cosine of a complex number" type="general">
+        </cell>
+        <cell name="D270" value="Returns the exponential distribution" type="general">
+        </cell>
+        <cell name="B116" value="IMLN" type="general">
+        </cell>
+        <cell name="C117" value="IMLOG10(inumber)" type="general">
+        </cell>
+        <cell name="B267" value="COVAR" type="general">
+        </cell>
+        <cell name="D225" value="Looks up values in a vector or array" type="general">
+        </cell>
+        <cell name="D34" value="Rounds a number up to the nearest odd integer" type="general">
+        </cell>
+        <cell name="B228" value="ROW" type="general">
+        </cell>
+        <cell name="E37" value="# for two numbers
+number1 * number2
+ 
+# for more than two
+import operator
+reduce(operator.mul, [number1, number2, number3...])" type="general">
+        </cell>
+        <cell name="C229" value="ROWS(array)" type="general">
+        </cell>
+        <cell name="B39" value="RADIANS" type="general">
+        </cell>
+        <cell name="E81" value="date.isoweekday()" type="general">
+        </cell>
+        <cell name="D355" value="Repeats text a given number of times" type="general">
+        </cell>
+        <cell name="H248" value="see http://docs.scipy.org/doc/scipy/reference/tutorial/stats.html" type="general">
+        </cell>
+        <cell name="E356" value="text[-length:]" type="general">
+        </cell>
+        <cell name="C38" value="QUOTIENT(numerator,denominator)" type="general">
+        </cell>
+        <cell name="G80" value="Instead of a serial number, returns a date object, with properties such as &apos;.year&apos;." type="general">
+        </cell>
+        <cell name="D250" value="Returns the average of its arguments" type="general">
+        </cell>
+        <cell name="B83" value="WORKDAY" type="general">
+        </cell>
+        <cell name="C82" value="WEEKNUM(serial_num,return_type)" type="general">
+        </cell>
+        <cell name="B358" value="SUBSTITUTE" type="general">
+        </cell>
+        <cell name="D198" value="Returns TRUE if the value is a reference" type="general">
+        </cell>
+        <cell name="C359" value="T(value)" type="general">
+        </cell>
+        <cell name="E193" value="isinstance(value, bool)" type="general">
+        </cell>
+        <cell name="B255" value="BETAINV" type="general">
+        </cell>
+        <cell name="C254" value="BETADIST(x,alpha,beta,A,B)" type="general">
+        </cell>
+        <cell name="D7" value="Returns the arcsine of a number" type="general">
+        </cell>
+        <cell name="B195" value="ISNONTEXT" type="general">
+        </cell>
+        <cell name="G1" value="comments" type="general">
+        </cell>
+        <cell name="D171" value="Returns the interest rate per period of an annuity" type="general">
+        </cell>
+        <cell name="D320" value="Returns the standard error of the predicted y-value for each x in the regression" type="general">
+        </cell>
+        <cell name="D223" value="Uses an index to choose a value from a reference or array" type="general">
+        </cell>
+        <cell name="B174" value="SYD" type="general">
+        </cell>
+        <cell name="C175" value="TBILLEQ(settlement,maturity,discount)" type="general">
+        </cell>
+        <cell name="B325" value="TTEST" type="general">
+        </cell>
+        <cell name="C324" value="TRIMMEAN(array,percent)" type="general">
+        </cell>
+        <cell name="B218" value="CHOOSE" type="general">
+        </cell>
+        <cell name="C219" value="COLUMN(reference)" type="general">
+        </cell>
+        <cell name="D100" value="Converts a decimal number to hexadecimal" type="general">
+        </cell>
+        <cell name="E99" value="bin( number )[2:].zfill( places )" type="general">
+        </cell>
+        <cell name="D305" value="Returns the percentage rank of a value in a data set" type="general">
+        </cell>
+        <cell name="G98" value="scipy.constants contains several constants that may be used in unit conversion" type="general">
+        </cell>
+        <cell name="D136" value="Returns the number of days in the coupon period that contains the settlement date" type="general">
+        </cell>
+        <cell name="B97" value="COMPLEX" type="general">
+        </cell>
+        <cell name="C96" value="BIN2OCT(number,places)" type="general">
+        </cell>
+        <cell name="B308" value="PROB" type="general">
+        </cell>
+        <cell name="C309" value="QUARTILE(array,quart)" type="general">
+        </cell>
+        <cell name="B141" value="CUMIPMT" type="general">
+        </cell>
+        <cell name="C140" value="COUPPCD(settlement,maturity,frequency,basis)" type="general">
+        </cell>
+        <cell name="D125" value="Returns the sum of complex numbers" type="general">
+        </cell>
+        <cell name="D266" value="Counts the number of cells within a range that meet multiple criteria" type="general">
+        </cell>
+        <cell name="D121" value="Returns the real coefficient of a complex number" type="general">
+        </cell>
+        <cell name="D278" value="Returns the gamma distribution" type="general">
+        </cell>
+        <cell name="B120" value="IMPRODUCT" type="general">
+        </cell>
+        <cell name="C121" value="IMREAL(inumber)" type="general">
+        </cell>
+        <cell name="B271" value="FDIST" type="general">
+        </cell>
+        <cell name="C270" value="EXPONDIST(x,lambda,cumulative)" type="general">
+        </cell>
+        <cell name="D237" value="Counts nonblank cells in a database" type="general">
+        </cell>
+        <cell name="B124" value="IMSUB" type="general">
+        </cell>
+        <cell name="C125" value="IMSUM(inumber1,inumber2,...)" type="general">
+        </cell>
+        <cell name="B275" value="FORECAST" type="general">
+        </cell>
+        <cell name="C274" value="FISHERINV(y)" type="general">
+        </cell>
+        <cell name="D46" value="Returns the sum of a power series based on the formula" type="general">
+        </cell>
+        <cell name="B232" value="VLOOKUP" type="general">
+        </cell>
+        <cell name="E41" value="random.randint( bottom, top ) or random.randrange( bottom, top )" type="general">
+        </cell>
+        <cell name="F41" value="import random" type="general">
+        </cell>
+        <cell name="D82" value="a serial number to a number representing where the week falls numerically with a year" type="general">
+        </cell>
+        <cell name="B43" value="ROUND" type="general">
+        </cell>
+        <cell name="C42" value="ROMAN(number,form)" type="general">
+        </cell>
+        <cell name="B362" value="UPPER" type="general">
+        </cell>
+        <cell name="D194" value="Returns TRUE if the value is the #N/A error value" type="general">
+        </cell>
+        <cell name="C363" value="VALUE(text)" type="general">
+        </cell>
+        <cell name="E197" value="number % 2 == 1" type="general">
+        </cell>
+        <cell name="H1" value="private comments" type="general">
+        </cell>
+        <cell name="B199" value="ISTEXT" type="general">
+        </cell>
+        <cell name="E4" value="abs(number)" type="general">
+        </cell>
+        <cell name="D183" value="Returns the annual yield of a security that pays interest at maturity" type="general">
+        </cell>
+        <cell name="B6" value="ACOSH" type="general">
+        </cell>
+        <cell name="C7" value="ASIN(number)" type="general">
+        </cell>
+        <cell name="D219" value="Returns the column number of a reference" type="general">
+        </cell>
+        <cell name="B178" value="VDB" type="general">
+        </cell>
+        <cell name="C179" value="XIRR(values,dates,guess)" type="general">
+        </cell>
+        <cell name="B329" value="VARPA" type="general">
+        </cell>
+        <cell name="C328" value="VARP(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B222" value="HYPERLINK" type="general">
+        </cell>
+        <cell name="C223" value="INDEX(array,row_num,column_num)" type="general">
+        </cell>
+        <cell name="D96" value="Converts a binary number to octal" type="general">
+        </cell>
+        <cell name="E103" value="special.erf(x)" type="general">
+        </cell>
+        <cell name="D317" value="Estimates standard deviation based on a sample, including numbers, text, and logical values" type="general">
+        </cell>
+        <cell name="F103" value="from scipy import special" type="general">
+        </cell>
+        <cell name="E314" value="sorted( my_list )[k]" type="general">
+        </cell>
+        <cell name="G102" value="If you require the result to be 0 or 1, use  &apos;(number1 == number2) and 1 or 0&apos;" type="general">
+        </cell>
+        <cell name="D148" value="Returns the annual duration of a security with periodic interest payments" type="general">
+        </cell>
+        <cell name="B101" value="DEC2OCT" type="general">
+        </cell>
+        <cell name="C100" value="DEC2HEX(number,places)" type="general">
+        </cell>
+        <cell name="B312" value="SKEW" type="general">
+        </cell>
+        <cell name="C313" value="SLOPE(known_y&apos;s,known_x&apos;s)" type="general">
+        </cell>
+        <cell name="B145" value="DISC" type="general">
+        </cell>
+        <cell name="C144" value="DDB(cost,salvage,life,period,factor)" type="general">
+        </cell>
+        <cell name="D69" value="the number of days between two dates based on a 360-day year" type="general">
+        </cell>
+        <cell name="E66" value="datetime.datetime( yyyy, mm, dd)
+
+or::
+
+datetime.date( yyyy, mm, dd )" type="general">
+        </cell>
+        <cell name="D274" value="Returns the inverse of the Fisher transformation" type="general">
+        </cell>
+        <cell name="F66" value="import datetime" type="general">
+        </cell>
+        <cell name="B279" value="GAMMAINV" type="general">
+        </cell>
+        <cell name="C278" value="GAMMADIST(x,alpha,beta,cumulative)" type="general">
+        </cell>
+        <cell name="D42" value="Converts an arabic numeral to roman, as text" type="general">
+        </cell>
+        <cell name="B236" value="DCOUNT" type="general">
+        </cell>
+        <cell name="C237" value="DCOUNTA(database,field,criteria)" type="general">
+        </cell>
+        <cell name="D94" value="Converts a binary number to decimal" type="general">
+        </cell>
+        <cell name="B47" value="SIGN" type="general">
+        </cell>
+        <cell name="D363" value="Converts a text argument to a number" type="general">
+        </cell>
+        <cell name="C46" value="SERIESSUM(x,n,m,coefficients)" type="general">
+        </cell>
+        <cell name="B91" value="BESSELJ" type="general">
+        </cell>
+        <cell name="C90" value="BESSELI(x,n)" type="general">
+        </cell>
+        <cell name="D206" value="Returns the logical value FALSE" type="general">
+        </cell>
+        <cell name="D15" value="Returns the hyperbolic cosine of a number" type="general">
+        </cell>
+        <cell name="E8" value="math.asinh(number)" type="general">
+        </cell>
+        <cell name="C202" value="TYPE(value)" type="general">
+        </cell>
+        <cell name="D292" value="Returns the maximum value in a list of arguments" type="general">
+        </cell>
+        <cell name="F8" value="import math" type="general">
+        </cell>
+        <cell name="D179" value="Returns the internal rate of return for a schedule of cash flows that is not necessarily periodic" type="general">
+        </cell>
+        <cell name="B10" value="ATAN2" type="general">
+        </cell>
+        <cell name="D328" value="Calculates variance based on the entire population" type="general">
+        </cell>
+        <cell name="C11" value="ATANH(number)" type="general">
+        </cell>
+        <cell name="B289" value="LOGEST" type="general">
+        </cell>
+        <cell name="C288" value="LINEST(known_y&apos;s,known_x&apos;s,const,stats)" type="general">
+        </cell>
+        <cell name="B182" value="YIELDDISC" type="general">
+        </cell>
+        <cell name="C183" value="YIELDMAT(settlement,maturity,issue,rate,pr,basis)" type="general">
+        </cell>
+        <cell name="D108" value="Converts a hexadecimal number to octal" type="general">
+        </cell>
+        <cell name="D313" value="Returns the slope of the linear regression line" type="general">
+        </cell>
+        <cell name="D144" value="Returns the depreciation of an asset for a specified period by using the double-declining balance method or some other method that you specify" type="general">
+        </cell>
+        <cell name="B105" value="GESTEP" type="general">
+        </cell>
+        <cell name="C104" value="ERFC(x)" type="general">
+        </cell>
+        <cell name="B316" value="STDEV" type="general">
+        </cell>
+        <cell name="C317" value="STDEVA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="B149" value="EFFECT" type="general">
+        </cell>
+        <cell name="C148" value="DURATION(settlement,maturity,coupon,yld,frequency,basis)" type="general">
+        </cell>
+        <cell name="D286" value="Returns the kurtosis of a data set" type="general">
+        </cell>
+        <cell name="D245" value="Estimates variance based on a sample from selected database entries" type="general">
+        </cell>
+        <cell name="B68" value="DAY" type="general">
+        </cell>
+        <cell name="C69" value="DAYS360(start_date,end_date,method)" type="general">
+        </cell>
+        <cell name="B283" value="HARMEAN" type="general">
+        </cell>
+        <cell name="C282" value="GROWTH(known_y&apos;s,known_x&apos;s,new_x&apos;s,const)" type="general">
+        </cell>
+        <cell name="D54" value="Adds the cells specified by a given criteria" type="general">
+        </cell>
+        <cell name="B240" value="DMIN" type="general">
+        </cell>
+        <cell name="E49" value="math.sinh(number)" type="general">
+        </cell>
+        <cell name="C241" value="DPRODUCT(database,field,criteria)" type="general">
+        </cell>
+        <cell name="F49" value="import math" type="general">
+        </cell>
+        <cell name="D90" value="Returns the modified Bessel function In(x)" type="general">
+        </cell>
+        <cell name="B51" value="SQRTPI" type="general">
+        </cell>
+        <cell name="E93" value="special.yn(n,x)" type="general">
+        </cell>
+        <cell name="F93" value="from scipy import special" type="general">
+        </cell>
+        <cell name="C50" value="SQRT(number)" type="general">
+        </cell>
+        <cell name="G92" value="Note arg order is swapped" type="general">
+        </cell>
+        <cell name="D166" value="Returns the payment on the principal for an investment for a given period" type="general">
+        </cell>
+        <cell name="B95" value="BIN2HEX" type="general">
+        </cell>
+        <cell name="C94" value="BIN2DEC(number)" type="general">
+        </cell>
+        <cell name="D202" value="Returns a number indicating the data type of a value" type="general">
+        </cell>
+        <cell name="B163" value="ODDLPRICE" type="general">
+        </cell>
+        <cell name="E205" value="logical1 and logical2 and logical3..." type="general">
+        </cell>
+        <cell name="C162" value="ODDFYIELD(settlement,maturity,issue,first_coupon,rate,pr,redemption,frequency,basis)" type="general">
+        </cell>
+        <cell name="D11" value="Returns the inverse hyperbolic tangent of a number" type="general">
+        </cell>
+        <cell name="B207" value="IF" type="general">
+        </cell>
+        <cell name="E12" value="math.ceil(number)" type="general">
+        </cell>
+        <cell name="D288" value="Returns the parameters of a linear trend" type="general">
+        </cell>
+        <cell name="C206" value="FALSE( )" type="general">
+        </cell>
+        <cell name="F12" value="import math" type="general">
+        </cell>
+        <cell name="E295" value="min(my_list)" type="general">
+        </cell>
+        <cell name="D191" value="Returns TRUE if the value is any error value" type="general">
+        </cell>
+        <cell name="B14" value="COS" type="general">
+        </cell>
+        <cell name="D340" value="Returns a numeric code for the first character in a text string" type="general">
+        </cell>
+        <cell name="C15" value="COSH(number)" type="general">
+        </cell>
+        <cell name="B293" value="MAXA" type="general">
+        </cell>
+        <cell name="C292" value="MAX(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B186" value="CELL" type="general">
+        </cell>
+        <cell name="C187" value="ERROR.TYPE(error_val)" type="general">
+        </cell>
+        <cell name="B337" value="BAHTTEXT" type="general">
+        </cell>
+        <cell name="C336" value="ASC(text)" type="general">
+        </cell>
+        <cell name="D104" value="Returns the complementary error function" type="general">
+        </cell>
+        <cell name="D261" value="Returns the correlation coefficient between two data sets" type="general">
+        </cell>
+        <cell name="D156" value="Returns the Macauley modified duration for a security with an assumed par value of $100" type="general">
+        </cell>
+        <cell name="B109" value="IMABS" type="general">
+        </cell>
+        <cell name="C108" value="HEX2OCT(number,places)" type="general">
+        </cell>
+        <cell name="B256" value="BINOMDIST" type="general">
+        </cell>
+        <cell name="C257" value="CHIDIST(x,degrees_freedom)" type="general">
+        </cell>
+        <cell name="B153" value="IPMT" type="general">
+        </cell>
+        <cell name="C152" value="INTRATE(settlement,maturity,investment,redemption,basis)" type="general">
+        </cell>
+        <cell name="H79" value="see http://docs.python.org/library/datetime.html#strftime-strptime-behavior" type="general">
+        </cell>
+        <cell name="D77" value="a serial number to a second" type="general">
+        </cell>
+        <cell name="D282" value="Returns values along an exponential trend" type="general">
+        </cell>
+        <cell name="G75" value="Implemented by this third-party package:http://pypi.python.org/pypi/workdays/" type="general">
+        </cell>
+        <cell name="D241" value="Multiplies the values in a particular field of records that match the criteria in a database" type="general">
+        </cell>
+        <cell name="B72" value="HOUR" type="general">
+        </cell>
+        <cell name="B287" value="LARGE" type="general">
+        </cell>
+        <cell name="C73" value="MINUTE(serial_number)" type="general">
+        </cell>
+        <cell name="C286" value="KURT(number1,number2,...)" type="general">
+        </cell>
+        <cell name="D50" value="Returns a positive square root" type="general">
+        </cell>
+        <cell name="B244" value="DSUM" type="general">
+        </cell>
+        <cell name="E53" value="sum(list_of_numbers)" type="general">
+        </cell>
+        <cell name="C245" value="DVAR(database,field,criteria)" type="general">
+        </cell>
+        <cell name="B55" value="SUMIFS" type="general">
+        </cell>
+        <cell name="C54" value="SUMIF(range,criteria,sum_range)" type="general">
+        </cell>
+        <cell name="D162" value="Returns the yield of a security with an odd first period" type="general">
+        </cell>
+        <cell name="B167" value="PRICE" type="general">
+        </cell>
+        <cell name="E209" value="not arg" type="general">
+        </cell>
+        <cell name="C166" value="PPMT(rate,per,nper,pv,fv,type)" type="general">
+        </cell>
+        <cell name="D23" value="Rounds a number down to the nearest integer" type="general">
+        </cell>
+        <cell name="B211" value="=&apos;TRUE&apos;" type="general">
+        </cell>
+        <cell name="E16" value="math.degrees(angle)" type="general">
+        </cell>
+        <cell name="D300" value="Returns the inverse of the normal cumulative distribution" type="general">
+        </cell>
+        <cell name="C210" value="OR(logical1,logical2,...)" type="general">
+        </cell>
+        <cell name="F16" value="import math" type="general">
+        </cell>
+        <cell name="D187" value="Returns a number corresponding to an error type" type="general">
+        </cell>
+        <cell name="B18" value="EXP" type="general">
+        </cell>
+        <cell name="D336" value="Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters" type="general">
+        </cell>
+        <cell name="C19" value="FACT(number)" type="general">
+        </cell>
+        <cell name="B297" value="MODE" type="general">
+        </cell>
+        <cell name="C296" value="MINA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="D348" value="Returns the leftmost characters from a text value" type="general">
+        </cell>
+        <cell name="B190" value="ISERR" type="general">
+        </cell>
+        <cell name="B341" value="CONCATENATE" type="general">
+        </cell>
+        <cell name="G346" value="use string formatting" type="general">
+        </cell>
+        <cell name="C340" value="CODE(text)" type="general">
+        </cell>
+        <cell name="B345" value="FIND, FINDB" type="general">
+        </cell>
+        <cell name="C344" value="EXACT(text1,text2)" type="general">
+        </cell>
+        <cell name="D116" value="Returns the natural logarithm of a complex number" type="general">
+        </cell>
+        <cell name="D257" value="Returns the one-tailed probability of the chi-squared distribution" type="general">
+        </cell>
+        <cell name="E262" value="sum(1 for a in [value1, value2] if isinstance(a, int))" type="general">
+        </cell>
+        <cell name="D152" value="Returns the interest rate for a fully invested security" type="general">
+        </cell>
+        <cell name="B113" value="IMCOS" type="general">
+        </cell>
+        <cell name="C112" value="IMCONJUGATE(inumber)" type="general">
+        </cell>
+        <cell name="B260" value="CONFIDENCE" type="general">
+        </cell>
+        <cell name="C261" value="CORREL(array1,array2)" type="general">
+        </cell>
+        <cell name="B157" value="MIRR" type="general">
+        </cell>
+        <cell name="C156" value="MDURATION(settlement,maturity,coupon,yld,frequency,basis)" type="general">
+        </cell>
+        <cell name="D37" value="Multiplies its arguments" type="general">
+        </cell>
+        <cell name="D73" value="a serial number to a minute" type="general">
+        </cell>
+        <cell name="B32" value="MROUND" type="general">
+        </cell>
+        <cell name="D358" value="Substitutes new text for old text in a text string" type="general">
+        </cell>
+        <cell name="C33" value="MULTINOMIAL(number1,number2, ...)" type="general">
+        </cell>
+        <cell name="E353" value="a_string.title()" type="general">
+        </cell>
+        <cell name="G79" value="Returns a datetime object" type="general">
+        </cell>
+        <cell name="D253" value="Returns the average (arithmetic mean) of all cells that meet multiple criteria." type="general">
+        </cell>
+        <cell name="B76" value="NOW" type="general">
+        </cell>
+        <cell name="E250" value="values = [number1, number2...]
+average = sum(values) / len(values)" type="general">
+        </cell>
+        <cell name="C77" value="SECOND(serial_number)" type="general">
+        </cell>
+        <cell name="B355" value="REPT" type="general">
+        </cell>
+        <cell name="A248" value="Statistical functions" type="general">
+        </cell>
+        <cell name="D62" value="Returns the hyperbolic tangent of a number" type="general">
+        </cell>
+        <cell name="C249" value="AVEDEV(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B59" value="SUMX2PY2" type="general">
+        </cell>
+        <cell name="C58" value="SUMX2MY2(array_x,array_y)" type="general">
+        </cell>
+        <cell name="D174" value="Returns the sum-of-years&apos; digits depreciation of an asset for a specified period" type="general">
+        </cell>
+        <cell name="D210" value="Returns TRUE if any argument is TRUE" type="general">
+        </cell>
+        <cell name="B171" value="RATE" type="general">
+        </cell>
+        <cell name="C170" value="PV(rate,nper,pmt,fv,type)" type="general">
+        </cell>
+        <cell name="A215" value="Lookup and reference functions" type="general">
+        </cell>
+        <cell name="D19" value="Returns the factorial of a number" type="general">
+        </cell>
+        <cell name="E20" value="scipy.misc.factorial2( number )" type="general">
+        </cell>
+        <cell name="D296" value="Returns the smallest value in a list of arguments, including numbers, text, and logical values" type="general">
+        </cell>
+        <cell name="F20" value="import scipy" type="general">
+        </cell>
+        <cell name="G21" value="NB. does not handle the second &apos;significance&apos; argument" type="general">
+        </cell>
+        <cell name="D135" value="Returns the number of days from the beginning of the coupon period to the settlement date" type="general">
+        </cell>
+        <cell name="B22" value="GCD" type="general">
+        </cell>
+        <cell name="C23" value="INT(number)" type="general">
+        </cell>
+        <cell name="B301" value="NORMSDIST" type="general">
+        </cell>
+        <cell name="D131" value="Returns the accrued interest for a security that pays periodic interest" type="general">
+        </cell>
+        <cell name="C300" value="NORMINV(probability,mean,standard_dev)" type="general">
+        </cell>
+        <cell name="D344" value="Checks to see if two text values are identical" type="general">
+        </cell>
+        <cell name="E351" value="text[start:end]" type="general">
+        </cell>
+        <cell name="A130" value="Financial functions" type="general">
+        </cell>
+        <cell name="C131" value="ACCRINT(issue,first_interest,settlement,rate,par,frequency,basis)" type="general">
+        </cell>
+        <cell name="B134" value="AMORLINC" type="general">
+        </cell>
+        <cell name="C135" value="COUPDAYBS(settlement,maturity,frequency,basis)" type="general">
+        </cell>
+        <cell name="B349" value="LEN, LENB" type="general">
+        </cell>
+        <cell name="D112" value="Returns the complex conjugate of a complex number" type="general">
+        </cell>
+        <cell name="D269" value="Returns the sum of squares of deviations" type="general">
+        </cell>
+        <cell name="D228" value="Returns the row number of a reference" type="general">
+        </cell>
+        <cell name="B117" value="IMLOG10" type="general">
+        </cell>
+        <cell name="C116" value="IMLN(inumber)" type="general">
+        </cell>
+        <cell name="B264" value="COUNTBLANK" type="general">
+        </cell>
+        <cell name="C265" value="COUNTIF(range,criteria)" type="general">
+        </cell>
+        <cell name="G226" value="Only handles match type &apos;equals&apos;" type="general">
+        </cell>
+        <cell name="B225" value="LOOKUP" type="general">
+        </cell>
+        <cell name="C224" value="INDIRECT(ref_text,a1)" type="general">
+        </cell>
+        <cell name="D33" value="Returns the multinomial of a set of numbers" type="general">
+        </cell>
+        <cell name="E38" value="math.floor( numerator / denominator )" type="general">
+        </cell>
+        <cell name="F38" value="import math" type="general">
+        </cell>
+        <cell name="D85" value="the year fraction representing the number of whole days between start_date and end_date" type="general">
+        </cell>
+        <cell name="B36" value="POWER" type="general">
+        </cell>
+        <cell name="E82" value="date.isocalendar()[1]" type="general">
+        </cell>
+        <cell name="D354" value="Replaces characters within text" type="general">
+        </cell>
+        <cell name="C37" value="PRODUCT(number1,number2,...)" type="general">
+        </cell>
+        <cell name="E357" value="text.lower().find( search_string.lower() )" type="general">
+        </cell>
+        <cell name="G83" value="Implemented by this third-party package: http://pypi.python.org/pypi/workdays/" type="general">
+        </cell>
+        <cell name="D249" value="Returns the average of the absolute deviations of data points from their mean" type="general">
+        </cell>
+        <cell name="B80" value="TODAY" type="general">
+        </cell>
+        <cell name="C81" value="WEEKDAY(serial_number,return_type)" type="general">
+        </cell>
+        <cell name="B359" value="T" type="general">
+        </cell>
+        <cell name="C358" value="SUBSTITUTE(text,old_text,new_text,instance_num)" type="general">
+        </cell>
+        <cell name="D58" value="Returns the sum of the difference of squares of corresponding values in two arrays" type="general">
+        </cell>
+        <cell name="B252" value="AVERAGEIF" type="general">
+        </cell>
+        <cell name="E61" value="math.tan(number)" type="general">
+        </cell>
+        <cell name="F61" value="import math" type="general">
+        </cell>
+        <cell name="D6" value="Returns the inverse hyperbolic cosine of a number" type="general">
+        </cell>
+        <cell name="E1" value="howto in resolver" type="general">
+        </cell>
+        <cell name="F1" value="imports" type="general">
+        </cell>
+        <cell name="B63" value="TRUNC" type="general">
+        </cell>
+        <cell name="C62" value="TANH(number)" type="general">
+        </cell>
+        <cell name="A3" value="Math and trigonometry functions" type="general">
+        </cell>
+        <cell name="D170" value="Returns the present value of an investment" type="general">
+        </cell>
+        <cell name="D327" value="Estimates variance based on a sample, including numbers, text, and logical values" type="general">
+        </cell>
+        <cell name="D222" value="Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet" type="general">
+        </cell>
+        <cell name="B175" value="TBILLEQ" type="general">
+        </cell>
+        <cell name="B322" value="TINV" type="general">
+        </cell>
+        <cell name="C174" value="SYD(cost,salvage,life,per)" type="general">
+        </cell>
+        <cell name="C323" value="TREND(known_y&apos;s,known_x&apos;s,new_x&apos;s,const)" type="general">
+        </cell>
+        <cell name="D31" value="Returns the remainder from division" type="general">
+        </cell>
+        <cell name="B219" value="COLUMN" type="general">
+        </cell>
+        <cell name="E24" value="def lcm(a, b):
+    return a * b // gcd(a, b)
+
+def lcmm(*args):
+    return reduce(lcm, args)" type="general">
+        </cell>
+        <cell name="C218" value="CHOOSE(index_num,value1,value2,...)" type="general">
+        </cell>
+        <cell name="D308" value="Returns the probability that values in a range are between two limits" type="general">
+        </cell>
+        <cell name="B26" value="LOG" type="general">
+        </cell>
+        <cell name="C27" value="LOG10(number)" type="general">
+        </cell>
+        <cell name="B305" value="PERCENTRANK" type="general">
+        </cell>
+        <cell name="D143" value="Returns the depreciation of an asset for a specified period by using the fixed-declining balance method" type="general">
+        </cell>
+        <cell name="C304" value="PERCENTILE(array,k)" type="general">
+        </cell>
+        <cell name="B138" value="COUPNCD" type="general">
+        </cell>
+        <cell name="C139" value="COUPNUM(settlement,maturity,frequency,basis)" type="general">
+        </cell>
+        <cell name="D124" value="Returns the difference between two complex numbers" type="general">
+        </cell>
+        <cell name="D265" value="Counts the number of cells within a range that meet the given criteria" type="general">
+        </cell>
+        <cell name="D224" value="Returns a reference indicated by a text value" type="general">
+        </cell>
+        <cell name="B121" value="IMREAL" type="general">
+        </cell>
+        <cell name="C120" value="IMPRODUCT(inumber1,inumber2,...)" type="general">
+        </cell>
+        <cell name="B268" value="CRITBINOM" type="general">
+        </cell>
+        <cell name="C269" value="DEVSQ(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B229" value="ROWS" type="general">
+        </cell>
+        <cell name="C228" value="ROW(reference)" type="general">
+        </cell>
+        <cell name="D45" value="Rounds a number up, away from zero" type="general">
+        </cell>
+        <cell name="D81" value="a serial number to a day of the week" type="general">
+        </cell>
+        <cell name="B40" value="RAND" type="general">
+        </cell>
+        <cell name="C41" value="RANDBETWEEN(bottom,top)" type="general">
+        </cell>
+        <cell name="E361" value="text.strip()" type="general">
+        </cell>
+        <cell name="G360" value="use string formatting" type="general">
+        </cell>
+        <cell name="D197" value="Returns TRUE if the number is odd" type="general">
+        </cell>
+        <cell name="B84" value="YEAR" type="general">
+        </cell>
+        <cell name="C85" value="YEARFRAC(start_date,end_date,basis)" type="general">
+        </cell>
+        <cell name="B363" value="VALUE" type="general">
+        </cell>
+        <cell name="C362" value="UPPER(text)" type="general">
+        </cell>
+        <cell name="B192" value="ISEVEN" type="general">
+        </cell>
+        <cell name="D2" value="http://office.microsoft.com/en-us/excel-help/list-of-worksheet-functions-by-category-HP010079186.aspx" type="general">
+        </cell>
+        <cell name="E5" value="math.acos(number)" type="general">
+        </cell>
+        <cell name="F5" value="import math" type="general">
+        </cell>
+        <cell name="D182" value="Returns the annual yield for a discounted security; for example, a Treasury bill" type="general">
+        </cell>
+        <cell name="B7" value="ASIN" type="general">
+        </cell>
+        <cell name="D323" value="Returns values along a linear trend" type="general">
+        </cell>
+        <cell name="C6" value="ACOSH(number)" type="general">
+        </cell>
+        <cell name="D218" value="Chooses a value from a list of values" type="general">
+        </cell>
+        <cell name="B179" value="XIRR" type="general">
+        </cell>
+        <cell name="B326" value="VAR" type="general">
+        </cell>
+        <cell name="C178" value="VDB(cost,salvage,life,start_period,end_period,factor,no_switch)" type="general">
+        </cell>
+        <cell name="C327" value="VARA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="B223" value="INDEX" type="general">
+        </cell>
+        <cell name="D27" value="Returns the base-10 logarithm of a number" type="general">
+        </cell>
+        <cell name="D304" value="Returns the k-th percentile of values in a range" type="general">
+        </cell>
+        <cell name="C222" value="HYPERLINK(link_location,friendly_name)" type="general">
+        </cell>
+        <cell name="D316" value="Estimates standard deviation based on a sample" type="general">
+        </cell>
+        <cell name="B30" value="MMULT" type="general">
+        </cell>
+        <cell name="B309" value="QUARTILE" type="general">
+        </cell>
+        <cell name="C31" value="MOD(number,divisor)" type="general">
+        </cell>
+        <cell name="C308" value="PROB(x_range,prob_range,lower_limit,upper_limit)" type="general">
+        </cell>
+        <cell name="D139" value="Returns the number of coupons payable between the settlement date and maturity date" type="general">
+        </cell>
+        <cell name="B313" value="SLOPE" type="general">
+        </cell>
+        <cell name="C312" value="SKEW(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B142" value="CUMPRINC" type="general">
+        </cell>
+        <cell name="C143" value="DB(cost,salvage,life,period,month)" type="general">
+        </cell>
+        <cell name="D120" value="Returns the product of complex numbers" type="general">
+        </cell>
+        <cell name="D277" value="Returns the result of an F-test" type="general">
+        </cell>
+        <cell name="D236" value="Counts the cells that contain numbers in a database" type="general">
+        </cell>
+        <cell name="B125" value="IMSUM" type="general">
+        </cell>
+        <cell name="B272" value="FINV" type="general">
+        </cell>
+        <cell name="C124" value="IMSUB(inumber1,inumber2)" type="general">
+        </cell>
+        <cell name="C273" value="FISHER(x)" type="general">
+        </cell>
+        <cell name="D232" value="Looks in the first column of an array and moves across the row to return the value of a cell" type="general">
+        </cell>
+        <cell name="C232" value="VLOOKUP(lookup_value,table_array,col_index_num,range_lookup)" type="general">
+        </cell>
+        <cell name="B237" value="DCOUNTA" type="general">
+        </cell>
+        <cell name="D41" value="Returns a random number between the numbers you specify" type="general">
+        </cell>
+        <cell name="C236" value="DCOUNT(database,field,criteria)" type="general">
+        </cell>
+        <cell name="E46" value="sum(
+    c * x ** pwr
+    for c, pwd in zip(
+        coefficients,
+        range(n, len( coefficients ), m)
+    )
+)" type="general">
+        </cell>
+        <cell name="D93" value="Returns the Bessel function Yn(x)" type="general">
+        </cell>
+        <cell name="B44" value="ROUNDDOWN" type="general">
+        </cell>
+        <cell name="E90" value="special.iv(n,x)" type="general">
+        </cell>
+        <cell name="D362" value="Converts text to uppercase" type="general">
+        </cell>
+        <cell name="C45" value="ROUNDUP(number,num_digits)" type="general">
+        </cell>
+        <cell name="F90" value="from scipy import special" type="general">
+        </cell>
+        <cell name="G91" value="Note arg order is swapped" type="general">
+        </cell>
+        <cell name="D193" value="Returns TRUE if the value is a logical value" type="general">
+        </cell>
+        <cell name="B196" value="ISNUMBER" type="general">
+        </cell>
+        <cell name="C197" value="ISODD(number)" type="general">
+        </cell>
+        <cell name="D14" value="Returns the cosine of a number" type="general">
+        </cell>
+        <cell name="E9" value="math.atan(number)" type="general">
+        </cell>
+        <cell name="F9" value="import math" type="general">
+        </cell>
+        <cell name="D178" value="Returns the depreciation of an asset for a specified or partial period by using a declining balance method" type="general">
+        </cell>
+        <cell name="B11" value="ATANH" type="general">
+        </cell>
+        <cell name="C10" value="ATAN2(x_num,y_num)" type="general">
+        </cell>
+        <cell name="B183" value="YIELDMAT" type="general">
+        </cell>
+        <cell name="B330" value="WEIBULL" type="general">
+        </cell>
+        <cell name="C182" value="YIELDDISC(settlement,maturity,pr,redemption,basis)" type="general">
+        </cell>
+        <cell name="D103" value="Returns the error function" type="general">
+        </cell>
+        <cell name="E96" value="oct( int( my_binary_number_as_string, 2 ) )" type="general">
+        </cell>
+        <cell name="D99" value="Converts a decimal number to binary" type="general">
+        </cell>
+        <cell name="G97" value="Does not handle &apos;suffix&apos; parameter, always uses &apos;j&apos;." type="general">
+        </cell>
+        <cell name="D312" value="Returns the skewness of a distribution" type="general">
+        </cell>
+        <cell name="E100" value="hex( number )[2:].zfill( places ).upper()" type="general">
+        </cell>
+        <cell name="G101" value="oct(n) prepends with a 0" type="general">
+        </cell>
+        <cell name="B98" value="CONVERT" type="general">
+        </cell>
+        <cell name="C99" value="DEC2BIN(number,places)" type="general">
+        </cell>
+        <cell name="D151" value="Returns the future value of an initial principal after applying a series of compound interest rates" type="general">
+        </cell>
+        <cell name="B102" value="DELTA" type="general">
+        </cell>
+        <cell name="B317" value="STDEVA" type="general">
+        </cell>
+        <cell name="C103" value="ERF(lower_limit,upper_limit)" type="general">
+        </cell>
+        <cell name="C316" value="STDEV(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B146" value="DOLLARDE" type="general">
+        </cell>
+        <cell name="C147" value="DOLLARFR(decimal_dollar,fraction)" type="general">
+        </cell>
+        <cell name="D68" value="a serial number to a day of the month" type="general">
+        </cell>
+        <cell name="D273" value="Returns the Fisher transformation" type="general">
+        </cell>
+        <cell name="E67" value="format = &quot;%d/%m/%Y&quot; # for example
+datetime.datetime.strptime( date_text, format )" type="general">
+        </cell>
+        <cell name="F67" value="import datetime" type="general">
+        </cell>
+        <cell name="G66" value="NB. Neither datetime.datetime nor datetime.date add to integers to give a new date." type="general">
+        </cell>
+        <cell name="A65" value="Date and time" type="general">
+        </cell>
+        <cell name="B276" value="FREQUENCY" type="general">
+        </cell>
+        <cell name="C277" value="FTEST(array1,array2)" type="general">
+        </cell>
+        <cell name="D244" value="Adds the numbers in the field column of records in the database that match the criteria" type="general">
+        </cell>
+        <cell name="B241" value="DPRODUCT" type="general">
+        </cell>
+        <cell name="D53" value="Adds its arguments" type="general">
+        </cell>
+        <cell name="C240" value="DMIN(database,field,criteria)" type="general">
+        </cell>
+        <cell name="E50" value="math.sqrt(number)" type="general">
+        </cell>
+        <cell name="F50" value="import math" type="general">
+        </cell>
+        <cell name="B48" value="SIN" type="general">
+        </cell>
+        <cell name="E94" value="int( my_binary_number_as_string, 2 )" type="general">
+        </cell>
+        <cell name="C49" value="SINH(number)" type="general">
+        </cell>
+        <cell name="G95" value="Returns a string" type="general">
+        </cell>
+        <cell name="D205" value="Returns TRUE if all of its arguments are TRUE" type="general">
+        </cell>
+        <cell name="B92" value="BESSELK" type="general">
+        </cell>
+        <cell name="E202" value="type(value)" type="general">
+        </cell>
+        <cell name="C93" value="BESSELY(x,n)" type="general">
+        </cell>
+        <cell name="B200" value="N" type="general">
+        </cell>
+        <cell name="C201" value="NA( )" type="general">
+        </cell>
+        <cell name="D10" value="Returns the arctangent from x- and y-coordinates" type="general">
+        </cell>
+        <cell name="D295" value="Returns the minimum value in a list of arguments" type="general">
+        </cell>
+        <cell name="E13" value="len( itertools.product( range(number), repeat=number_chosen ) )" type="general">
+        </cell>
+        <cell name="F13" value="import itertools" type="general">
+        </cell>
+        <cell name="G12" value="NB. does not handle the second &apos;significance&apos; argument" type="general">
+        </cell>
+        <cell name="D190" value="Returns TRUE if the value is any error value except #N/A" type="general">
+        </cell>
+        <cell name="D331" value="Returns the one-tailed probability-value of a z-test" type="general">
+        </cell>
+        <cell name="B15" value="COSH" type="general">
+        </cell>
+        <cell name="B290" value="LOGINV" type="general">
+        </cell>
+        <cell name="C14" value="COS(number)" type="general">
+        </cell>
+        <cell name="C291" value="LOGNORMDIST(x,mean,standard_dev)" type="general">
+        </cell>
+        <cell name="B187" value="ERROR.TYPE" type="general">
+        </cell>
+        <cell name="C186" value="CELL(info_type,reference)" type="general">
+        </cell>
+        <cell name="D111" value="Returns the argument theta, an angle expressed in radians" type="general">
+        </cell>
+        <cell name="D260" value="Returns the confidence interval for a population mean" type="general">
+        </cell>
+        <cell name="E104" value="special.erfc(x)" type="general">
+        </cell>
+        <cell name="F104" value="from scipy import special" type="general">
+        </cell>
+        <cell name="D147" value="Converts a dollar price, expressed as a decimal number, into a dollar price, expressed as a fraction" type="general">
+        </cell>
+        <cell name="B106" value="HEX2BIN" type="general">
+        </cell>
+        <cell name="B257" value="CHIDIST" type="general">
+        </cell>
+        <cell name="C107" value="HEX2DEC(number)" type="general">
+        </cell>
+        <cell name="C256" value="BINOMDIST(number_s,trials,probability_s,cumulative)" type="general">
+        </cell>
+        <cell name="B150" value="FV" type="general">
+        </cell>
+        <cell name="C151" value="FVSCHEDULE(principal,schedule)" type="general">
+        </cell>
+        <cell name="D285" value="Returns the intercept of the linear regression line" type="general">
+        </cell>
+        <cell name="D281" value="Returns the geometric mean" type="general">
+        </cell>
+        <cell name="B69" value="DAYS360" type="general">
+        </cell>
+        <cell name="B280" value="GAMMALN" type="general">
+        </cell>
+        <cell name="C68" value="DAY(serial_number)" type="general">
+        </cell>
+        <cell name="C281" value="GEOMEAN(number1,number2,...)" type="general">
+        </cell>
+        <cell name="D240" value="Returns the minimum value from selected database entries" type="general">
+        </cell>
+        <cell name="B284" value="HYPGEOMDIST" type="general">
+        </cell>
+        <cell name="C285" value="INTERCEPT(known_y&apos;s,known_x&apos;s)" type="general">
+        </cell>
+        <cell name="B245" value="DVAR" type="general">
+        </cell>
+        <cell name="D49" value="Returns the hyperbolic sine of a number" type="general">
+        </cell>
+        <cell name="C244" value="DSUM(database,field,criteria)" type="general">
+        </cell>
+        <cell name="D165" value="Returns the periodic payment for an annuity" type="general">
+        </cell>
+        <cell name="B52" value="SUBTOTAL" type="general">
+        </cell>
+        <cell name="C53" value="SUM(number1,number2, ...)" type="general">
+        </cell>
+        <cell name="D201" value="Returns the error value #N/A" type="general">
+        </cell>
+        <cell name="E206" value="=&quot;False&quot;" type="general">
+        </cell>
+        <cell name="B160" value="NPV" type="general">
+        </cell>
+        <cell name="C161" value="ODDFPRICE(settlement,maturity,issue,first_coupon,rate,yld,redemption,frequency,basis)" type="general">
+        </cell>
+        <cell name="G207" value="known as the &apos;and/or trick&apos;" type="general">
+        </cell>
+        <cell name="E210" value="logical1 or logical2 or logical3..." type="general">
+        </cell>
+        <cell name="A204" value="Logical functions" type="general">
+        </cell>
+        <cell name="C205" value="AND(logical1,logical2, ...)" type="general">
+        </cell>
+        <cell name="B208" value="IFERROR" type="general">
+        </cell>
+        <cell name="D22" value="Returns the greatest common divisor" type="general">
+        </cell>
+        <cell name="D291" value="Returns the cumulative lognormal distribution" type="general">
+        </cell>
+        <cell name="C209" value="NOT(logical)" type="general">
+        </cell>
+        <cell name="E17" value="int(math.ceil(number / 2.0)) * 2" type="general">
+        </cell>
+        <cell name="E292" value="max(my_list)" type="general">
+        </cell>
+        <cell name="F17" value="import math" type="general">
+        </cell>
+        <cell name="D186" value="Returns information about the formatting, location, or contents of a cell" type="general">
+        </cell>
+        <cell name="D343" value="Converts a number to text, using the $ (dollar) currency format" type="general">
+        </cell>
+        <cell name="B19" value="FACT" type="general">
+        </cell>
+        <cell name="B294" value="MEDIAN" type="general">
+        </cell>
+        <cell name="C18" value="EXP(number)" type="general">
+        </cell>
+        <cell name="C295" value="MIN(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B191" value="ISERROR" type="general">
+        </cell>
+        <cell name="B338" value="CHAR" type="general">
+        </cell>
+        <cell name="C339" value="CLEAN(text)" type="general">
+        </cell>
+        <cell name="D107" value="Converts a hexadecimal number to decimal" type="general">
+        </cell>
+        <cell name="D256" value="Returns the individual term binomial distribution probability" type="general">
+        </cell>
+        <cell name="E263" value="len([value1, value2])" type="general">
+        </cell>
+        <cell name="D159" value="Returns the number of periods for an investment" type="general">
+        </cell>
+        <cell name="B110" value="IMAGINARY" type="general">
+        </cell>
+        <cell name="B261" value="CORREL" type="general">
+        </cell>
+        <cell name="C111" value="IMARGUMENT(inumber)" type="general">
+        </cell>
+        <cell name="C260" value="CONFIDENCE(alpha,standard_dev,size)" type="general">
+        </cell>
+        <cell name="B154" value="IRR" type="general">
+        </cell>
+        <cell name="D76" value="the serial number of the current date and time" type="general">
+        </cell>
+        <cell name="D72" value="a serial number to an hour" type="general">
+        </cell>
+        <cell name="D357" value="Finds one text value within another (not case-sensitive)" type="general">
+        </cell>
+        <cell name="E79" value="datetime.strptime( time_text, python_date_string_format )" type="general">
+        </cell>
+        <cell name="E354" value="text.replace( &apos;str_to_replace&apos;, &apos;str_to_replace_with&apos; )" type="general">
+        </cell>
+        <cell name="B73" value="MINUTE" type="general">
+        </cell>
+        <cell name="C72" value="HOUR(serial_number)" type="general">
+        </cell>
+        <cell name="D252" value="Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria" type="general">
+        </cell>
+        <cell name="B77" value="SECOND" type="general">
+        </cell>
+        <cell name="B352" value="PHONETIC" type="general">
+        </cell>
+        <cell name="C76" value="NOW( )" type="general">
+        </cell>
+        <cell name="C353" value="PROPER(text)" type="general">
+        </cell>
+        <cell name="B249" value="AVEDEV" type="general">
+        </cell>
+        <cell name="D61" value="Returns the tangent of a number" type="general">
+        </cell>
+        <cell name="D161" value="Returns the price per $100 face value of a security with an odd first period" type="general">
+        </cell>
+        <cell name="B56" value="SUMPRODUCT" type="general">
+        </cell>
+        <cell name="C57" value="SUMSQ(number1,number2, ...)" type="general">
+        </cell>
+        <cell name="B164" value="ODDLYIELD" type="general">
+        </cell>
+        <cell name="C165" value="PMT(rate,nper,pv,fv,type)" type="general">
+        </cell>
+        <cell name="D209" value="Reverses the logic of its argument" type="general">
+        </cell>
+        <cell name="D18" value="Returns e raised to the power of a given number" type="general">
+        </cell>
+        <cell name="D303" value="Returns the Pearson product moment correlation coefficient" type="general">
+        </cell>
+        <cell name="E21" value="math.floor(number)" type="general">
+        </cell>
+        <cell name="E296" value="min(my_list)" type="general">
+        </cell>
+        <cell name="F21" value="import math" type="general">
+        </cell>
+        <cell name="G297" value="See scipy.stats.mode" type="general">
+        </cell>
+        <cell name="D134" value="Returns the depreciation for each accounting period" type="general">
+        </cell>
+        <cell name="D339" value="Removes all nonprintable characters from text" type="general">
+        </cell>
+        <cell name="B23" value="INT" type="general">
+        </cell>
+        <cell name="B298" value="NEGBINOMDIST" type="general">
+        </cell>
+        <cell name="C22" value="GCD(number1,number2, ...)" type="general">
+        </cell>
+        <cell name="C299" value="NORMDIST(x,mean,standard_dev,cumulative)" type="general">
+        </cell>
+        <cell name="B131" value="ACCRINT" type="general">
+        </cell>
+        <cell name="C343" value="DOLLAR(number,decimals)" type="general">
+        </cell>
+        <cell name="D119" value="Returns a complex number raised to an integer power" type="general">
+        </cell>
+        <cell name="D268" value="Returns the smallest value for which the cumulative binomial distribution is less than or equal to a criterion value" type="general">
+        </cell>
+        <cell name="D155" value="Calculates the interest paid during a specific period of an investment" type="general">
+        </cell>
+        <cell name="B114" value="IMDIV" type="general">
+        </cell>
+        <cell name="B265" value="COUNTIF" type="general">
+        </cell>
+        <cell name="C115" value="IMEXP(inumber)" type="general">
+        </cell>
+        <cell name="C264" value="COUNTBLANK(range)" type="general">
+        </cell>
+        <cell name="B158" value="NOMINAL" type="general">
+        </cell>
+        <cell name="D36" value="Returns the result of a number raised to a power" type="general">
+        </cell>
+        <cell name="C159" value="NPER(rate, pmt, pv, fv, type)" type="general">
+        </cell>
+        <cell name="E35" value="math.pi" type="general">
+        </cell>
+        <cell name="F35" value="import math" type="general">
+        </cell>
+        <cell name="B33" value="MULTINOMIAL" type="general">
+        </cell>
+        <cell name="C32" value="MROUND(number,multiple)" type="general">
+        </cell>
+        <cell name="D84" value="a serial number to a year" type="general">
+        </cell>
+        <cell name="D353" value="Capitalizes the first letter in each word of a text value" type="general">
+        </cell>
+        <cell name="E358" value="text.replace( &apos;str_to_replace&apos;, &apos;str_to_replace_with&apos; )" type="general">
+        </cell>
+        <cell name="B81" value="WEEKDAY" type="general">
+        </cell>
+        <cell name="B356" value="RIGHT, RIGHTB" type="general">
+        </cell>
+        <cell name="C80" value="TODAY( )" type="general">
+        </cell>
+        <cell name="B253" value="AVERAGEIFS" type="general">
+        </cell>
+        <cell name="D57" value="Returns the sum of the squares of the arguments" type="general">
+        </cell>
+        <cell name="E62" value="math.tanh(number)" type="general">
+        </cell>
+        <cell name="F62" value="import math" type="general">
+        </cell>
+        <cell name="G63" value="NB. Does not take second parameter." type="general">
+        </cell>
+        <cell name="D173" value="Returns the straight-line depreciation of an asset for one period" type="general">
+        </cell>
+        <cell name="B60" value="SUMXMY2" type="general">
+        </cell>
+        <cell name="C61" value="TAN(number)" type="general">
+        </cell>
+        <cell name="D169" value="Returns the price per $100 face value of a security that pays interest at maturity" type="general">
+        </cell>
+        <cell name="D326" value="Estimates variance based on a sample" type="general">
+        </cell>
+        <cell name="B168" value="PRICEDISC" type="general">
+        </cell>
+        <cell name="C169" value="PRICEMAT(settlement,maturity,issue,rate,yld,basis)" type="general">
+        </cell>
+        <cell name="D221" value="Looks in the top row of an array and returns the value of the indicated cell" type="general">
+        </cell>
+        <cell name="E218" value="[value1, value2...][index_num]" type="general">
+        </cell>
+        <cell name="B172" value="RECEIVED" type="general">
+        </cell>
+        <cell name="B323" value="TREND" type="general">
+        </cell>
+        <cell name="C173" value="SLN(cost,salvage,life)" type="general">
+        </cell>
+        <cell name="C322" value="TINV(probability,degrees_freedom)" type="general">
+        </cell>
+        <cell name="B216" value="ADDRESS" type="general">
+        </cell>
+        <cell name="D30" value="Returns the matrix product of two arrays" type="general">
+        </cell>
+        <cell name="D299" value="Returns the normal cumulative distribution" type="general">
+        </cell>
+        <cell name="C217" value="AREAS(reference)" type="general">
+        </cell>
+        <cell name="E25" value="math.log(number)" type="general">
+        </cell>
+        <cell name="F25" value="import math" type="general">
+        </cell>
+        <cell name="D351" value="Returns a specific number of characters from a text string starting at the position you specify" type="general">
+        </cell>
+        <cell name="B27" value="LOG10" type="general">
+        </cell>
+        <cell name="E344" value="=&apos;==&apos;" type="general">
+        </cell>
+        <cell name="B302" value="NORMSINV" type="general">
+        </cell>
+        <cell name="C26" value="LOG(number,base)" type="general">
+        </cell>
+        <cell name="C303" value="PEARSON(array1,array2)" type="general">
+        </cell>
+        <cell name="B135" value="COUPDAYBS" type="general">
+        </cell>
+        <cell name="B346" value="FIXED" type="general">
+        </cell>
+        <cell name="C134" value="AMORLINC(cost,date_purchased,first_period,salvage,period,rate,basis)" type="general">
+        </cell>
+        <cell name="C347" value="JIS(text)" type="general">
+        </cell>
+        <cell name="D115" value="Returns the exponential of a complex number" type="general">
+        </cell>
+        <cell name="D264" value="Counts the number of blank cells within a range" type="general">
+        </cell>
+        <cell name="D231" value="Returns the transpose of an array" type="general">
+        </cell>
+        <cell name="B118" value="IMLOG2" type="general">
+        </cell>
+        <cell name="B269" value="DEVSQ" type="general">
+        </cell>
+        <cell name="C119" value="IMPOWER(inumber,number)" type="general">
+        </cell>
+        <cell name="C268" value="CRITBINOM(trials,probability_s,alpha)" type="general">
+        </cell>
+        <cell name="B226" value="MATCH" type="general">
+        </cell>
+        <cell name="D32" value="Returns a number rounded to the desired multiple" type="general">
+        </cell>
+        <cell name="C227" value="OFFSET(reference,rows,cols,height,width)" type="general">
+        </cell>
+        <cell name="E39" value="math.radians(angle)" type="general">
+        </cell>
+        <cell name="F39" value="import math" type="general">
+        </cell>
+        <cell name="B37" value="PRODUCT" type="general">
+        </cell>
+        <cell name="C36" value="POWER(number,power)" type="general">
+        </cell>
+        <cell name="D80" value="the serial number of today&apos;s date" type="general">
+        </cell>
+        <cell name="E362" value="text.upper()" type="general">
+        </cell>
+        <cell name="D196" value="Returns TRUE if the value is a number" type="general">
+        </cell>
+        <cell name="E195" value="not isinstance(value, basestring)" type="general">
+        </cell>
+        <cell name="B85" value="YEARFRAC" type="general">
+        </cell>
+        <cell name="B360" value="TEXT" type="general">
+        </cell>
+        <cell name="C84" value="YEAR(serial_number)" type="general">
+        </cell>
+        <cell name="C361" value="TRIM(text)" type="general">
+        </cell>
+        <cell name="B193" value="ISLOGICAL" type="general">
+        </cell>
+        <cell name="D5" value="Returns the arccosine of a number" type="general">
+        </cell>
+        <cell name="C192" value="ISEVEN(number)" type="general">
+        </cell>
+        <cell name="C1" value="syntax" type="general">
+        </cell>
+        <cell name="D181" value="Returns the yield on a security that pays periodic interest" type="general">
+        </cell>
+        <cell name="D322" value="Returns the inverse of the Student&apos;s t-distribution" type="general">
+        </cell>
+        <cell name="D217" value="Returns the number of areas in a reference" type="general">
+        </cell>
+        <cell name="B176" value="TBILLPRICE" type="general">
+        </cell>
+        <cell name="B327" value="VARA" type="general">
+        </cell>
+        <cell name="C177" value="TBILLYIELD(settlement,maturity,pr)" type="general">
+        </cell>
+        <cell name="C326" value="VAR(number1,number2,...)" type="general">
+        </cell>
+        <cell name="B220" value="COLUMNS" type="general">
+        </cell>
+        <cell name="D26" value="Returns the logarithm of a number to a specified base" type="general">
+        </cell>
+        <cell name="C221" value="HLOOKUP(lookup_value,table_array,row_index_num,range_lookup)" type="general">
+        </cell>
+        <cell name="D311" value="Returns the square of the Pearson product moment correlation coefficient" type="general">
+        </cell>
+        <cell name="D142" value="Returns the cumulative principal paid on a loan between two periods" type="general">
+        </cell>
+        <cell name="D347" value="Changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters" type="general">
+        </cell>
+        <cell name="B31" value="MOD" type="general">
+        </cell>
+        <cell name="E348" value="text[:length]" type="general">
+        </cell>
+        <cell name="B306" value="PERMUT" type="general">
+        </cell>
+        <cell name="C30" value="MMULT(array1,array2)" type="general">
+        </cell>
+        <cell name="C307" value="POISSON(x,mean,cumulative)" type="general">
+        </cell>
+        <cell name="B139" value="COUPNUM" type="general">
+        </cell>
+        <cell name="B350" value="LOWER" type="general">
+        </cell>
+        <cell name="C138" value="COUPNCD(settlement,maturity,frequency,basis)" type="general">
+        </cell>
+        <cell name="D127" value="Converts an octal number to decimal" type="general">
+        </cell>
+        <cell name="D276" value="Returns a frequency distribution as a vertical array" type="general">
+        </cell>
+        <cell name="D227" value="Returns a reference offset from a given reference" type="general">
+        </cell>
+        <cell name="B122" value="IMSIN" type="general">
+        </cell>
+        <cell name="B273" value="FISHER" type="general">
+        </cell>
+        <cell name="C123" value="IMSQRT(inumber)" type="general">
+        </cell>
+        <cell name="C272" value="FINV(probability,degrees_freedom1,degrees_freedom2)" type="general">
+        </cell>
+        <cell name="B230" value="RTD" type="general">
+        </cell>
+        <cell name="D44" value="Rounds a number down, toward zero" type="general">
+        </cell>
+        <cell name="C231" value="TRANSPOSE(array)" type="general">
+        </cell>
+        <cell name="D40" value="Returns a random number between 0 and 1" type="general">
+        </cell>
+        <cell name="B41" value="RANDBETWEEN" type="general">
+        </cell>
+        <cell name="C40" value="RAND( )" type="general">
+        </cell>
+        <cell name="D92" value="Returns the modified Bessel function Kn(x)" type="general">
+        </cell>
+        <cell name="D361" value="Removes spaces from text" type="general">
+        </cell>
+        <cell name="B45" value="ROUNDUP" type="general">
+        </cell>
+        <cell name="E91" value="special.jn(n,x)" type="general">
+        </cell>
+        <cell name="F91" value="from scipy import special" type="general">
+        </cell>
+        <cell name="C44" value="ROUNDDOWN(number,num_digits)" type="general">
+        </cell>
+        <cell name="G90" value="Note arg order is swapped" type="general">
+        </cell>
+        <cell name="D192" value="Returns TRUE if the number is even" type="general">
+        </cell>
+        <cell name="A89" value="Engineering functions" type="general">
+        </cell>
+        <cell name="E199" value="isinstance(value, basestring)" type="general">
+        </cell>
+        <cell name="B197" value="ISODD" type="general">
+        </cell>
+        <cell name="D1" value="excel description" type="general">
+        </cell>
+        <cell name="E6" value="math.acosh(number)" type="general">
+        </cell>
+        <cell name="F6" value="import math" type="general">
+        </cell>
+        <cell name="B4" value="ABS" type="general">
+        </cell>
+        <cell name="C5" value="ACOS(number)" type="general">
+        </cell>
+        <cell name="D177" value="Returns the yield for a Treasury bill" type="general">
+        </cell>
+        <cell name="B180" value="XNPV" type="general">
+        </cell>
+        <cell name="B331" value="ZTEST" type="general">
+        </cell>
+        <cell name="C181" value="YIELD(settlement,maturity,rate,pr,redemption,frequency,basis)" type="general">
+        </cell>
+        <cell name="C330" value="WEIBULL(x,alpha,beta,cumulative)" type="general">
+        </cell>
+        <cell name="D102" value="Tests whether two values are equal" type="general">
+        </cell>
+        <cell name="D307" value="Returns the Poisson distribution" type="general">
+        </cell>
+        <cell name="E97" value="complex(real_num, i_num)
+ 
+or::
+
+(X + Yj)
+::
+where X and Y are both integer or float literals." type="general">
+        </cell>
+        <cell name="G96" value="Returns a string" type="general">
+        </cell>
+        <cell name="D138" value="Returns the next coupon date after the settlement date" type="general">
+        </cell>
+        <cell name="B99" value="DEC2BIN" type="general">
+        </cell>
+        <cell name="B310" value="RANK" type="general">
+        </cell>
+        <cell name="C98" value="CONVERT(number,from_unit,to_unit)" type="general">
+        </cell>
+        <cell name="C311" value="RSQ(known_y&apos;s,known_x&apos;s)" type="general">
+        </cell>
+        <cell name="D150" value="Returns the future value of an investment" type="general">
+        </cell>
+        <cell name="B143" value="DB" type="general">
+        </cell>
+        <cell name="C142" value="CUMPRINC(rate,nper,pv,start_period,end_period,type)" type="general">
+        </cell>
+        <cell name="B147" value="DOLLARFR" type="general">
+        </cell>
+        <cell name="C146" value="DOLLARDE(fractional_dollar,fraction)" type="general">
+        </cell>
+        <cell name="D123" value="Returns the square root of a complex number" type="general">
+        </cell>
+        <cell name="D272" value="Returns the inverse of the F probability distribution" type="general">
+        </cell>
+        <cell name="D239" value="Returns the maximum value from selected database entries" type="general">
+        </cell>
+        <cell name="B126" value="OCT2BIN" type="general">
+        </cell>
+        <cell name="B277" value="FTEST" type="general">
+        </cell>
+        <cell name="C127" value="OCT2DEC(number)" type="general">
+        </cell>
+        <cell name="C276" value="FREQUENCY(data_array,bins_array)" type="general">
+        </cell>
+        <cell name="A234" value="Database" type="general">
+        </cell>
+        <cell name="C235" value="DAVERAGE(database,field,criteria)" type="general">
+        </cell>
+        <cell name="D52" value="Returns a subtotal in a list or database" type="general">
+        </cell>
+        <cell name="E51" value="math.sqrt( number * math.pi )" type="general">
+        </cell>
+        <cell name="F51" value="import math" type="general">
+        </cell>
+        <cell name="B49" value="SINH" type="general">
+        </cell>
+        <cell name="E95" value="hex( int( my_binary_number_as_string, 2 ) )" type="general">
+        </cell>
+        <cell name="C48" value="SIN(number)" type="general">
+        </cell>
+        <cell name="G94" value="Returns an int" type="general">
+        </cell>
+        <cell name="B93" value="BESSELY" type="general">
+        </cell>
+        <cell name="C92" value="BESSELK(x,n)" type="general">
+        </cell>
+        <cell name="G202" value="Returns a Python type though, not an Excel type" type="general">
+        </cell>
+        <cell name="B201" value="NA" type="general">
+        </cell>
+        <cell name="D13" value="Returns the number of combinations for a given number of objects" type="general">
+        </cell>
+        <cell name="C200" value="N(value)" type="general">
+        </cell>
+        <cell name="E10" value="math.atan2(x_num,y_num)" type="general">
+        </cell>
+        <cell name="F10" value="import math" type="general">
+        </cell>
+        <cell name="D9" value="Returns the arctangent of a number" type="general">
+        </cell>
+        <cell name="D294" value="Returns the median of the given numbers" type="general">
+        </cell>
+        <cell name="E14" value="math.cos(number)" type="general">
+        </cell>
+        <cell name="F14" value="import math" type="general">
+        </cell>
+        <cell name="B8" value="ASINH" type="general">
+        </cell>
+        <cell name="C9" value="ATAN (number)" type="general">
+        </cell>
+        <cell name="D189" value="Returns TRUE if the value is blank" type="general">
+        </cell>
+        <cell name="D330" value="Returns the Weibull distribution" type="general">
+        </cell>
+        <cell name="B12" value="CEILING" type="general">
+        </cell>
+        <cell name="B291" value="LOGNORMDIST" type="general">
+        </cell>
+        <cell name="C13" value="COMBIN(number,number_chosen)" type="general">
+        </cell>
+        <cell name="C290" value="LOGINV(probability,mean,standard_dev)" type="general">
+        </cell>
+        <cell name="A335" value="Text functions" type="general">
+        </cell>
+        <cell name="D98" value="Converts a number from one measurement system to another" type="general">
+        </cell>
+        <cell name="D319" value="Calculates standard deviation based on the entire population, including numbers, text, and logical values" type="general">
+        </cell>
+        <cell name="E101" value="oct( number ).zfill(places)" type="general">
+        </cell>
+        <cell name="G100" value="hex(n) without the slice returns a string prepended with &apos;0x&apos;, and A-F are represented as a-f (lowercase)" type="general">
+        </cell>
+        <cell name="B103" value="ERF" type="general">
+        </cell>
+        <cell name="B314" value="SMALL" type="general">
+        </cell>
+        <cell name="C102" value="DELTA(number1,number2)" type="general">
+        </cell>
+        <cell name="C315" value="STANDARDIZE(x,mean,standard_dev)" type="general">
+        </cell>
+        <cell name="D146" value="Converts a dollar price, expressed as a fraction, into a dollar price, expressed as a decimal number" type="general">
+        </cell>
+        <cell name="B151" value="FVSCHEDULE" type="general">
+        </cell>
+        <cell name="C150" value="FV(rate,nper,pmt,pv,type)" type="general">
+        </cell>
+        <cell name="D71" value="the serial number of the last day of the month before or after a specified number of months" type="general">
+        </cell>
+        <cell name="D284" value="Returns the hypergeometric distribution" type="general">
+        </cell>
+        <cell name="D235" value="Returns the average of selected database entries" type="general">
+        </cell>
+        <cell name="B66" value="DATE" type="general">
+        </cell>
+        <cell name="B281" value="GEOMEAN" type="general">
+        </cell>
+        <cell name="C67" value="DATEVALUE(date_text)" type="general">
+        </cell>
+        <cell name="C280" value="GAMMALN(x)" type="general">
+        </cell>
+        <cell name="B238" value="DGET" type="general">
+        </cell>
+        <cell name="C239" value="DMAX(database,field,criteria)" type="general">
+        </cell>
+        <cell name="D48" value="Returns the sine of the given angle" type="general">
+        </cell>
+        <cell name="D164" value="Returns the yield of a security with an odd last period" type="general">
+        </cell>
+        <cell name="B53" value="SUM" type="general">
+        </cell>
+        <cell name="C52" value="SUBTOTAL(function_num, ref1, ref2, ...)" type="general">
+        </cell>
+        <cell name="D200" value="Returns a value converted to a number" type="general">
+        </cell>
+        <cell name="E207" value="logical_test and value_if_true or value_if_false" type="general">
+        </cell>
+        <cell name="B161" value="ODDFPRICE" type="general">
+        </cell>
+        <cell name="C160" value="NPV(rate,value1,value2, ...)" type="general">
+        </cell>
+        <cell name="B205" value="AND" type="general">
+        </cell>
+        <cell name="D21" value="Rounds a number down, toward zero" type="general">
+        </cell>
+        <cell name="D290" value="Returns the inverse of the lognormal distribution" type="general">
+        </cell>
+        <cell name="E18" value="math.exp(number)" type="general">
+        </cell>
+        <cell name="F18" value="import math" type="general">
+        </cell>
+        <cell name="B16" value="DEGREES" type="general">
+        </cell>
+        <cell name="B295" value="MIN" type="general">
+        </cell>
+        <cell name="C17" value="EVEN(number)" type="general">
+        </cell>
+        <cell name="C294" value="MEDIAN(number1,number2,...)" type="general">
+        </cell>
+        <cell name="G336" value="Only relevant in VBA" type="general">
+        </cell>
+        <cell name="B188" value="INFO" type="general">
+        </cell>
+        <cell name="B339" value="CLEAN" type="general">
+        </cell>
+        <cell name="C338" value="CHAR(number)" type="general">
+        </cell>
+        <cell name="D110" value="Returns the imaginary coefficient of a complex number" type="general">
+        </cell>
+        <cell name="D315" value="Returns a normalized value" type="general">
+        </cell>
+        <cell name="E316" value="numpy.std( [number1, number2] )" type="general">
+        </cell>
+        <cell name="G104" value="NB. scipy version takes complex number as only parameter. not equivalent" type="general">
+        </cell>
+        <cell name="D263" value="Counts how many values are in the list of arguments" type="general">
+        </cell>
+        <cell name="B107" value="HEX2DEC" type="general">
+        </cell>
+        <cell name="C106" value="HEX2BIN(number,places)" type="general">
+        </cell>
+        <cell name="B318" value="STDEVP" type="general">
+        </cell>
+        <cell name="D158" value="Returns the annual nominal interest rate" type="general">
+        </cell>
+        <cell name="C319" value="STDEVPA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="B258" value="CHIINV" type="general">
+        </cell>
+        <cell name="C259" value="CHITEST(actual_range,expected_range)" type="general">
+        </cell>
+        <cell name="B155" value="ISPMT" type="general">
+        </cell>
+        <cell name="C154" value="IRR(values,guess)" type="general">
+        </cell>
+        <cell name="D67" value="a date in the form of text to a serial number" type="general">
+        </cell>
+        <cell name="D280" value="Returns the natural logarithm of the gamma function, G(x)" type="general">
+        </cell>
+        <cell name="E287" value="reverse( sorted( my_list )[k]" type="general">
+        </cell>
+        <cell name="B70" value="EDATE" type="general">
+        </cell>
+        <cell name="B285" value="INTERCEPT" type="general">
+        </cell>
+        <cell name="C71" value="EOMONTH(start_date,months)" type="general">
+        </cell>
+        <cell name="D243" value="Calculates the standard deviation based on the entire population of selected database entries" type="general">
+        </cell>
+        <cell name="C284" value="HYPGEOMDIST(sample_s,number_sample,population_s,number_population)" type="general">
+        </cell>
+        <cell name="B242" value="DSTDEV" type="general">
+        </cell>
+        <cell name="C243" value="DSTDEVP(database,field,criteria)" type="general">
+        </cell>
+        <cell name="B246" value="DVARP" type="general">
+        </cell>
+        <cell name="D60" value="Returns the sum of squares of differences of corresponding values in two arrays" type="general">
+        </cell>
+        <cell name="D160" value="Returns the net present value of an investment based on a series of periodic cash flows and a discount rate" type="general">
+        </cell>
+        <cell name="B57" value="SUMSQ" type="general">
+        </cell>
+        <cell name="C56" value="SUMPRODUCT(array1,array2,array3, ...)" type="general">
+        </cell>
+        <cell name="E211" value="=&apos;True&apos;" type="general">
+        </cell>
+        <cell name="B165" value="PMT" type="general">
+        </cell>
+        <cell name="C164" value="ODDLYIELD(settlement,maturity,last_interest,rate,pr,redemption,frequency,basis)" type="general">
+        </cell>
+        <cell name="B209" value="NOT" type="general">
+        </cell>
+        <cell name="D17" value="Rounds a number up to the nearest even integer" type="general">
+        </cell>
+        <cell name="D302" value="Returns the inverse of the standard normal cumulative distribution" type="general">
+        </cell>
+        <cell name="E22" value="
+# for two numbers
+fractions.gcd( number1, number2 )
+ 
+# for more than two
+reduce(
+    fractions.gcd,
+    [number1, number2, number3...]
+)" type="general">
+        </cell>
+        <cell name="F22" value="import fractions" type="general">
+        </cell>
+        <cell name="D133" value="Returns the depreciation for each accounting period by using a depreciation coefficient" type="general">
+        </cell>
+        <cell name="D338" value="Returns the character specified by the code number" type="general">
+        </cell>
+        <cell name="B20" value="FACTDOUBLE" type="general">
+        </cell>
+        <cell name="E341" value="text1 + text2
+::
+or::
+
+separator = &apos;X&apos;
+separator.join(text1, text2...)
+" type="general">
+        </cell>
+        <cell name="B299" value="NORMDIST" type="general">
+        </cell>
+        <cell name="C21" value="FLOOR(number,significance)" type="general">
+        </cell>
+        <cell name="C298" value="NEGBINOMDIST(number_f,number_s,probability_s)" type="general">
+        </cell>
+        <cell name="B128" value="OCT2HEX" type="general">
+        </cell>
+        <cell name="B343" value="DOLLAR" type="general">
+        </cell>
+        <cell name="D106" value="Converts a hexadecimal number to binary" type="general">
+        </cell>
+        <cell name="E109" value="abs(inumber)" type="general">
+        </cell>
+        <cell name="D118" value="Returns the base-2 logarithm of a complex number" type="general">
+        </cell>
+        <cell name="D259" value="Returns the test for independence" type="general">
+        </cell>
+        <cell name="B111" value="IMARGUMENT" type="general">
+        </cell>
+        <cell name="C110" value="IMAGINARY(inumber)" type="general">
+        </cell>
+        <cell name="G261" value="See numpy.corrcoef" type="general">
+        </cell>
+        <cell name="D154" value="Returns the internal rate of return for a series of cash flows" type="general">
+        </cell>
+        <cell name="B115" value="IMEXP" type="general">
+        </cell>
+        <cell name="B262" value="COUNT" type="general">
+        </cell>
+        <cell name="C114" value="IMDIV(inumber1,inumber2)" type="general">
+        </cell>
+        <cell name="C263" value="COUNTA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="B159" value="NPER" type="general">
+        </cell>
+        <cell name="C158" value="NOMINAL(effect_rate,npery)" type="general">
+        </cell>
+        <cell name="D79" value="a time in the form of text to a serial number" type="general">
+        </cell>
+        <cell name="D356" value="Returns the rightmost characters from a text value" type="general">
+        </cell>
+        <cell name="E355" value="text * number_times" type="general">
+        </cell>
+        <cell name="B74" value="MONTH" type="general">
+        </cell>
+        <cell name="B353" value="PROPER" type="general">
+        </cell>
+        <cell name="C75" value="NETWORKDAYS(start_date,end_date,holidays)" type="general">
+        </cell>
+        <cell name="D255" value="Returns the inverse of the cumulative distribution function for a specified beta distribution" type="general">
+        </cell>
+        <cell name="C352" value="PHONETIC(reference)" type="general">
+        </cell>
+        <cell name="B250" value="AVERAGE" type="general">
+        </cell>
+        <cell name="D56" value="Returns the sum of the products of corresponding array components" type="general">
+        </cell>
+        <cell name="C251" value="AVERAGEA(value1,value2,...)" type="general">
+        </cell>
+        <cell name="E63" value="math.trunc(number)" type="general">
+        </cell>
+        <cell name="F63" value="import math" type="general">
+        </cell>
+        <cell name="D172" value="Returns the amount received at maturity for a fully invested security" type="general">
+        </cell>
+        <cell name="B61" value="TAN" type="general">
+        </cell>
+        <cell name="C60" value="SUMXMY2(array_x,array_y)" type="general">
+        </cell>
+        <cell name="D208" value="Returns a value you specify if a formula evaluates to an error; otherwise, returns the result of the formula" type="general">
+        </cell>
+        <cell name="B169" value="PRICEMAT" type="general">
+        </cell>
+        <cell name="C168" value="PRICEDISC(settlement,maturity,discount,redemption,basis)" type="general">
+        </cell>
+        <cell name="D29" value="Returns the matrix inverse of an array" type="general">
+        </cell>
+        <cell name="D298" value="Returns the negative binomial distribution" type="general">
+        </cell>
+        <cell name="E26" value="math.log(number, base)" type="general">
+        </cell>
+        <cell name="F26" value="import math" type="general">
+        </cell>
+        <cell name="B24" value="LCM" type="general">
+        </cell>
+        <cell name="D350" value="Converts text to lowercase" type="general">
+        </cell>
+        <cell name="E345" value="text.find( &apos;text_to_find&apos; )" type="general">
+        </cell>
+        <cell name="B303" value="PEARSON" type="general">
+        </cell>
+        <cell name="C25" value="LN(number)" type="general">
+        </cell>
+        <cell name="C302" value="NORMSINV(probability)" type="general">
+        </cell>
+        <cell name="B132" value="ACCRINTM" type="general">
+        </cell>
+        <cell name="B347" value="JIS" type="general">
+        </cell>
+        <cell name="C133" value="AMORDEGRC(cost,date_purchased,first_period,salvage,period,rate,basis)" type="general">
+        </cell>
+        <cell name="C346" value="FIXED(number,decimals,no_commas)" type="general">
+        </cell>
+        <cell name="D114" value="Returns the quotient of two complex numbers" type="general">
+        </cell>
+        <cell name="D271" value="Returns the F probability distribution" type="general">
+        </cell>
+        <cell name="D230" value="Retrieves real-time data from a program that supports COM automation (Automation: A way to work with an application&apos;s objects from another application or development tool. Formerly called OLE Automation, Automation is an industry standard and a feature of the Component Object Model (COM).)" type="general">
+        </cell>
+        <cell name="B119" value="IMPOWER" type="general">
+        </cell>
+        <cell name="B266" value="COUNTIFS" type="general">
+        </cell>
+        <cell name="C118" value="IMLOG2(inumber)" type="general">
+        </cell>
+        <cell name="C267" value="COVAR(array1,array2)" type="general">
+        </cell>
+        <cell name="B227" value="OFFSET" type="general">
+        </cell>
+        <cell name="D39" value="Converts degrees to radians" type="general">
+        </cell>
+        <cell name="C226" value="MATCH(lookup_value,lookup_array,match_type)" type="general">
+        </cell>
+        <cell name="D75" value="the number of whole workdays between two dates" type="general">
+        </cell>
+        <cell name="D352" value="Extracts the phonetic (furigana) characters from a text string" type="general">
+        </cell>
+        <cell name="B34" value="ODD" type="general">
+        </cell>
+        <cell name="E76" value="datetime.datetime.now()" type="general">
+        </cell>
+        <cell name="E359" value="str(value)" type="general">
+        </cell>
+        <cell name="C35" value="PI( )" type="general">
+        </cell>
+        <cell name="E363" value="int(text)
+::
+or::
+
+float(text)
+" type="general">
+        </cell>
+        <cell name="B78" value="TIME" type="general">
+        </cell>
+        <cell name="B357" value="SEARCH, SEARCHB" type="general">
+        </cell>
+        <cell name="C79" value="TIMEVALUE(time_text)" type="general">
+        </cell>
+        <cell name="D251" value="Returns the average of its arguments, including numbers, text, and logical values" type="general">
+        </cell>
+        <cell name="B361" value="TRIM" type="general">
+        </cell>
+        <cell name="C360" value="TEXT(value,format_text)" type="general">
+        </cell>
+        <cell name="B254" value="BETADIST" type="general">
+        </cell>
+        <cell name="D4" value="Returns the absolute value of a number" type="general">
+        </cell>
+        <cell name="C255" value="BETAINV(probability,alpha,beta,A,B)" type="general">
+        </cell>
+        <cell name="D168" value="Returns the price per $100 face value of a discounted security" type="general">
+        </cell>
+        <cell name="A1" value="category" type="general">
+        </cell>
+        <cell name="D325" value="Returns the probability associated with a Student&apos;s t-test" type="general">
+        </cell>
+        <cell name="B1" value="function" type="general">
+        </cell>
+        <cell name="D220" value="Returns the number of columns in a reference" type="general">
+        </cell>
+        <cell name="B173" value="SLN" type="general">
+        </cell>
+        <cell name="B320" value="STEYX" type="general">
+        </cell>
+        <cell name="C172" value="RECEIVED(settlement,maturity,investment,discount,basis)" type="general">
+        </cell>
+        <cell name="C321" value="TDIST(x,degrees_freedom,tails)" type="general">
+        </cell>
+        <cell name="D216" value="Returns a reference as text to a single cell in a worksheet" type="general">
+        </cell>
+        <cell name="B217" value="AREAS" type="general">
+        </cell>
+        <cell name="C216" value="ADDRESS(row_num,column_num,abs_num,a1,sheet_text)" type="general">
+        </cell>
+        <cell name="B221" value="HLOOKUP" type="general">
+        </cell>
+        <cell name="D25" value="Returns the natural logarithm of a number" type="general">
+        </cell>
+        <cell name="C220" value="COLUMNS(array)" type="general">
+        </cell>
+        <cell name="D310" value="Returns the rank of a number in a list of numbers" type="general">
+        </cell>
+        <cell name="D141" value="Returns the cumulative interest paid between two periods" type="general">
+        </cell>
+        <cell name="D346" value="Formats a number as text with a fixed number of decimals" type="general">
+        </cell>
+        <cell name="B28" value="MDETERM" type="general">
+        </cell>
+        <cell name="E349" value="len(text)" type="general">
+        </cell>
+        <cell name="B307" value="POISSON" type="general">
+        </cell>
+        <cell name="C29" value="MINVERSE(array)" type="general">
+        </cell>
+        <cell name="C306" value="PERMUT(number,number_chosen)" type="general">
+        </cell>
+        <cell name="B136" value="COUPDAYS" type="general">
+        </cell>
+        <cell name="B351" value="MID, MIDB" type="general">
+        </cell>
+        <cell name="C137" value="COUPDAYSNC(settlement,maturity,frequency,basis)" type="general">
+        </cell>
+        <cell name="C350" value="LOWER(text)" type="general">
+        </cell>
+        <cell name="D126" value="Converts an octal number to binary" type="general">
+        </cell>
+        <cell name="D267" value="Returns covariance, the average of the products of paired deviations" type="general">
+        </cell>
+        <cell name="D226" value="Looks up values in a reference or array" type="general">
+        </cell>
+        <cell name="B123" value="IMSQRT" type="general">
+        </cell>
+        <cell name="B270" value="EXPONDIST" type="general">
+        </cell>
+        <cell name="C122" value="IMSIN(inumber)" type="general">
+        </cell>
+        <cell name="C271" value="FDIST(x,degrees_freedom1,degrees_freedom2)" type="general">
+        </cell>
+        <cell name="B231" value="TRANSPOSE" type="general">
+        </cell>
+        <cell name="D35" value="Returns the value of pi" type="general">
+        </cell>
+        <cell name="C230" value="RTD(ProgID,server,topic1,[topic2],...)" type="general">
+        </cell>
+        <cell name="E36" value="a**b" type="general">
+        </cell>
+        <cell name="B38" value="QUOTIENT" type="general">
+        </cell>
+        <cell name="E80" value="datetime.date.today()" type="general">
+        </cell>
+        <cell name="C39" value="RADIANS(angle)" type="general">
+        </cell>
+        <cell name="D83" value="the serial number of the date before or after a specified number of workdays" type="general">
+        </cell>
+        <cell name="G81" value="Alternatively, consider date.weekday(), which is 0-indexed on Monday by default. Both options require a date object, instead of taking a serial number." type="general">
+        </cell>
+        <cell name="D360" value="Formats a number and converts it to text" type="general">
+        </cell>
+        <cell name="B82" value="WEEKNUM" type="general">
+        </cell>
+        <cell name="C83" value="WORKDAY(start_date,days,holidays)" type="general">
+        </cell>
+        <cell name="D199" value="Returns TRUE if the value is text" type="general">
+        </cell>
+        <cell name="E192" value="number % 2 == 0" type="general">
+        </cell>
+    </worksheet>
+    <postFormulaeUserCode><![CDATA[
+TITLE = 'Common Spreadsheet Functions in Dirigible'
+UNFINISHED_MARKER = 'Coming soon'
+UNFINISHED_LINK = '`' + UNFINISHED_MARKER + '`_'
+
+SUPPORT_TEXT = '''
+.. _''' + UNFINISHED_MARKER + ''':
+'''
+
+def get_definitions():
+    definitions = []
+    for cell in mt.Cols['function'].Cells:
+        if cell.Value:
+            new = FunctionDef()
+            new._row = cell.Row
+            new.excel_function_name = cell.Value or ''
+            new.excel_syntax = mt.Cols['syntax'][cell.Row] or mt.Cols['function'][cell.Row] + '()'
+            new.excel_description = mt.Cols['excel description'][cell.Row] or ''
+            new.howto_in_resolver = mt.Cols['howto in resolver'][cell.Row]
+            new.imports = mt.Cols['imports'][cell.Row]
+            new.comments = mt.Cols['comments'][cell.Row]
+            definitions.append(new)
+    return definitions
+
+def output_title(title, underline, out_file):
+    print >> out_file,  title
+    print >> out_file,  underline * len(title)
+    print >> out_file,  ''
+    
+def output_header(out_file):
+    output_title(TITLE, '=', out_file)
+    print >> out_file, SUPPORT_TEXT
+
+def format_syntax(syntax):
+    syntax = syntax.replace(' (', '(')
+    syntax = syntax.replace('(', '( ')
+    syntax = syntax.replace(')', ' )')
+    syntax = syntax.replace(',', ', ')
+    syntax = '| **' + syntax.replace('(', '**\ (')    
+    return syntax
+
+def get_func_desc(syntax, description):
+    lines = [
+        format_syntax(syntax),
+        '',
+        r'\ *%s*' % (description,),
+    ]
+    return lines
+
+def get_python_equiv(imports, howto, comment):
+    lines = []
+
+    if imports or howto:
+        lines.extend(['::', ''])
+        if imports:
+            lines.append(' ' + imports)
+        if howto:
+            indent = ' '
+            for h in howto.split('\n'):
+                if h == '::':
+                    indent = ''
+                    lines.append('')
+                    continue
+                elif h.endswith('::'):
+                    lines.append(h)
+                else:
+                    lines.append(indent + h)
+                indent = ' '
+        lines.append('')
+
+    if comment:
+        lines.append(r'\ *%s*' % (comment,))
+
+    if not (howto or comment):
+        lines.append(UNFINISHED_LINK)
+
+    return lines
+
+def get_row(defn):
+    return [
+        get_func_desc(defn.excel_syntax, defn.excel_description),
+        get_python_equiv(defn.imports, defn.howto_in_resolver, defn.comments),
+    ]
+
+def get_col_widths(headings, rows):
+    col_widths = map(len, headings)
+    for row in rows:
+        for index, col in enumerate(row):
+            for line in col:
+                col_widths[index] = max(col_widths[index], len(line))
+    return col_widths
+
+def get_row_divider(col_widths):
+    table_line = '+'
+    for width in col_widths:
+        table_line += '-' * width + '+'
+    return table_line
+
+def output_row(row, col_widths, out_file):
+    for line_parts in izip_longest(*row):
+        line = '|'
+        for index, line_part in enumerate(line_parts):
+            text = line_part if line_part else ''
+            spacing = ' ' * (col_widths[index] - len(text))
+            line += text + spacing + '|'
+        print >> out_file, line
+    return line
+
+
+def output_category(cat, definitions, out_file):
+    output_title(cat, '-', out_file)
+    out_headings = ['Function', 'Python Equivalent']
+    rows = [get_row(defn) for defn in definitions]
+    col_widths = get_col_widths(out_headings, rows)
+    row_divider = get_row_divider(col_widths)
+
+    print >> out_file, row_divider
+    output_row([[h] for h in out_headings], col_widths, out_file)
+    print >> out_file, row_divider.replace('-', '=')
+    for row in rows:
+        output_row(row, col_widths, out_file)
+        print >> out_file, row_divider
+    print >> out_file,  ''
+
+
+def output_rst():
+    definitions = get_definitions()
+    out_file = file(join(dirname(__file__), 'spreadsheet-functions.rst'), 'w')
+    try:
+        output_header(out_file)
+        categories = [c.Value for c in mt.Cols['category'].Cells if c.Value]
+        for category in categories[1:]:
+            output_category(
+                category,
+                [d for d in definitions if d.category==category],
+                out_file)
+    finally:    
+        out_file.close()
+
+output_rst()
+]]></postFormulaeUserCode>
+</document>

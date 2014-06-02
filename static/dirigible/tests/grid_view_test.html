@@ -1,0 +1,660 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.caret.1.02.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="/static/dirigible/scripts/htmlescape.js"></script>
+
+    <script src="/static/dirigible/scripts/grid_view.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<div id="id_editor_container"></div>
+<!-- required for testScrollListener -->
+<div class='slick-viewport' style="overflow: auto; width: 99px; height: 88px;">
+<div style="width: 1000px; height: 1000px"></div>
+<div id="id_buffering_message"></div>
+</div>
+
+
+<script type="text/javascript">
+
+tests = [
+
+    new YAHOO.tool.TestCase({
+
+        name: "WithRestoreCursorDecoratorTest",
+
+        setUp: function() {
+            var self = this;
+            $("#id_editor_container").append("<input class='editor-text'></input>");
+            $("#id_editor_container").append("<input id='id_formula_bar'></input>");
+            $("#id_editor_container").append("<input id='id_other_thing'></input>");
+            this.mockControl = new MockControl();
+            this.mockGrid = this.mockControl.createMock({
+                editActiveCell: function() {}
+            });
+            this.mockGrid.onScroll = {subscribe: function () {}};
+            this.mockRemoteModel = this.mockControl.createMock({
+            });
+            this.mockRemoteModel.onDataLoaded = {subscribe: function() {}};
+            this.mockRemoteModel.onDataLoading = {subscribe: function() {}};
+            this.rawData = {};
+            this.headerData = [];
+            this.origHeaderFn = Dirigible.GridView.jsonToSlickGridRowHeaders;
+            Dirigible.GridView.jsonToSlickGridRowHeaders = function() {
+                return self.headerData;
+            }
+            this.gridView = new Dirigible.GridView(this.mockGrid, this.mockRemoteModel);
+        },
+
+        tearDown: function() {
+            Dirigible.GridView.jsonToSlickGridRowHeaders = this.origHeaderFn;
+            $('input.editor-text').remove();
+            $('#id_formula_bar').remove();
+            $('#id_other_thing').remove();
+        },
+
+        testWithRestoreCursorShouldSaveAndRestoreEditorAndFormulaBarContentsIfTheyArePresent: function () {
+            var $editor = $('input.editor-text');
+            var $formulaBar = $('#id_formula_bar');
+
+            $editor.val('hello');
+
+            function wrapMe() {
+                $editor.remove();
+                $("#id_editor_container").append("<input class='editor-text'></input>");
+                $formulaBar.val('');
+            }
+            
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            $editor = $('input.editor-text');
+            YAHOO.util.Assert.areSame('hello', $editor.val());
+            YAHOO.util.Assert.areSame('hello', $formulaBar.val());
+        },
+
+        testWithRestoreCursorShouldCallEditActiveCellIfEditorWasActive: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            var $editor = $('input.editor-text');
+            $editor.focus();
+
+            function wrapMe() {
+                $editor.remove();
+                $("#id_editor_container").append("<input class='editor-text'></input>");
+            }
+            
+            this.mockGrid.expects().editActiveCell();
+
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            this.mockControl.verify();
+        },
+
+        testWithRestoreCursorShouldCallEditActiveCellIfFormulaBarWasActive: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            var $formulaBar = $('#id_formula_bar');
+            $formulaBar.focus();
+
+            function wrapMe() {
+                $('#id_other_thing').focus();
+            }
+            this.mockGrid.expects().editActiveCell();
+
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            this.mockControl.verify();
+        },
+
+        testWithRestoreCursorShouldNotCallEditActiveCellIfEditorWasNotActive: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            var $editor = $('input.editor-text');
+
+            function wrapMe() {
+                $editor.remove();
+                $("#id_editor_container").append("<input class='editor-text'></input>");
+            }
+
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            this.mockControl.verify();
+        },
+
+        testWithRestoreCursorShouldPreserveFocusOnEditorIfActive: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            var $editor = $('input.editor-text');
+            $editor.focus();
+
+            function wrapMe() {
+                $editor.remove();
+                $("#id_editor_container").append("<input class='editor-text'></input>");
+            }
+
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            $editor = $('input.editor-text');
+            YAHOO.util.Assert.areSame(
+                    $editor[0],
+                    document.activeElement,
+                    'gridView.updateMetaData lost focus on editor box'
+            );
+        },
+
+        testWithResoreCursorDecoratorShouldPreserveCaretPositionAndSelectionInEditor: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            var $editor = $('input.editor-text');
+            $editor.focus();
+            var caret_args = [];
+            $editor.extend($.fn, {
+                caret: function (start, end) {
+                    if (start === undefined && end === undefined) {
+                        caret_args.push('called with no args');
+                    } else{
+                        caret_args.push([start, end]);
+                    }
+                    return {start:123, end:456};
+                }
+            });
+
+            function wrapMe() {
+                $editor.remove();
+                $("#id_editor_container").append("<input class='editor-text'></input>");
+            }
+
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            assertDeepAreSame(
+                ['called with no args', [123, 456]],
+                caret_args,
+                'caret function not called properly'
+            );
+
+        },
+
+        testWithRestoreCursorShouldPreserveCaretPositionAndSelectionInFormulaBar: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            var $editor = $('input.editor-text');
+            var $formulaBar = $('#id_formula_bar');
+            $formulaBar.focus();
+            var caret_args = [];
+            $formulaBar.extend($.fn, {
+                caret: function (start, end) {
+                    if (start===undefined && end===undefined  ){
+                        caret_args.push('called with no args');
+                    } else{
+                        caret_args.push([start, end]);
+                    }
+                    return {start:123, end:456};
+                }
+            });
+
+            function wrapMe() {
+                $editor.remove();
+                $("#id_editor_container").append("<input class='editor-text'></input>");
+            }
+            
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            assertDeepAreSame(
+                ['called with no args', [123, 456]],
+                caret_args,
+                'caret function not called properly'
+            );
+
+        },
+
+        testWithRestoreCursorShouldPreserveFocusOnFormulaBarIfActive: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            var $formulaBar = $('#id_formula_bar');
+            $formulaBar.select();
+
+            function wrapMe() {
+                $('#id_other_thing').focus();
+            }
+
+            this.gridView.with_restore_cursor(wrapMe)();
+
+            YAHOO.util.Assert.areSame(
+                    $formulaBar[0],
+                    document.activeElement,
+                    'gridView.updateMetaData lost focus on formula bar'
+            );
+        },
+
+        testWithRestoreCursorShouldNotCrashIfNoEditorOrFormulaBarPresent: function () {
+            this.gridView.ensureCurrentViewportData = function() {};
+            // Remove the stuff that setUp created for us.
+            $('input.editor-text').remove();
+            $('#id_formula_bar').remove();
+
+            this.gridView.with_restore_cursor(function() {})();
+        }
+
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "UpdateMetaDataTest",
+
+        setUp: function() {
+            $("#id_editor_container").append("<input class='editor-text'></input>");
+            $("#id_editor_container").append("<input id='id_formula_bar'></input>");
+            $("#id_editor_container").append("<input id='id_other_thing'></input>");
+            this.mockControl = new MockControl();
+            this.mockGrid = this.mockControl.createMock({
+                editActiveCell: function() {},
+                getCellFromPoint: function() {},
+                render: function() {},
+                setColumns: function() {}
+            });
+            this.mockGrid.onScroll = {subscribe: function () {}};
+            this.mockRemoteModel = this.mockControl.createMock({
+                reset: function () {}
+            });
+            this.mockRemoteModel.onDataLoaded = {subscribe: function() {}};
+            this.mockRemoteModel.onDataLoading = {subscribe: function() {}};
+            this.rawData = {};
+            this.headerData = [];
+            this.origHeaderFn = Dirigible.GridView.jsonToSlickGridRowHeaders;
+            var that = this;
+            Dirigible.GridView.jsonToSlickGridRowHeaders = function() {
+                return that.headerData;
+            }
+            this.gridView = new Dirigible.GridView(this.mockGrid, this.mockRemoteModel);
+        },
+
+        tearDown: function() {
+            Dirigible.GridView.jsonToSlickGridRowHeaders = this.origHeaderFn;
+            $('input.editor-text').remove();
+            $('#id_formula_bar').remove();
+            $('#id_other_thing').remove();
+        },
+
+        testUpdateMetaDataShouldInvalidateRowsResetRemoteDataAndColumnsThenRender: function () {
+            var mockJsonToSlickGridRowHeadersOwner = this.mockControl.createMock({
+                jsonToSlickGridRowHeaders: function(){}
+            });
+            Dirigible.GridView.jsonToSlickGridRowHeaders = mockJsonToSlickGridRowHeadersOwner.jsonToSlickGridRowHeaders;
+
+            var mockEnsureCurrentViewportDataOwner = this.mockControl.createMock({
+                ensureCurrentViewportData: function(){}
+            });
+            this.gridView.ensureCurrentViewportData = mockEnsureCurrentViewportDataOwner.ensureCurrentViewportData;
+
+            mockJsonToSlickGridRowHeadersOwner.expects().jsonToSlickGridRowHeaders(this.rawData).andReturn(this.headerData);
+
+            this.mockRemoteModel.expects().reset(this.headerData);
+
+            this.mockGrid.expects().render();
+            mockEnsureCurrentViewportDataOwner.expects().ensureCurrentViewportData();
+
+            this.gridView.updateMetaData(this.rawData);
+
+            this.mockControl.verify();
+        },
+
+        testUpdateMetaDataIsWrappedWithWithRestoreCursor: function () {
+
+            YAHOO.util.Assert.isTrue(this.gridView.updateMetaData.wrapped);
+        }
+     
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "HandleScrollTest",
+
+        testInitialise: function () {
+            var mockControl = new MockControl();
+
+            var mockOnScroll = mockControl.createMock({
+                subscribe: function () {}
+            });
+            var mockGrid = {onScroll: mockOnScroll};
+
+            var mockRemoteModel = {
+                onDataLoaded: {subscribe: function() {}}, 
+                onDataLoading: {subscribe: function() {}}
+            };
+
+            var onScrollSubscribeArgs = null;
+            mockOnScroll.expects().subscribe(TypeOf.isA(Function)).andStub(
+                function () {
+                    onScrollSubscribeArgs = arguments[0];
+                }
+            );
+
+            var gridView = new Dirigible.GridView(mockGrid, mockRemoteModel);
+
+            assertDeepAreSame(gridView.grid, mockGrid);
+            assertDeepAreSame(gridView.remoteModel, mockRemoteModel);
+            mockControl.verify();
+            assertDeepAreSame(gridView.ensureCurrentViewportData, onScrollSubscribeArgs);
+        }
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "EnsureCurrentViewportDataTest",
+
+        testEnsureCurrentViewportData: function() {
+            var mockControl = new MockControl();
+
+            var mockGrid = mockControl.createMock({
+                getCellFromPoint : function() {},
+            });
+            mockGrid.onScroll = {subscribe: function () {}};
+            
+            var mockRemoteModel = mockControl.createMock({
+                ensureData : function() {}
+            });
+            mockRemoteModel.onDataLoaded = {subscribe: function() {}};
+            mockRemoteModel.onDataLoading = {subscribe: function() {}};
+            
+            var gridView = new Dirigible.GridView(mockGrid, mockRemoteModel);
+
+            var event = null;
+            $('div.slick-viewport').scrollLeft(400);
+            $('div.slick-viewport').scrollTop(700);
+            $('div.slick-viewport').width(99);
+            $('div.slick-viewport').height(88);
+
+            mockGrid.expects().getCellFromPoint(
+                400, 700
+            ).andReturn({cell: 1, row: 2});
+            mockGrid.expects().getCellFromPoint(
+                499,
+                788
+            ).andReturn({cell: 3, row: 4});
+            mockRemoteModel.expects().ensureData(1, 2, 3, 4);
+
+            gridView.ensureCurrentViewportData();
+
+            mockControl.verify();
+        }
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "HandleDataLoadEventsTest",
+
+        setUp: function() {
+            this.mockControl = new MockControl();
+            this.mockGrid = this.mockControl.createMock({
+                invalidateRow: function() {},
+                render: function() {},
+                updateRowCount: function() {}
+            });
+            this.mockGrid.onScroll = {subscribe: function() {}};
+            this.mockRemoteModel = this.mockControl.createMock({
+                ensureData : function() {},
+                onDataLoaded: function() {},
+                onDataLoading: function() {}
+            });
+            this.mockRemoteModel.onDataLoaded.subscribe = function () {};
+            this.mockRemoteModel.onDataLoading.subscribe = function () {};
+            this.mockGrid.remoteModel = this.mockRemoteModel;
+        },
+
+        testInitialise: function () {
+            this.mockOnDataLoaded = this.mockControl.createMock({
+                subscribe: function () {}
+            });
+            this.mockOnDataLoading = this.mockControl.createMock({
+                subscribe: function () {}
+            });
+            this.mockRemoteModel.onDataLoaded = this.mockOnDataLoaded;
+            this.mockRemoteModel.onDataLoading = this.mockOnDataLoading;
+
+            var onDataLoadingSubscribeArgs = null;
+            this.mockRemoteModel.onDataLoading.expects().subscribe(TypeOf.isA(Function)).andStub(
+                function () {
+                    onDataLoadingSubscribeArgs = arguments[0];
+                }
+            );
+
+            var onDataLoadedSubscribeArgs = null;
+            this.mockRemoteModel.onDataLoaded.expects().subscribe(TypeOf.isA(Function)).andStub(
+                function () {
+                    onDataLoadedSubscribeArgs = arguments[0];
+                }
+            );
+
+            this.gridView = new Dirigible.GridView(this.mockGrid, this.mockRemoteModel);
+
+            this.mockControl.verify();
+            assertDeepAreSame(this.gridView.handleOnDataLoaded, onDataLoadedSubscribeArgs);
+            assertDeepAreSame(this.gridView.handleOnDataLoading, onDataLoadingSubscribeArgs);
+
+
+        },
+
+        testHandleOnDataLoaded: function() {
+            this.gridView = new Dirigible.GridView(this.mockGrid, this.mockRemoteModel);
+            var event = null;
+            var data = {topmost: 4, bottom: 7};
+
+            this.mockGrid.expects().invalidateRow(3);
+            this.mockGrid.expects().invalidateRow(4);
+            this.mockGrid.expects().invalidateRow(5);
+            this.mockGrid.expects().invalidateRow(6);
+            this.mockGrid.expects().updateRowCount();
+            this.mockGrid.expects().render();
+
+            this.gridView.handleOnDataLoaded(event, data);
+
+            this.mockControl.verify();
+
+            YAHOO.util.Assert.isTrue($('#id_buffering_message').hasClass('hidden'));
+        },
+
+        testHandleOnDataLoadedIsWrappedWithWithRestoreCursor: function () {
+            YAHOO.util.Assert.isTrue(this.gridView.handleOnDataLoaded.wrapped);
+        },
+
+        testHandleOnDataLoading: function() {
+            this.gridView = new Dirigible.GridView(this.mockGrid, this.mockRemoteModel);
+            YAHOO.util.Assert.isTrue($('#id_buffering_message').hasClass('hidden'));
+            this.gridView.handleOnDataLoading();
+            YAHOO.util.Assert.isFalse($('#id_buffering_message').hasClass('hidden'));
+        }
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "JSONToSlickgridDataTest",
+
+        testZeroSize : function () {
+            input = {
+                width: 0,
+                height: 0
+            };
+            expected = [];
+            assertDeepAreSame(
+                expected,
+                Dirigible.GridView.jsonToSlickGridData(input));
+        },
+
+        testTenByFiveEmpty : function () {
+            input = {
+                width: 10,
+                height: 5
+            };
+            expected = [
+                { header: 1 },
+                { header: 2 },
+                { header: 3 },
+                { header: 4 },
+                { header: 5 }
+            ];
+            assertDeepAreSame(
+                expected,
+                Dirigible.GridView.jsonToSlickGridData(input));
+        },
+
+        testTenByFiveWithContent: function () {
+            input = {
+                width: 10,
+                height: 5,
+
+                1 : {
+                    2 : { formula: "Row 1, col 2 formula", formatted_value: "Row 1, col 2 value" },
+                    10 : { formula: "Row 1, col 10 formula", formatted_value: "Row 1, col 10 value" }
+                },
+                5 : {
+                    1 : { formula: "Row 5, col 1 formula", formatted_value: "Row 5, col 1 value" },
+                    10 : { formula: "Row 5, col 10 formula", formatted_value: "Row 5, col 10 value" }
+                }
+            };
+            expected = [
+                {
+                    header: 1,
+                    2: { formula: "Row 1, col 2 formula", formatted_value: "Row 1, col 2 value" },
+                    10: { formula: "Row 1, col 10 formula", formatted_value: "Row 1, col 10 value" }
+                },
+                { header: 2 },
+                { header: 3 },
+                { header: 4 },
+                {
+                    header: 5,
+                    1: { formula: "Row 5, col 1 formula", formatted_value: "Row 5, col 1 value" },
+                    10: { formula: "Row 5, col 10 formula", formatted_value: "Row 5, col 10 value" }
+                }
+            ];
+            assertDeepAreSame(
+                expected,
+                Dirigible.GridView.jsonToSlickGridData(input)
+            );
+        }
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "JSONToSlickGridHeadersTest",
+
+        testColumnsFromGrid : function () {
+            var data =  {"width": 3, "height": 4, "name": "Sheet 322"};
+            var actual_result = Dirigible.GridView.jsonToSlickGridColumnHeaders(data);
+            var expected_result = [
+                { "name" : "", "id" : "header", "field" : "header", "width":40, "sortable" : false, unselectable: true },
+                { "name" : "A", "id" : "1", "field" : "1", "formatter" : Dirigible.GridView.cellFormatter },
+                { "name" : "B", "id" : "2", "field" : "2", "formatter" : Dirigible.GridView.cellFormatter },
+                { "name" : "C", "id" : "3", "field" : "3", "formatter" : Dirigible.GridView.cellFormatter }
+            ];
+            assertDeepAreSame(expected_result, actual_result);
+        },
+
+        testRowsFromGrid : function () {
+            var data =  {"width": 3, "height": 4, "name": "Sheet 322"};
+            var actual_result = Dirigible.GridView.jsonToSlickGridRowHeaders(data);
+            var expected_result = [
+                { "header" : 1 },
+                { "header" : 2 },
+                { "header" : 3 },
+                { "header" : 4 }
+            ];
+            assertDeepAreSame(expected_result, actual_result);
+        }
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "ColumnIndexToNameTest",
+
+        testColumnIndexToName: function () {
+            YAHOO.util.Assert.areSame('A', Dirigible.GridView.columnIndexToName(1));
+            YAHOO.util.Assert.areSame('Z', Dirigible.GridView.columnIndexToName(26));
+            YAHOO.util.Assert.areSame('AA', Dirigible.GridView.columnIndexToName(27));
+            YAHOO.util.Assert.areSame('AZ', Dirigible.GridView.columnIndexToName(52));
+        }
+
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "CellFormatterTest",
+
+        getExpectedSpan : function (value, forFormula) {
+            var cssClass = forFormula ? 'grid_formula' : 'grid_formatted_value';
+            return (
+                '<span class="' + cssClass + '" title="' + value + '">' +
+                value + '</span>'
+            );
+        },
+
+        testUndefinedObject : function () {
+            YAHOO.util.Assert.areSame(
+                "",
+                Dirigible.GridView.cellFormatter(null, null, undefined, null, null)
+            );
+        },
+
+        testEmptyObject : function () {
+            YAHOO.util.Assert.areSame(
+                "",
+                Dirigible.GridView.cellFormatter(null, null, {}, null, null)
+            );
+        },
+
+        testObjectWithValueThatNeedsEscaping : function () {
+            YAHOO.util.Assert.areSame(
+                this.getExpectedSpan("&lt;object&gt;"),
+                Dirigible.GridView.cellFormatter(null, null, { formatted_value: "<object>" }, null, null)
+            );
+        },
+
+        testObjectWithFormula : function () {
+            YAHOO.util.Assert.areSame(
+                this.getExpectedSpan("=1 &lt; 3", true),
+                Dirigible.GridView.cellFormatter(null, null, { formula: "=1 < 3" }, null, null)
+            );
+        },
+
+        testObjectWithError : function () {
+            var column = 100;
+            var row = 2;
+            var escaped_error = 'fish &amp; chips &gt; spam &lt; this &quot;parrot&quot;';
+            var expected = "<img id='id_" + column + "_" + (row + 1) + "_error' title='" + escaped_error + "' src='/static/dirigible/images/error.gif' />";
+            YAHOO.util.Assert.areSame(
+                expected,
+                Dirigible.GridView.cellFormatter(row, column, { error: 'fish & chips > spam < this "parrot"'}, null, null)
+            );
+        },
+
+        testObjectWithValueAndFormula : function () {
+            YAHOO.util.Assert.areSame(
+                this.getExpectedSpan('123'),
+                Dirigible.GridView.cellFormatter(null, null, { formatted_value: "123", formula: "=goo" }, null, null)
+            );
+        },
+
+        testObjectWithEverything : function () {
+            var expected = "<img id='id_3_5_error' title='hello world' src='/static/dirigible/images/error.gif' />";
+            YAHOO.util.Assert.areSame(
+                expected,
+                Dirigible.GridView.cellFormatter(4, 3, { formatted_value: "123", formula: "=goo", error: "hello world" }, null, null)
+            );
+        }
+
+    })
+
+];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

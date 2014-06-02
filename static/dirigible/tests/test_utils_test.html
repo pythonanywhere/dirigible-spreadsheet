@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testDeepAreSame",
+
+            testStrings: function () {
+                var message = 'msg';
+                YAHOO.util.Assert.areSame('msg property differs, aaa !== aBB', _deepAreSame('aaa', 'aBB', message));
+            },
+            testInteger: function () {
+                var message = 'msg';
+                YAHOO.util.Assert.areSame('msg property differs, 1 !== 2', _deepAreSame(1, 2, message));
+            },
+            testActualMissingProperty: function () {
+                var message = '_';
+                var actual = {foo: 'bar'};
+                var expected = {bar : 'foo'};
+                YAHOO.util.Assert.areSame('_.bar property missing from actual', _deepAreSame(expected, actual, message));
+            },
+            testActualSuperfluousProperty: function () {
+                var message = '_';
+                var actual = {bar: 'foo', foo: 'bar'};
+                var expected = {bar: 'foo'};
+                YAHOO.util.Assert.areSame('_.foo property unexpectedly on actual', _deepAreSame(expected, actual, message));
+            },
+            testExpectedFalsyProperty: function () {
+                var message = '_';
+                var actual = {bar: 'foo', foo: true};
+                var expected = {bar: 'foo', foo: false};
+                YAHOO.util.Assert.areSame('_.foo property differs, false !== true', _deepAreSame(expected, actual, message));
+            },
+
+
+            testPropertyValueDiffers: function () {
+                var message = '_';
+                var actual = {bar: 'bar'};
+                var expected = {bar: 'foo'};
+                YAHOO.util.Assert.areSame('_.bar property differs, foo !== bar', _deepAreSame(expected, actual, message));
+            },
+            testNestedPropertyValueDiffers: function () {
+                var message = '_';
+                var actual = {bar: {breakfast: 'eggs'}};
+                var expected = {bar: {breakfast: 'sausages'}};
+                YAHOO.util.Assert.areSame('_.bar.breakfast property differs, sausages !== eggs', _deepAreSame(expected, actual, message));
+            },
+            testArrays: function () {
+                var message = '_';
+                var actual = [1, 2, 3, 5];
+                var expected = [1, 2, 3, 666];
+                YAHOO.util.Assert.areSame('_.3 property differs, 666 !== 5', _deepAreSame(expected, actual, message));
+            },
+            testFunctions: function () {
+                var message = '_';
+                var actual = {mine: function () {return 'yay';}};
+                var expected = {mine: function () {return 'boo';}};
+                var expectedMessage = '_.mine methods exist on both expected and actual but differ\n';
+                YAHOO.util.Assert.areSame(0, _deepAreSame(expected, actual, message).indexOf(expectedMessage));
+            },
+            testFalsyObjects: function () {
+                YAHOO.util.Assert.areSame('_ types differ (expected is string, actual is object)', _deepAreSame('', {}, '_'));
+            }
+
+        }),
+        new YAHOO.tool.TestCase({
+
+            name: "testAssertDeepAreSame",
+
+            testAssertRaisesOnAnyStringReturnFromDeepAreSame: function () {
+                assertDeepAreSame(1, 1, 'message'); // doesn't raise
+
+                var should_raise = true;
+                try {
+                    assertDeepAreSame('1', 2, 'message');
+                    should_raise = false;
+                }
+                catch(e) {}
+                YAHOO.util.Assert.isTrue(should_raise);
+            }
+    })
+
+    ];
+</script>
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

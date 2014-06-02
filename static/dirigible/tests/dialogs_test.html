@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="/static/dirigible/scripts/dialogs.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<img id="id_import_button" />
+<img id="id_export_button" />
+<div id='id_import_form' style='display:none'>
+<form>
+    <input id="id_import_form_file" />
+    <input id="id_import_form_column" />
+    <input id="id_import_form_row" />
+    <span class="import_form_radio_button">
+        <input type="radio" name="csv_encoding" value="excel" checked />
+    </span>
+    <span class="import_form_radio_button">
+        <input type="radio" name="csv_encoding" value="other" />
+    </span>
+    <input id="id_import_form_upload_csv_button" />
+    <input id="id_import_form_upload_csv_button" />
+    <input id="id_import_form_upload_xls_values_button" />
+    <input id="id_import_form_upload_xls_formulae_button" />
+    <input id="id_import_form_cancel_button" />
+    </form>
+    </div>
+
+<div id="id_export_dialog" style="display: none">
+    <input id="id_export_dialog_close_button" />
+</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testImportInitialise",
+
+            setUp : function () {
+                this.mockControl = new MockControl();
+                this.mockGrid = this.mockControl.createMock({
+                    getActiveCell: function () {}
+                });
+            },
+
+            testInitialiseImport: function () {
+                var mockCell = {cell: 12, row: 13};
+                this.mockGrid.expects().getActiveCell().andReturn(mockCell);
+
+                Dirigible.Dialogs.Initialise(this.mockGrid, {});
+
+                $('#id_import_form_file').val('previous_file_value.xls');
+
+                $('#id_import_button').trigger('click');
+
+                YAHOO.util.Assert.areSame(
+                    "" + mockCell.cell,
+                    $('#id_import_form_column').val()
+                );
+                YAHOO.util.Assert.areSame(
+                    "" + (mockCell.row + 1),
+                    $('#id_import_form_row').val()
+                );
+                elementVisible($('#id_import_form'), true);
+                elementVisible($('span.import_form_radio_button'), false);
+                elementVisible($('#id_import_form_upload_csv_button'), false);
+                elementVisible(
+                    $('#id_import_form_upload_xls_values_button'), false
+                );
+                YAHOO.util.Assert.areSame(
+                    "",
+                    $('#id_import_form_file').val()
+                );
+
+                this.mockControl.verify();
+            },
+
+            testInitialiseExport: function () {
+                Dirigible.Dialogs.Initialise(this.mockGrid, {});
+
+                $('#id_export_button').trigger('click');
+
+                elementVisible($('#id_export_dialog'), true);
+            },
+
+            testImportCancelButton: function() {
+                Dirigible.Dialogs.Initialise(this.mockGrid, {});
+                $('#id_import_button').trigger('click');
+
+                $('#id_import_form_cancel_button').trigger('click');
+
+                elementVisible($('#id_import_form'), false);
+            },
+
+            testExportCancelButton: function() {
+                Dirigible.Dialogs.Initialise(this.mockGrid, {});
+                $('#id_export_button').trigger('click');
+
+                $('#id_export_dialog_close_button').trigger('click');
+
+                elementVisible($('#id_export_dialog'), false);
+            },
+
+            testFileFieldChangeShowsUploadCSVButtonAndRadioButtonsForCSVFile: function() {
+                Dirigible.Dialogs.Initialise(
+                    this.mockGrid,
+                    {
+                        importXls: 'xl_url',
+                        importCsv: 'csv_url'
+                    }
+                );
+                $('#id_import_form form').attr('action', 'initial value');
+                $('#id_import_button').trigger('click');
+                elementVisible($('span.import_form_radio_button'), false);
+                elementVisible($('#id_import_form_upload_csv_button'), false);
+                elementVisible($('#id_import_form_upload_xls_values_button'), false);
+                $('#id_import_form_file').val('myfile.csv');
+                $('#id_import_form_file').change();
+                elementVisible($('span.import_form_radio_button'), true);
+                elementVisible($('#id_import_form_upload_csv_button'), true);
+                elementVisible($('#id_import_form_upload_xls_values_button'), false);
+                YAHOO.util.Assert.areSame(
+                        'csv_url',
+                        $('#id_import_form form').attr('action')
+                );
+
+            },
+
+            testFileFieldChangeShowsUploadCSVButtonAndRadioButtonsForOtherFiles: function() {
+                Dirigible.Dialogs.Initialise(
+                    this.mockGrid,
+                    {
+                        importXls: 'xl_url',
+                        importCsv: 'csv_url'
+                    }
+                );
+                $('#id_import_button').trigger('click');
+                elementVisible($('span.import_form_radio_button'), false);
+                elementVisible($('#id_import_form_upload_csv_button'), false);
+                elementVisible($('#id_import_form_upload_xls_values_button'), false);
+                $('#id_import_form_file').val('myfile.other');
+                $('#id_import_form_file').change();
+                elementVisible($('span.import_form_radio_button'), true);
+                elementVisible($('#id_import_form_upload_csv_button'), true);
+                elementVisible($('#id_import_form_upload_xls_values_button'), false);
+                YAHOO.util.Assert.areSame(
+                        'csv_url',
+                        $('#id_import_form form').attr('action')
+                );
+            },
+
+            testFileFieldChangeShowsOnlyUploadXlsButtonForXlsFile: function() {
+                Dirigible.Dialogs.Initialise(
+                    this.mockGrid,
+                    {
+                        importXls: 'xl_url',
+                        importCsv: 'csv_url'
+                    }
+                );
+                $('#id_import_button').trigger('click');
+                elementVisible($('#id_import_form_upload_csv_button'), false);
+                elementVisible($('span.import_form_radio_button'), false);
+                elementVisible($('#id_import_form_upload_xls_values_button'), false);
+
+                $('#id_import_form span.import_form_radio_button').show();
+
+                $('#id_import_form_file').val('myfile.xls');
+                $('#id_import_form_file').trigger('change');
+
+                elementVisible($('span.import_form_radio_button'), false);
+                elementVisible($('#id_import_form_upload_csv_button'), false);
+                elementVisible($('#id_import_form_upload_xls_values_button'), true);
+                YAHOO.util.Assert.areSame(
+                        'xl_url',
+                        $('#id_import_form form').attr('action')
+                );
+            }
+
+        })
+
+    ];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

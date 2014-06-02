@@ -1,0 +1,15 @@
+{% extends "error_page.html" %}
+
+{% block title %}
+    Excel Import Error: Dirigible
+{% endblock %}
+
+{% block error_title %}Could not import Excel file{% endblock %}
+{% block error_text %}
+    Sorry, the file you uploaded was not imported
+{% endblock %}
+
+
+{% block error_recovery_link %}
+<a id="id_account_link" href="/">Return to your account page</a>
+{% endblock %}

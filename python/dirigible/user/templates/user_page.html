@@ -1,0 +1,121 @@
+{% extends "non_sheet_page_small_logo.html" %}
+
+{% block title %}
+    {{ user.username }}'s Dashboard: Dirigible
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/user_page.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+{% endblock %}
+
+
+{% block content %}
+
+    <script type="text/javascript">
+        $(function() {
+            function show_form() {
+                $('#id_change_password_error').html('');
+                $('#id_change_password_form input[type="password"]').val('');
+                $('#id_change_password_form').show('blind');
+                $('#id_change_password_button').hide('blind');
+            }
+            function show_button() {
+                $('#id_change_password_form').hide('blind');
+                $('#id_change_password_button').show('blind');
+            }
+            $('#id_change_password_button').click(function() {
+                show_form();
+                return false;
+            });
+            $('#id_change_password_cancel_button').click(function() {
+                show_button();
+                return false;
+            });
+            $('#id_change_password_form').submit(function() {
+                $.post(
+                    '{% url change_password user.username %}',
+                    $('#id_change_password_form').serialize(),
+                    function(data) {
+                        if (data == 'Your password has been changed.') {
+                            show_button();
+                            $('#id_change_password_success').html(data).show();
+                            setTimeout(" $('#id_change_password_success').hide('fade')", 3000);
+                        } else {
+                            $('#id_change_password_error').html(data);
+                        }
+                    }
+                );
+                return false;     
+            });
+        });
+    </script>
+
+    <div class="clear"></div>
+
+    <div id='id_dashboard_wrap' class="centered-block">
+
+        <div id="id_sheets" class="grey_rounded_corner_box">
+<!--[if IE]>
+<div id="id_ie_warning"><span><em>It looks like you're using Internet Explorer.
+We're sorry to say we're currently working on a couple of bugs in IE.
+If you can use 
+<a href="http://www.browserchoice.eu/BrowserChoice/browserchoice_en.htm">another browser</a>,
+please do!</span></em></div>
+<![endif]-->
+
+
+            <div id="id_sheets_header">
+                <h2 id="id_sheets_title" class="section-title">Sheets</h2>
+
+                <a id="id_create_new_sheet" href="{% url new_sheet %}">Create new sheet...</a>
+            </div>
+
+            <div id="id_sheets_body">
+                {% if sheets %}
+                    <ul id="id_sheets_list">
+                        {% for s in sheets %}
+                            <li><a href="{% url sheet_page user.username s.id %}">{{s.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p id="id_no_sheets_message">You have no sheets. Create one to get started!</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div id="id_right_column">
+            <div id="id_account_details">
+                <h2 id="id_account_details_title" class="section-title">Account details</h2>
+
+                <a id="id_change_password_button"  href="#">Change password...</a>
+                <form id="id_change_password_form" method="POST">
+                    Current Password: <input id="id_change_password_current_password" name="id_change_password_current_password" type="password"><br />
+                    New Password: <input id="id_change_password_new_password" name="id_change_password_new_password" type="password"><br />
+                    Confirm Password: <input id="id_change_password_new_password_again" name="id_change_password_new_password_again" type="password"><br />
+                    <div id="id_change_password_buttons">
+                        <input type="submit" class="blue_button" id="id_change_password_ok_button" type="button" value="OK">
+                        <input id="id_change_password_cancel_button" class="blue_button" type="button" value="Cancel">
+                    </div>
+                    <div class="clear"></div>
+                    <div id="id_change_password_error"></div>
+                </form>
+                <div id="id_change_password_success"></div>
+
+            </div>
+
+            <div id="id_example_sheets">
+            <h2 class="section-title">Example sheets</h2>
+            Here are some <a href="{% url featured_sheets %}">example spreadsheets</a> you can copy into your account to
+            get you started.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="clear"></div>
+
+{% endblock %}

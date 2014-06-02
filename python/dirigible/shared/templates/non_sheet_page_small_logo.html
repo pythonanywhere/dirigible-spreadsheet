@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/non_sheet_page.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+
+{% block body %}
+<div id="id_container">
+    <div id="id_content">
+
+        <div id="id_header" class="centered-block">
+
+            <a href="/">
+                <img id="id_small_header_logo" src="/static/dirigible/images/logo_transparent_289x66.png" alt="Dirigible logo" title="Dirigible logo" />
+            </a>
+
+            {% include "header_links_include.html" %}
+        </div>
+
+
+        {% block content %}
+        {% endblock %}
+
+        {% include "footer_links_include.html" %}
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "non_sheet_page_small_logo.html" %}
+
+
+{% block title %}
+    The Video: Dirigible
+{% endblock %}
+
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/video.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block content %}
+    <div class="clear"></div>
+
+    <div class="centered-block">
+        <div id="id_video_div">
+            <iframe title="YouTube video player" class="youtube-player" type="text/html" width="960" height="750" src="http://www.youtube.com/embed/2ZoIp-5NaiQ?hd=1" frameborder="0"></iframe>
+        </div>
+    </div>
+
+{% endblock %}

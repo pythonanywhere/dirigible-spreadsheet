@@ -1,0 +1,134 @@
+html {
+    height: 100%;
+}
+
+
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    background: #009EE0;
+    color: #FFFFFF;
+}
+
+
+a {
+    text-decoration: None;
+    color: #FFFFFF;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.blue_button {
+    color: #FFFFFF;
+    background-color: #016AA1;
+    border: 0px;
+    margin: 0px;
+
+}
+input[type=submit], input[type=button], a.button {
+}
+
+a.button:hover {
+    text-decoration: none;
+}
+
+
+a img {
+    border: 0px;
+}
+
+
+/* Separators between (eg.) "My account" and "Log out" */
+.separator {
+    color: #5CBEE5;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+}
+
+div.clear {
+    clear: both
+}
+
+.hidden {
+    display: none;
+}
+
+.dialog_buttons {
+    float: right;
+}
+
+#id_small_header_logo {
+    margin: 15px 0px 8px 10px;
+    float: left;
+}
+
+
+#id_top_links {
+    float: right;
+    clear: right;
+    margin-top: 10px;
+    margin-right: 16px;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+
+#id_account_buttons_wrap {
+    padding-top: 14px;
+    padding-bottom: 11px;
+    float: right;
+    background-color: #006AA0;
+    font-weight: bold;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#id_feedback_dialog_blurb_big {
+    font-weight: bold;
+    font-size: larger;
+    margin-bottom: 0.25em;
+    margin-top: 0.25em;
+}
+
+#id_feedback_dialog_text {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    width: 562px;
+}
+
+#id_feedback_dialog_email_address {
+    width: 562px;
+}
+
+.email_prompt {
+    font-style: italic;
+    color: #808080;
+}
+
+#id_feedback_dialog .dialog_buttons {
+    margin-top: 1.5em;
+}
+
+#id_feedback_dialog_error {
+    font-size: smaller;
+    margin-top: 3ex;
+    float: left;
+}
+
+#id_feedback_dialog_spinner {
+    margin-right: 1ex;
+}
+
+#id_feedback_dialog_ok_button {
+    font-weight: bold;
+}
+
+/* JQuery UI style overrides */
+.ui-widget-content a {
+    color: #009EE0 !important;
+}
+

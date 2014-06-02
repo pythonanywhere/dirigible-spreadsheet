@@ -1,0 +1,14 @@
+Hi,
+
+Thank you for signing up for Dirigible!
+
+Click on the following link to start using it:
+
+<http://localhost:8000{% url registration_activate activation_key %}>
+
+If you cannot click the link from your email program, please copy the URL and paste it into your web browser.
+
+If you do not want to use Dirigible, simply ignore this message and we'll not bother you again.
+
+
+Best Regards,

@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script src="/static/ace/ace-uncompressed.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/ace/mode-python.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="/static/dirigible/scripts/usercode_view.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testUsercodeView",
+
+            testInitialiseComponentsShouldSetPythonModeAndReadOnlyTrueIfEditableFalse: function() {
+                var mockControl = new MockControl();
+                var mockEditor = mockControl.createMock( {
+                    getSession: function() {},
+                    setReadOnly: function() {}
+                } );
+                var mockSession = mockControl.createMock( {
+                    setMode: function() {}
+                } );
+                var ucView = new Dirigible.UsercodeView(mockEditor);
+                mockEditor.expects().getSession().andReturn(mockSession);
+                var modeType = require('ace/mode/python').Mode;
+                mockSession.expects().setMode(TypeOf.isA(modeType));
+                mockEditor.expects().setReadOnly(true);
+
+                ucView.initialiseComponents(false);
+
+                mockControl.verify();
+            },
+
+            testInitialiseComponentsShouldSetPythonModeAndReadOnlyFalseIfEditableTrue: function() {
+                var mockControl = new MockControl();
+                var mockEditor = mockControl.createMock( {
+                    getSession: function() {},
+                    setReadOnly: function() {}
+                } );
+                var mockSession = mockControl.createMock( {
+                    setMode: function() {}
+                } );
+                var ucView = new Dirigible.UsercodeView(mockEditor);
+                mockEditor.expects().getSession().andReturn(mockSession);
+                var modeType = require('ace/mode/python').Mode;
+                mockSession.expects().setMode(TypeOf.isA(modeType));
+                mockEditor.expects().setReadOnly(false);
+
+                ucView.initialiseComponents(true);
+
+                mockControl.verify();
+            },
+
+            testUpdateMetaDataPutsErrorsIntoEditorAnnotations: function () {
+                var mockControl = new MockControl();
+                var mockEditor = mockControl.createMock( {
+                    getSession: function() {},
+                } );
+                var mockSession = mockControl.createMock( {
+                    setAnnotations: function() {},
+                    setMode: function(){}
+                } );
+                var usercodeView = new Dirigible.UsercodeView(mockEditor);
+
+                mockEditor.expects().getSession().andReturn(mockSession);
+                var annotations;
+                mockSession.expects().setAnnotations(TypeOf.isA(Array)).andStub(
+                    function() { annotations = arguments[0]; }
+                );
+                    
+                usercodeView.updateMetaData(
+                    {'usercode_error': {'message': 'user code error', 'line': '3'}}
+                );
+
+                mockControl.verify();
+                assertDeepAreSame(
+                    [{
+                        row: 2,
+                        column: 0,
+                        text: 'user code error',
+                        type: 'error'
+                    }],
+                    annotations
+                );
+            },
+
+            testUpdateMetaDataSafelyClearsAnnotationsWithNoError: function() {
+                var mockControl = new MockControl();
+                var mockEditor = mockControl.createMock( {
+                    getSession: function() {},
+                } );
+                var mockSession = mockControl.createMock( {
+                    setAnnotations: function() {},
+                    setMode: function() {}
+                } );
+
+                var usercodeView = new Dirigible.UsercodeView(mockEditor);
+
+                mockEditor.expects().getSession().andReturn(mockSession);
+                var annotations;
+                mockSession.expects().setAnnotations(TypeOf.isA(Array)).andStub(
+                    function() { annotations = arguments[0]; }
+                );
+                    
+                usercodeView.updateMetaData( {} );
+
+                mockControl.verify();
+                assertDeepAreSame( [], annotations );
+            }
+
+        })
+
+    ];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

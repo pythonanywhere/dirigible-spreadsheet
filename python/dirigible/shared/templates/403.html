@@ -1,0 +1,14 @@
+{% extends "error_page.html" %}
+
+{% block title %}
+    Access Forbidden: Dirigible
+{% endblock %}
+
+{% block error_title %}403 Access Forbidden{% endblock %}
+{% block error_text %}
+        This page is private and belongs to someone else.
+{% endblock %}
+
+{% block error_recovery_link %}
+<a id="id_link_home" href="/">Return to Dirigible home</a>
+{% endblock %}

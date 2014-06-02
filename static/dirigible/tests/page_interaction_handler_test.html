@@ -1,0 +1,568 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.core.js"></script>
+    <script type="text/javascript" src="yuitest/yuitest-combo.js"></script>
+    <script type="text/javascript" src="jsmock.js"></script>
+
+    <script type="text/javascript" src="../scripts/page_interaction_handler.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<div id="id_sheet_name">test sheet name</div>
+
+<div id="id_right_column">
+</div>
+
+<div id="id_header_and_toolbar">
+</div>
+
+
+<script type="text/javascript">
+
+tests = [
+
+    new YAHOO.tool.TestCase({
+
+        name: "testPageInteractionHandler",
+
+        setUp: function() {
+            this.mockControl = new MockControl();
+            this.dummyEditor = {
+                getSession: function () {
+                    return {addEventListener: function(){}};
+                },
+                addEventListener: function () {}
+            };
+            this.editor = this.mockControl.createMock(this.dummyEditor);
+
+            this.mockSession = this.mockControl.createMock({
+                addEventListener: function () {}
+            });
+            this.editorCommands = this.mockControl.createMock({
+                saveUsercode: function () {}
+            });
+            this.gridCommands = this.mockControl.createMock({
+                commitCurrentEdit: function () {}
+            });
+            this.pageCommands = this.mockControl.createMock({
+                recalculate: function() {}
+            });
+            this.mockEditController = this.mockControl.createMock({
+                commitCurrentEdit: function() {}
+            });
+            this.mockGrid = this.mockControl.createMock({
+                getEditController: function() {}
+            });
+            this.mockGrid.onActiveCellChanged = this.mockControl.createMock({
+                notify: function() {}
+            });
+
+        },
+
+
+        tearDown: function () {
+            // IMPORTANT!  Without these, each unit test will bind a new set of event handlers
+            // to the DOM, which can lead to very confusing failures.
+            $('#id_right_column, #id_header_and_toolbar').unbind('click');
+            $(document).unbind("keydown");
+            $(document).unbind("mouseup");
+            $(window).unbind("resize");
+        },
+
+
+        testBindShouldBindClickAwayHandlersToEditor: function () {
+            var pageIH = new Dirigible.PageInteractionHandler(
+                $, null, this.pageCommands, this.editor, this.editorCommands, null, this.gridCommands
+            );
+
+            this.editor.expects().addEventListener(
+                'click', pageIH.commitCurrentEdit);
+            this.editor.expects().addEventListener(
+                'blur', this.editorCommands.saveUsercode);
+            this.editor.expects().getSession().andReturn(
+                this.mockSession);
+            this.mockSession.expects().addEventListener(
+                'change', TypeOf.isA(Function))
+                .andStub(function() {
+                    changeHandler = arguments[1]
+            });
+
+            pageIH.bind();
+
+            this.mockControl.verify();
+
+            YAHOO.util.Assert.isFalse(this.editor.usercodeDirty);
+            changeHandler();
+            YAHOO.util.Assert.isTrue(this.editor.usercodeDirty);
+        },
+
+        testBindShouldBindClickAwayHandlersToOtherStuff: function () {
+            var pageIH = new Dirigible.PageInteractionHandler(
+                $, null, this.pageCommands, this.dummyEditor, this.editorCommands, null, this.gridCommands
+            );
+            var commitCurrentEditObject = this.mockControl.createMock({
+                commitCurrentEdit: function() {}
+            });
+            pageIH.commitCurrentEdit = commitCurrentEditObject.commitCurrentEdit;
+
+            pageIH.bind();
+
+            commitCurrentEditObject.expects().commitCurrentEdit(TypeOf.isA(Object));
+            commitCurrentEditObject.expects().commitCurrentEdit(TypeOf.isA(Object));
+
+            $('#id_right_column').trigger('click');
+            $('#id_header_and_toolbar').trigger('click');
+
+            this.mockControl.verify();
+        },
+
+        testBindShouldBindCtrlSOnPageToSaveUserCode: function () {
+            this.editorCommands.expects().saveUsercode();
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                $, null, this.pageCommands, this.dummyEditor, this.editorCommands, null, this.gridCommands
+            );
+            pageIH.bind();
+            var event = jQuery.Event("keydown");
+            event.ctrlKey = true;
+            event.which = 83;
+            $('body').trigger(event);
+
+            this.mockControl.verify();
+
+            YAHOO.util.Assert.isTrue(event.isDefaultPrevented());
+        },
+
+        testBindShouldBindF9ToRecalculate: function () {
+            this.pageCommands.expects().recalculate();
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                $, null, this.pageCommands, this.dummyEditor, this.editorCommands, null, this.gridCommands
+            );
+            pageIH.bind();
+            var event = jQuery.Event("keydown");
+            event.which = 120;
+            $('body').trigger(event);
+
+            this.mockControl.verify();
+
+            YAHOO.util.Assert.isTrue(event.isDefaultPrevented());
+        },
+
+        testBindShouldBindDocumentMouseUpToQueuedResizeComponents: function() {
+            var mockDocument = this.mockControl.createMock({
+                mouseup: function() {},
+                keydown: function() {}
+            });
+            var mockJQuery = function(locator) {
+                if (locator === document) {
+                    return mockDocument;
+                }
+                return $(locator);
+            };
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery, null, this.pageCommands, this.dummyEditor, this.editorCommands, null, this.gridCommands
+            );
+
+            mockDocument.expects().keydown(TypeOf.isA(Function));
+            var mouseUpParam;
+            mockDocument.expects().mouseup(
+                TypeOf.isA(Function)
+            ).andStub(
+                function() {
+                    mouseUpParam = arguments[0];
+                }
+            );
+
+            pageIH.bind();
+
+            this.mockControl.verify();
+            this.mockControl.reset();
+
+            var mockWindow = this.mockControl.createMock({
+                setTimeout: function() {}
+            });
+            var originalSetTimeout = window.setTimeout;
+            try {
+                window.setTimeout = mockWindow.setTimeout;
+                mockWindow.expects().setTimeout(pageIH.resizeComponents, 0);
+                mouseUpParam();
+                this.mockControl.verify();
+            } finally {
+                window.setTimeout = originalSetTimeout;
+            }
+        },
+
+        testBindShouldBindWindowResizeToResizeComponents: function() {
+            var mockWindow = this.mockControl.createMock({
+                resize: function() {},
+                setTimeout: function() {}
+            });
+            var mockJQuery = function(locator) {
+                if (locator === window) {
+                    return mockWindow;
+                }
+                return $(locator);
+            };
+           var mockGrid = this.mockControl.createMock({
+                resizeCanvas: function() {}
+            });
+            var pageIH = new Dirigible.PageInteractionHandler(
+                    mockJQuery, null, this.pageCommands, this.dummyEditor,
+                    this.editorCommands, mockGrid, this.gridCommands
+            );
+
+            var resizeParam;
+            mockWindow.expects().resize(
+                TypeOf.isA(Function)
+            ).andStub(
+                function() {
+                    resizeParam = arguments[0];
+                }
+            );
+
+            pageIH.bind();
+
+            this.mockControl.verify();
+            this.mockControl.reset();
+
+            var originalSetTimeout = window.setTimeout;
+            try {
+                mockWindow.expects().setTimeout(pageIH.resizeComponents, 0);
+                window.setTimeout = mockWindow.setTimeout;
+                resizeParam();
+                this.mockControl.verify();
+            } finally {
+                window.setTimeout = originalSetTimeout;
+            }
+        },
+
+        testCommitCurrentEditShouldCallPageCommandsCommitCurrentEdit: function() {
+            var pageIH = new Dirigible.PageInteractionHandler(
+                $, null, this.pageCommands, this.dummyEditor, this.editorCommands, this.mockGrid, this.gridCommands
+            );
+            this.mockControl.reset();
+
+            this.gridCommands.expects().commitCurrentEdit();
+
+            pageIH.commitCurrentEdit();
+
+            this.mockControl.verify();
+        },
+
+        testInitialiseComponentsShouldInitialiseSheetNameEditorIfEditable: function() {
+            var mockJQuery = this.mockControl.createMock({
+                find: function() {}
+            });
+
+            var mockPageView = {
+                updatePageTitle: {}
+            };
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery.find, mockPageView, this.pageCommands, this.dummyEditor, this.editorCommands, this.mockGrid, this.gridCommands
+            );
+
+            var mockSheetName = this.mockControl.createMock({
+                eip: function() {}
+            });
+            mockJQuery.expects().find('#id_sheet_name').andReturn(mockSheetName);
+            var eipParams;
+            mockSheetName.expects().eip(
+                'set sheet name url',
+                TypeOf.isA(Object)
+            ).andStub(
+                function() {eipParams = arguments[1];}
+            );
+
+            var mockSplittable = {
+                splitter: function() {}
+            };
+            mockJQuery.expects().find('#id_grid_and_code').andReturn(mockSplittable);
+            mockJQuery.expects().find('#id_right_column').andReturn(mockSplittable);
+
+            pageIH.initialiseComponents({setSheetName: 'set sheet name url'}, true);
+
+            this.mockControl.verify();
+            assertDeepAreSame(
+                {
+                    select_text : true,
+                    form_buttons : '',
+                    text_form: '<input type="text" id="edit-#{id}" class="#{editfield_class}" value="#{value}" /> ',
+                    after_save: mockPageView.updatePageTitle
+                },
+                eipParams
+            );
+        },
+
+        testInitialiseComponentsShouldNotInitialiseSheetNameEditorIfNotEditable: function() {
+            var mockJQuery = this.mockControl.createMock({
+                find: function() {}
+            });
+
+            var mockPageView = {
+                updatePageTitle: {}
+            };
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery.find, mockPageView, this.pageCommands, this.dummyEditor, this.editorCommands, this.mockGrid, this.gridCommands
+            );
+
+            var mockSheetName = this.mockControl.createMock({
+                eip: function() {}
+            });
+
+            var mockSplittable = {
+                splitter: function() {}
+            };
+            mockJQuery.expects().find('#id_grid_and_code').andReturn(mockSplittable);
+            mockJQuery.expects().find('#id_right_column').andReturn(mockSplittable);
+
+            pageIH.initialiseComponents({setSheetName: 'set sheet name url'}, false);
+
+            this.mockControl.verify();
+        },
+
+        testInitialiseComponentsShouldInitialiseSplitters: function() {
+            var mockJQuery = this.mockControl.createMock({
+                find: function() {}
+            });
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery.find, {}, this.pageCommands, this.dummyEditor, this.editorCommands, this.mockGrid, this.gridCommands
+            );
+
+            var mockGridAndCodeDiv = this.mockControl.createMock({
+                splitter: function() {}
+            });
+            mockJQuery.expects().find('#id_grid_and_code').andReturn(mockGridAndCodeDiv);
+            var vSplitterParams;
+            mockGridAndCodeDiv.expects().splitter(
+                TypeOf.isA(Object)
+            ).andStub(
+                function() {vSplitterParams = arguments[0];}
+            );
+
+            var mockRightColumnDiv = this.mockControl.createMock({
+                splitter: function() {}
+            });
+            mockJQuery.expects().find('#id_right_column').andReturn(mockRightColumnDiv);
+            var hSplitterParams;
+            mockRightColumnDiv.expects().splitter(
+                TypeOf.isA(Object)
+            ).andStub(
+                function() {hSplitterParams = arguments[0];}
+            );
+
+            pageIH.initialiseComponents({}, false);
+
+            this.mockControl.verify();
+            assertDeepAreSame(
+                {
+                    splitVertical: true,
+                    outline: true,
+                    anchorToWindow: true,
+                    sizeLeft: true,
+                    cookie: 'dirigible_vertical_splitter'
+                },
+                vSplitterParams
+            );
+            assertDeepAreSame(
+                {
+                    splitHorizontal: true,
+                    outline: true,
+                    anchorToWindow: true,
+                    sizeBottom: true,
+                    cookie: 'dirigible_horizontal_splitter'
+                },
+                hSplitterParams
+            );
+        },
+
+        testResizeComponentsShouldResizeConsole: function() {
+            var dummyEditor = {
+                resize: function() {}
+            };
+            var dummyGrid = {
+                resizeCanvas: function() {}
+            };
+            var dummyComponent = {
+                width: function() {},
+                height: function() {},
+                show: function() {},
+                hide: function() {}
+            };
+            var mockConsole = this.mockControl.createMock(dummyComponent);
+            var mockRightColumn = this.mockControl.createMock(dummyComponent);
+            var mockConsoleWrap = this.mockControl.createMock(dummyComponent);
+            var mockJQuery = function(selector) {
+                if (selector === '#id_console') {
+                    return mockConsole;
+                } else if (selector === '#id_right_column') {
+                    return mockRightColumn;
+                } else if (selector === '#id_console_wrap') {
+                    return mockConsoleWrap;
+                }
+                return dummyComponent;
+            }
+
+            mockRightColumn.expects().width().andReturn(100);
+            mockConsole.expects().width(80);
+            mockConsoleWrap.expects().height().andReturn(110);
+            mockConsole.expects().height(90);
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery, null, this.pageCommands, dummyEditor, null, dummyGrid, null
+            );
+            pageIH.resizeComponents();
+
+            this.mockControl.verify();
+        },
+
+        testResizeComponentsShouldResizeGrid: function() {
+            var dummyEditor = {
+                resize: function() {}
+            };
+            var mockGrid = this.mockControl.createMock({
+                resizeCanvas: function() {}
+            });
+            var dummyComponent = {
+                width: function() {},
+                height: function() {},
+                show: function() {},
+                hide: function() {}
+            };
+            var mockGridAndFormulaBar = this.mockControl.createMock(dummyComponent);
+            var mockGridDiv = this.mockControl.createMock(dummyComponent);
+            var mockLeftColumn = this.mockControl.createMock(dummyComponent);
+            var mockFormulaBar = this.mockControl.createMock(dummyComponent);
+
+            var mockJQuery = function(selector) {
+                if (selector === '#id_grid_and_formula_bar') {
+                    return mockGridAndFormulaBar;
+                } else if (selector === '#id_grid') {
+                    return mockGridDiv;
+                } else if (selector === '#id_left_column') {
+                    return mockLeftColumn;
+                } else if (selector === '#id_formula_bar') {
+                    return mockFormulaBar;
+                }
+                return dummyComponent;
+            }
+
+            mockLeftColumn.expects().height().andReturn(100);
+            mockGridAndFormulaBar.expects().height(90);
+            mockFormulaBar.expects().height().andReturn(30);
+            mockGridDiv.expects().height(42);
+            mockGridDiv.expects().width().andReturn(110);
+            mockFormulaBar.expects().width(102);
+            mockGrid.expects().resizeCanvas();
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery, null, this.pageCommands, dummyEditor, null, mockGrid, null
+            );
+            pageIH.resizeComponents();
+
+            this.mockControl.verify();
+        },
+
+        testResizeComponentsShouldResizeUserCodeAndShowEditorIfHeightIsSufficient: function() {
+            var mockEditor = this.mockControl.createMock({
+                resize: function() {}
+            });
+            var dummyGrid = {
+                resizeCanvas: function() {}
+            };
+            var dummyComponent = {
+                width: function() {},
+                height: function() {},
+                show: function() {},
+                hide: function() {}
+            };
+
+            var mockUsercodeWrap = this.mockControl.createMock(dummyComponent);
+            var mockUsercodeDiv = this.mockControl.createMock(dummyComponent);
+
+            var mockJQuery = function(selector) {
+                if (selector === '#id_usercode_wrap') {
+                    return mockUsercodeWrap;
+                } else if (selector === '#id_usercode') {
+                    return mockUsercodeDiv;
+                }
+                return dummyComponent;
+            }
+
+            mockUsercodeWrap.expects().height().andReturn(90);
+            mockUsercodeDiv.expects().show();
+            mockUsercodeWrap.expects().width().andReturn(110);
+            mockUsercodeDiv.expects().width(90);
+            mockUsercodeWrap.expects().height().andReturn(200);
+            mockUsercodeDiv.expects().height(190);
+            mockEditor.expects().resize();
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery, null, this.pageCommands, mockEditor, null, dummyGrid, null
+            );
+            pageIH.resizeComponents();
+
+            this.mockControl.verify();
+        },
+
+        testResizeComponentsShouldResizeUserCodeAndHideEditorIfHeightIsInsufficient: function() {
+            var mockEditor = this.mockControl.createMock({
+                resize: function() {}
+            });
+            var dummyGrid = {
+                resizeCanvas: function() {}
+            };
+            var dummyComponent = {
+                width: function() {},
+                height: function() {},
+                show: function() {},
+                hide: function() {}
+            };
+
+            var mockUsercodeWrap = this.mockControl.createMock(dummyComponent);
+            var mockUsercodeDiv = this.mockControl.createMock(dummyComponent);
+
+            var mockJQuery = function(selector) {
+                if (selector === '#id_usercode_wrap') {
+                    return mockUsercodeWrap;
+                } else if (selector === '#id_usercode') {
+                    return mockUsercodeDiv;
+                }
+                return dummyComponent;
+            }
+
+            mockUsercodeWrap.expects().height().andReturn(29);
+            mockUsercodeDiv.expects().hide();
+            mockUsercodeWrap.expects().width().andReturn(110);
+            mockUsercodeDiv.expects().width(90);
+            mockUsercodeWrap.expects().height().andReturn(200);
+            mockUsercodeDiv.expects().height(190);
+            mockEditor.expects().resize();
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                mockJQuery, null, this.pageCommands, mockEditor, null, dummyGrid, null
+            );
+            pageIH.resizeComponents();
+
+            this.mockControl.verify();
+        }
+    })
+];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

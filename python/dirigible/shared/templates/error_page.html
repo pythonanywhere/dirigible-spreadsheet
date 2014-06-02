@@ -1,0 +1,21 @@
+{% extends "non_sheet_page_small_logo.html" %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/error.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block content %}
+    <div class="clear"></div>
+    <br />
+    <div id="id_error_wrap" class="grey_rounded_corner_box">
+        <h3 id="id_server_error_title">{% block error_title %}{% endblock %}</h3>
+
+        <p id="id_server_error_text">
+            {% block error_text %}{% endblock %}
+        </p>
+        <p id="id_recovery_block">
+            {% block error_recovery_link %}{% endblock %}
+        </p>
+    </div>
+{% endblock %}

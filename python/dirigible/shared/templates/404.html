@@ -1,0 +1,16 @@
+{% extends "error_page.html" %}
+
+{% block title %}
+    Page not found: Dirigible
+{% endblock %}
+
+{% block error_title %}404 Not Found{% endblock %}
+{% block error_text %}
+        The page that you seek<br/>
+        can't be found; lost in the clouds.<br/>
+        Please look somewhere else
+{% endblock %}
+
+{% block error_recovery_link %}
+<a id="id_link_home" href="/">Return to Dirigible home</a>
+{% endblock %}

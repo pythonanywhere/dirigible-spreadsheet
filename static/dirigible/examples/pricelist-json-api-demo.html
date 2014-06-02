@@ -1,0 +1,238 @@
+<html>
+    <head>
+        <title>Dirigible pricelist</title>
+        <script
+            type="text/javascript"
+            src="/static/jquery/jquery-1.4.2.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="/static/json/json2.js"
+        ></script>
+        <script type="text/javascript">
+
+var URL = "/user/admin/sheet/126/v0.1/json/";
+
+var COL_STOCK_NAME = 1;
+
+var COL_ITEM_NAME = 5;
+var COL_ITEM_NAME_LETTER  = 'E';
+var COL_ITEM_QUANTITY = 6;
+var COL_ITEM_QUANTITY_LETTER = 'F';
+var COL_ITEM_EACH = 7;
+
+var request = null;
+
+
+function get_overrides() {
+    var overrides = {};
+    var item;
+    var id = 1;
+    var override_row = 2;
+    // iterate through rows in the html table
+    while (true) {
+        item = $('#id_item_' + id);
+        if (item.length == 0) {
+            break;
+        }
+
+        name = item.text();
+        value = $('#id_amount_' + id)[0].value;
+
+        if (value) {
+            overrides[COL_ITEM_NAME_LETTER + override_row] = name;
+            overrides[COL_ITEM_QUANTITY_LETTER + override_row] = value;
+            override_row += 1;
+        }
+
+        id += 1;
+    }
+    return overrides;
+}
+
+function get_items(sheet) {
+    var items = {};
+    var item;
+    var row = 2;
+
+    // iterate through items listed in the json spreadsheet
+    while (true) {
+        item = get_item(sheet, row);
+        if (item === undefined) {
+            break;
+        }
+        items[item.name] = item;
+        row += 1;
+    }
+    return items;
+}
+
+function get_item(sheet, n) {
+    var item;
+    if (sheet[COL_ITEM_QUANTITY][n] != undefined) {
+        item = {
+            name: sheet[COL_ITEM_NAME][n],
+            quantity: sheet[COL_ITEM_QUANTITY][n],
+            each: sheet[COL_ITEM_EACH][n]
+        };
+    }
+    return item;
+}
+
+function display_item(id, item) {
+    var each = "<nobr />";
+    var subtotal = "<nobr />";
+    if (item !== undefined && item.each) {
+        each = item.each;
+        subtotal = item.quantity * item.each;
+        item.subtotal = subtotal;
+    }
+    $("#id_each_" + id).html(each);
+    $("#id_subtotal_" + id).html(subtotal);
+}
+
+function display_results(items) {
+    var id = 1;
+    var item;
+    var total = 0;
+    var name;
+
+    // iterate through rows in the html table
+    while (true) {
+        item = $('#id_item_' + id);
+        if (item.length == 0) {
+            break;
+        }
+
+        name = $('#id_item_' + id).text();
+        item = items[name];
+        display_item(id, item);
+        if (item && item.subtotal) {
+            total += item.subtotal
+        }
+
+        id += 1;
+    }
+    $("#id_total").html(total);
+}
+
+function handle_response(sheet) {
+    var items;
+    $("#id_status").html("recieved response...");
+    if (sheet.usercode_error) {
+        $("#id_status").html(
+            sheet.usercode_error.message +
+            ', line ' + sheet.usercode_error.line
+        );
+    } else {
+        items = get_items(sheet);
+        display_results(items);
+        $("#id_status").html("done.");
+    }
+}
+
+function handle_click(event) {
+    json_request(URL, get_overrides(), handle_response);
+
+    $("#id_status").html("sent request...");
+
+    event.preventDefault(); // disable normal form submit behavior
+    return false; // prevent further bubbling of event
+}
+
+
+function json_request(json_url, overrides, handle_response) {
+    if (window.XDomainRequest) {
+        // For IE
+        xdr = new XDomainRequest();
+        if (xdr) {
+            xdr.onload = function() {
+                handle_response( $.parseJSON( xdr.responseText ) );
+            };
+            xdr.open('get', json_url + '?' + $.param(overrides));
+            xdr.send();
+        }
+    } else {
+        // For everyone else
+        $.getJSON(json_url, overrides, handle_response);
+    }
+
+}
+
+function get_stocks(sheet) {
+    var stocks = {};
+    var stock;
+    var row = 2;
+
+    // iterate through stocks listed in the json spreadsheet
+    while (true) {
+        stock = sheet[COL_STOCK_NAME][row];
+        if (stock === undefined) {
+            break;
+        }
+        stocks[stock] = 1;
+        row += 1;
+    }
+    return stocks;
+}
+
+function populate_table(sheet) {
+    var stocks = get_stocks(sheet);
+    var header = $('#id_header');
+    var row_html;
+    var id = 1;
+    $("#id_status").html("stocks loaded...");
+    for (stock in stocks) {
+        row_html = '\
+            <tr> \
+                <td id="id_item_' + id + '">' + stock + '</td> \
+                <td><input id="id_amount_' + id + '" /></td> \
+                <td id="id_each_' + id + '"><nobr /></td> \
+                <td id="id_subtotal_' + id + '"><nobr /></td> \
+            </tr>';
+        header.after(row_html);
+        id += 1;
+    }
+    $("#id_status").html("ready");
+}
+
+function init() {
+    $("#id_status").html("requesting available stocks...");
+    json_request(URL, {}, populate_table);
+}
+
+$( init );
+
+        </script>
+        <style>
+body {
+    background-color: #DDD;
+}
+        </style>
+    </head>
+    <body>
+        <table border=1 cellpadding=0 cellspacing=0>
+            <tr id="id_header">
+                <th>Item</th>
+                <th>Amount</th>
+                <th>Each</th>
+                <th>Subtotal</th>
+            </tr>
+            <tr>
+                <td colspan="3" align="right">Total:</td>
+                <td id="id_total"><nobr /></td>
+            </tr>
+        </table>
+
+        <input
+            name="Submit"
+            type="button"
+            value="Update"
+            onclick="return handle_click(event);"
+        />
+
+        <div id="id_status"><nobr /></div>
+
+    </body>
+</html>
+

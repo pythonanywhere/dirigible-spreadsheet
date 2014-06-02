@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="../scripts/htmlescape.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testEscape",
+
+            testEscape: function () {
+
+                YAHOO.util.Assert.areSame('&lt;', htmlescape('<') );
+                YAHOO.util.Assert.areSame('&gt;', htmlescape('>') );
+                YAHOO.util.Assert.areSame('&amp;', htmlescape('&') );
+                YAHOO.util.Assert.areSame('&quot;', htmlescape('"') );
+                YAHOO.util.Assert.areSame('&#39;', htmlescape("'") );
+
+                YAHOO.util.Assert.areSame(
+                    'fish &amp; chips &gt; &quot;spam&quot; &lt; &#39;this parrot&#39;',
+                    htmlescape('fish & chips > "spam" < \'this parrot\'')
+                );
+            }
+
+        })
+
+    ];
+</script>
+
+<div id="id_editor_container"></div>
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

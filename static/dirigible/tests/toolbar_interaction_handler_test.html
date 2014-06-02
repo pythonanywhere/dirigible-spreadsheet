@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="../scripts/toolbar_interaction_handler.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+<div id="id_results">Please wait</div>
+
+<img id='id_cut_button' alt="Cut" title="Cut" />
+<img id='id_copy_button' alt="Copy" title="Copy" />
+<img id='id_paste_button' alt="Paste" title="Paste" />
+<img id='id_recalc_button' alt="Recalculate" title="Recalculate" />
+
+
+<script type="text/javascript">
+
+    tests = [
+
+        new YAHOO.tool.TestCase({
+
+            name: "testToolbarInteractionHandler",
+
+            testBind_BindsEvents: function () {
+                var mockControl = new MockControl();
+                var gridCommands = mockControl.createMock({
+                    cut: function() {},
+                    copy: function() {},
+                    paste: function() {}
+                });
+                var pageCommands = mockControl.createMock({
+                    recalculate: function() {}
+                });
+
+                gridCommands.expects().cut(TypeOf.isA(Object));
+                gridCommands.expects().copy(TypeOf.isA(Object));
+                gridCommands.expects().paste(TypeOf.isA(Object));
+                pageCommands.expects().recalculate(TypeOf.isA(Object));
+
+                var handler = new Dirigible.ToolbarInteractionHandler(
+                    gridCommands, pageCommands
+                );
+                handler.bind();
+                $('#id_cut_button').trigger('click');
+                $('#id_copy_button').trigger('click');
+                $('#id_paste_button').trigger('click');
+                $('#id_recalc_button').trigger('click');
+
+                mockControl.verify();
+            }
+
+        })
+
+    ];
+</script>
+
+
+<script src="yuirunner.js"></script>
+</body>
+</html>

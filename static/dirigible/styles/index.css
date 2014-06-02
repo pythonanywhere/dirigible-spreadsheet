@@ -1,0 +1,60 @@
+.id_dirigible_tagline {
+    font-size: 20px;
+    color: #4B576D;
+    text-align: center;
+}
+
+#id_grey_stripe_hwrap {
+    background-color: #D1D2D4;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+#id_more_info_buttons {
+    /* Only easy to center a block if its width is fixed :-(  Luckily this one contains
+       images so we know how wide it is. */
+    width: 470px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 35px;
+}
+
+#id_more_info_buttons a img {
+    border: 0px;
+}
+
+#id_find_out_more {
+    margin: 0px 5px 0px 0px;
+    padding: 0px;
+}
+
+#id_watch_a_video {
+    margin: 0px 0px 0px 5px;
+    padding: 0px;
+}
+
+#id_featured_sheets_front_page {
+    margin-top: 30px;
+}
+
+#id_featured_sheets_front_page a {
+    color: #4B576D;
+    text-decoration: underline;
+}
+
+#id_signup_call_to_action_div {
+    font-size: 36pt;
+    margin-top: 35px;
+    text-align: center;
+    width: 11.5ex;
+    border-radius: 24px;
+    -moz-border-radius: 24px;
+}
+
+#id_signup_call_to_action {
+}
+
+#id_footer_links {
+    position: relative;
+    bottom: 0;
+}

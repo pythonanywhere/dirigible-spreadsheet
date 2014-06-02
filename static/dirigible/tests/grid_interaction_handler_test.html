@@ -1,0 +1,799 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.caret.1.02.min.js"></script>
+    <script type="text/javascript" src="/static/dirigible/tests/test_utils.js"></script>
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script src="yuitest/yuitest-combo.js"></script>
+    <script src="jsmock.js"></script>
+
+    <script src="../scripts/grid_interaction_handler.js"></script>
+    <link rel="stylesheet" type="text/css" href="logger.css" />
+    <link rel="stylesheet" type="text/css" href="testlogger.css" />
+</head>
+
+<body>
+    <div id="id_results">Please wait</div>
+    <div id="id_editor_container"></div>
+
+<script type="text/javascript">
+
+tests = [
+
+    new YAHOO.tool.TestCase({
+
+        name: "testConstructor",
+
+        testBind_BindsHandlers: function () {
+            var mockJQuery = function(){ return {
+                keypress: function(){},
+                click: function(){}
+            } };
+            var mockControl = new MockControl();
+            var mockCommands = mockControl.createMock({
+                resizeColumns : function (){},
+                sendCellChangeToServer: function (){}
+            });
+            var mockGrid = mockControl.createMock({});
+            mockGrid.onKeyDown = mockControl.createMock({
+                subscribe: function(){}
+            });
+            mockGrid.onColumnsResized = mockControl.createMock({
+                subscribe: function(){}
+            });
+            mockGrid.onCellChange = mockControl.createMock({
+                subscribe: function(){}
+            });
+            mockGrid.onActiveCellChanged = mockControl.createMock({
+                subscribe: function(){}
+            });
+            mockGrid.onClick = mockControl.createMock({
+                subscribe: function(){}
+            });
+            mockGrid.onScroll = mockControl.createMock({
+                subscribe: function(){}
+            });
+
+            var gridInteractionHandler = new Dirigible.GridInteractionHandler(mockJQuery, mockGrid, mockCommands);
+
+            mockGrid.onKeyDown.expects().subscribe(gridInteractionHandler.handleKeyDown);
+            mockGrid.onColumnsResized.expects().subscribe(mockCommands.resizeColumns);
+            mockGrid.onCellChange.expects().subscribe(mockCommands.sendCellChangeToServer);
+            mockGrid.onActiveCellChanged.expects().subscribe(gridInteractionHandler.updateFormulaBar);
+            mockGrid.onClick.expects().subscribe(gridInteractionHandler.updateFormulaBar);
+            //mockGrid.onScroll.expects().subscribe(gridInteractionHandler.handleScroll);
+
+            gridInteractionHandler.bind();
+
+            mockControl.verify();
+        },
+
+        testBind_BindsDivKeyPressHandlerAndFormulaBarClickHandler: function () {
+            var mockControl = new MockControl();
+            var mockGrid = mockControl.createMock({});
+            mockGrid.onKeyDown = {
+                subscribe: function() {}
+            };
+            mockGrid.onColumnsResized = {
+                subscribe: function() {}
+            };
+            mockGrid.onCellChange = {
+                subscribe: function() {}
+            };
+            mockGrid.onActiveCellChanged = {
+                subscribe: function() {}
+            };
+            mockGrid.onClick = {
+                subscribe: function() {}
+            };
+            mockGrid.onScroll = {
+                subscribe: function(){}
+            };
+            var mockJQuery = mockControl.createMock({
+                find: function() {} 
+            });
+            var mockDiv = mockControl.createMock({
+                keypress: function() {}
+            });
+            var mockFormulaBar = mockControl.createMock({
+                click: function() {}
+            });
+            
+            mockGridCommands = { resizeColumns: null };
+            var gridInteractionHandler = new Dirigible.GridInteractionHandler(mockJQuery.find, mockGrid, mockGridCommands);
+
+            mockJQuery.expects().find('#id_grid').andReturn(mockDiv);
+            mockDiv.expects().keypress(gridInteractionHandler.handleGridDivKeyPress);
+            mockJQuery.expects().find('#id_formula_bar').andReturn(mockFormulaBar);
+            mockFormulaBar.expects().click(gridInteractionHandler.handleFormulaBarClick);
+            
+            gridInteractionHandler.bind();
+
+            mockControl.verify();
+        }
+
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "testHandleKeyDown",
+
+        setUp: function() {
+            var mockJQuery = function(){ return {
+                keypress: function(){}               
+            } };
+            this.mockControl = new MockControl();
+            this.mockGrid = this.mockControl.createMock({
+                editActiveCell: function() {},
+                getActiveCell: function() {},
+                getColumns: function() {},
+                getDataLength: function() {},
+                getViewport: function() {},
+                gotoCell: function() {},
+                scrollRowIntoView: function() {},
+            });
+            this.mockGrid.onKeyDown = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onColumnsResized = {
+                subscribe: function(){}
+            };
+            this.mockGrid.onCellChange = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onActiveCellChanged = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onClick = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onScroll = {
+                subscribe: function(){}
+            };
+            this.mockGridCommands = this.mockControl.createMock({
+                clear: function() {},
+                copy: function() {},
+                cut: function() {},
+                paste: function() {}
+            });
+
+            this.gridInteractionHandler = new Dirigible.GridInteractionHandler(mockJQuery, this.mockGrid, this.mockGridCommands);  
+        },
+
+        testHandleKeyDown_ShouldSwallowEventsThatWouldMoveActiveCellOffValidGrid: function () {
+            var LEFT = 37;
+            var UP = 38;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+
+            event.which = LEFT;
+
+            this.mockControl.reset();
+            this.mockGrid.expects().getActiveCell().andReturn({row: 12, cell: 2});
+            this.gridInteractionHandler.handleKeyDown(event);
+            this.mockControl.verify();
+
+            this.mockControl.reset();
+            this.mockGrid.expects().getActiveCell().andReturn({row: 12, cell: 1});
+            event.expects().stopImmediatePropagation();
+            this.gridInteractionHandler.handleKeyDown(event);
+            this.mockControl.verify();
+
+            event.which = UP;
+
+            this.mockGrid.expects().getActiveCell().andReturn({row: 1, cell: 1});
+            this.gridInteractionHandler.handleKeyDown(event);
+            this.mockControl.verify();
+
+            this.mockGrid.expects().getActiveCell().andReturn({row: 0, cell: 1});
+            event.expects().stopImmediatePropagation();
+            this.gridInteractionHandler.handleKeyDown(event);
+            this.mockControl.verify();
+
+        },
+
+        testHandleKeyDown_PageDownShouldMoveActiveCellAndScrollRowIntoViewAndSwallowEventIfThereIsSpace: function () {
+
+            var PAGE_DOWN = 34;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = PAGE_DOWN;
+
+            this.mockGrid.expects().getViewport().andReturn(
+                {top: 200, bottom: 300}
+            );
+            this.mockGrid.expects().getActiveCell().andReturn(
+                {cell: 111, row: 222}
+            );
+            this.mockGrid.expects().getDataLength().andReturn(1000);
+            this.mockGrid.expects().scrollRowIntoView(299, true);
+            this.mockGrid.expects().gotoCell(222 + (100 - 1), 111);
+            event.expects().stopImmediatePropagation();
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+
+        testHandleKeyDown_PageDownShouldMoveActiveCellAndNotScrollRowIntoViewAndSwallowEventIfThereIsNoSpace: function () {
+
+            var PAGE_DOWN = 34;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = PAGE_DOWN;
+
+            this.mockGrid.expects().getViewport().andReturn(
+                { top: 400, bottom: 500 }
+            );
+            this.mockGrid.expects().getActiveCell().andReturn(
+                { cell: 111, row: 450 }
+            );
+            this.mockGrid.expects().getDataLength().andReturn(500);
+            this.mockGrid.expects().gotoCell(450 + (100 - 1), 111);
+            event.expects().stopImmediatePropagation();
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+
+        testHandleKeyDown_PageUpShouldScrollRowIntoViewMoveActiveCellAndSwallowEvent: function () {
+
+            var PAGE_UP = 33;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = PAGE_UP;
+
+            this.mockGrid.expects().getViewport().andReturn(
+                {top: 200, bottom: 300}
+            );
+            this.mockGrid.expects().getActiveCell().andReturn(
+                {cell: 111, row: 222}
+            );
+            this.mockGrid.expects().scrollRowIntoView(101, false);
+            this.mockGrid.expects().gotoCell(222 - (100 - 1), 111);
+            event.expects().stopImmediatePropagation();
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+
+        testHandleKeyDown_PageUpShouldScrollRowIntoViewWithoutJumpingAboveTopOfGridMoveActiveCellAndSwallowEvent: function () {
+
+            var PAGE_UP = 33;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = PAGE_UP;
+
+            this.mockGrid.expects().getViewport().andReturn(
+                {top: 5, bottom: 105}
+            );
+            this.mockGrid.expects().getActiveCell().andReturn(
+                {cell: 111, row: 75}
+            );
+            this.mockGrid.expects().scrollRowIntoView(0, false);
+            this.mockGrid.expects().gotoCell(75 - (100 - 1), 111);
+            event.expects().stopImmediatePropagation();
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+
+        make_testHandleKeyDown_ControlHomeShouldGoToA1AndSwallowEvent: function (modifier) {
+
+            var HOME = 36;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = HOME;
+            event[modifier] = true;
+
+            this.mockGrid.expects().gotoCell(0, 1);
+            event.expects().stopImmediatePropagation();
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_ControlHomeShouldGoToA1AndSwallowEvent : function () {
+            this.make_testHandleKeyDown_ControlHomeShouldGoToA1AndSwallowEvent('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaHomeShouldGoToA1AndSwallowEvent : function () {
+            this.make_testHandleKeyDown_ControlHomeShouldGoToA1AndSwallowEvent('metaKey');
+        },
+
+        testHandleKeyDown_HomeWithoutControlShouldNotGoToACellOrSwallowEvent: function () {
+
+            var HOME = 36;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = HOME;
+            event.ctrlKey = false;
+            event.metaKey = false;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+
+        make_testHandleKeyDown_ControlEndShouldGoToBottomRightAndSwallowEvent: function (modifier) {
+            var END = 35;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = END;
+            event[modifier] = true;
+
+            this.mockGrid.expects().getDataLength().andReturn(1000);
+            this.mockGrid.expects().getColumns().andReturn(
+                { length: 53 }
+            );
+            this.mockGrid.expects().gotoCell(999, 52);
+            event.expects().stopImmediatePropagation();
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_ControlEndShouldGoToBottomRightAndSwallowEvent: function () {
+            this.make_testHandleKeyDown_ControlEndShouldGoToBottomRightAndSwallowEvent('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaEndShouldGoToBottomRightAndSwallowEvent: function () {
+            this.make_testHandleKeyDown_ControlEndShouldGoToBottomRightAndSwallowEvent('metaKey');
+        },
+
+        testHandleKeyDown_EndWithoutControlShouldNotGoToACellOrSwallowEvent: function () {
+
+            var END = 35;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = END;
+            event.ctrlKey = false;
+            event.metaKey = false;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+
+        testHandleKeyDown_F2EntersEditModeAndDoesNotSwallowEvent: function () {
+            var F2 = 113;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            event.which = F2;
+
+            this.mockGrid.expects().editActiveCell();
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+
+        make_testHandleKeyDown_CtrlX_ShouldStopPropagationIfCutActionReturnsTrue: function (modifier) {
+            var LETTER_X = 88;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+
+            this.mockGridCommands.expects().cut().andReturn(true);
+            event.expects().stopImmediatePropagation();
+
+            event.which = LETTER_X;
+            event[modifier] = true;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_CtrlX_WhenNotEditing_PerformsCutAndStopsPropagation: function () {
+            this.make_testHandleKeyDown_CtrlX_ShouldStopPropagationIfCutActionReturnsTrue('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaX_WhenNotEditing_PerformsCutAndStopsPropagation: function () {
+            this.make_testHandleKeyDown_CtrlX_ShouldStopPropagationIfCutActionReturnsTrue('metaKey');
+        },
+
+        make_testHandleKeyDown_CtrlX_ShouldNotStopPropagationIfCutActionReturnsFalse: function (modifier) {
+            var LETTER_X = 88;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+
+            this.mockGridCommands.expects().cut().andReturn(false);
+
+            event.which = LETTER_X;
+            event[modifier] = true;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_CtrlX_WhenEditing_DoesNothing: function () {
+            this.make_testHandleKeyDown_CtrlX_ShouldNotStopPropagationIfCutActionReturnsFalse('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaKeyX_WhenEditing_DoesNothing: function () {
+            this.make_testHandleKeyDown_CtrlX_ShouldNotStopPropagationIfCutActionReturnsFalse('metaKey');
+        },
+
+        make_testHandleKeyDown_CtrlC_StopsPropagationIfCopyActionReturnsTrue: function (modifier) {
+            var LETTER_C = 67;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            this.mockGridCommands.expects().copy().andReturn(true);
+            event.expects().stopImmediatePropagation();
+
+            event.which = LETTER_C;
+            event[modifier] = true;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_CtrlC_WhenNotEditing_PerformsCopyAndStopsPropagation: function () {
+            this.make_testHandleKeyDown_CtrlC_StopsPropagationIfCopyActionReturnsTrue('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaC_WhenNotEditing_PerformsCopyAndStopsPropagation: function () {
+            this.make_testHandleKeyDown_CtrlC_StopsPropagationIfCopyActionReturnsTrue('metaKey');
+        },
+
+        make_testHandleKeyDown_CtrlC_DoesNotStopPropagationIfCopyActionReturnsFalse: function (modifier) {
+            var LETTER_C = 67;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            this.mockGridCommands.expects().copy().andReturn(false);
+
+            event.which = LETTER_C;
+            event[modifier] = true;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_CtrlC_WhenEditing_DoesNothing: function () {
+            this.make_testHandleKeyDown_CtrlC_DoesNotStopPropagationIfCopyActionReturnsFalse('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaC_WhenEditing_DoesNothing: function () {
+            this.make_testHandleKeyDown_CtrlC_DoesNotStopPropagationIfCopyActionReturnsFalse('metaKey');
+        },
+
+        make_testHandleKeyDown_CtrlV_StopsPropagationIfPasteActionReturnsTrue: function (modifier) {
+            var LETTER_V = 86;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+
+            this.mockGridCommands.expects().paste().andReturn(true);
+            event.expects().stopImmediatePropagation();
+
+            event.which = LETTER_V;
+            event[modifier] = true;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_CtrlV_WhenNotEditing_PerformsPasteAndStopsPropagation: function () {
+            this.make_testHandleKeyDown_CtrlV_StopsPropagationIfPasteActionReturnsTrue('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaV_WhenNotEditing_PerformsPasteAndStopsPropagation: function () {
+            this.make_testHandleKeyDown_CtrlV_StopsPropagationIfPasteActionReturnsTrue('metaKey');
+        },
+
+        make_testHandleKeyDown_CtrlV_DoesntStopPropagationIfPasteActionReturnsFalse: function (modifier) {
+            var LETTER_V = 86;
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            this.mockGridCommands.expects().paste().andReturn(false);
+
+            event.which = LETTER_V;
+            event[modifier] = true;
+
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_CtrlV_WhenEditing_DoesNothing: function () {
+            this.make_testHandleKeyDown_CtrlV_DoesntStopPropagationIfPasteActionReturnsFalse('ctrlKey');
+        },
+        testHandleKeyDown_MacMetaV_WhenEditing_DoesNothing: function () {
+            this.make_testHandleKeyDown_CtrlV_DoesntStopPropagationIfPasteActionReturnsFalse('metaKey');
+        },
+
+        make_testHandleKeyDown_DeleteyKey_StopsPropagationIfClearActionReturnsTrue: function (deleteyKey) {
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+
+            this.mockGridCommands.expects().clear().andReturn(true);
+            event.expects().stopImmediatePropagation();
+
+            event.which = deleteyKey;
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_Del_StopsPropagationIfClearActionReturnsTrue: function() {
+            var DEL = 46;
+            this.make_testHandleKeyDown_DeleteyKey_StopsPropagationIfClearActionReturnsTrue(DEL);
+        },
+        testHandleKeyDown_Backspace_StopsPropagationIfClearActionReturnsTrue: function() {
+            var BACKSPACE = 8;
+            this.make_testHandleKeyDown_DeleteyKey_StopsPropagationIfClearActionReturnsTrue(BACKSPACE);
+        },
+
+        make_testHandleKeyDown_DeleteyKey_DoesntStopPropagationIfClearActionReturnsFalse: function (deleteyKey) {
+            var event = this.mockControl.createMock({
+                stopImmediatePropagation: function() {}
+            });
+            this.mockGridCommands.expects().clear().andReturn(false);
+
+            event.which = deleteyKey;
+            this.gridInteractionHandler.handleKeyDown(event);
+
+            this.mockControl.verify();
+        },
+        testHandleKeyDown_Del_DoesntStopPropagationIfClearActionReturnsFalse: function() {
+            var DEL = 46;
+            this.make_testHandleKeyDown_DeleteyKey_DoesntStopPropagationIfClearActionReturnsFalse(DEL);
+        },
+        testHandleKeyDown_Backspace_DoesntStopPropagationIfClearActionReturnsFalse: function() {
+            var BACKSPACE = 8;
+            this.make_testHandleKeyDown_DeleteyKey_DoesntStopPropagationIfClearActionReturnsFalse(BACKSPACE);
+        }
+
+    }),
+
+
+    new YAHOO.tool.TestCase({
+
+        name: "testGridDivKeyPressHandler",
+
+        setUp: function() {
+            var mockJQuery = function(){ return {
+                keypress: function(){}               
+            } };
+            this.mockControl = new MockControl();
+            this.mockGrid = this.mockControl.createMock({
+                getCellEditor : function() {},
+                editActiveCell: function() {}
+            });
+            this.mockGrid.onKeyDown = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onColumnsResized = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onCellChange = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onActiveCellChanged = {
+                subscribe: function() {}
+            };
+            this.mockGrid.onClick = {
+                subscribe: function() {}
+            };
+            this.mockCellEditor = this.mockControl.createMock({
+                setInputElementValues : function() {}
+            });
+            mockGridCommands = { resizeColumns: null };
+
+            this.gridIH = new Dirigible.GridInteractionHandler(
+                mockJQuery, this.mockGrid, mockGridCommands
+            );
+        },
+
+        testGridDivKeyPressHandlerHandlesCharacterKeysAndReturnsFalseIfNoCellEditor: function() {
+            this.mockGrid.expects().getCellEditor().andReturn(null);
+            this.mockGrid.expects().editActiveCell();
+            this.mockGrid.expects().getCellEditor().andReturn(this.mockCellEditor);
+            this.mockCellEditor.expects().setInputElementValues('a');
+
+            var bubble = this.gridIH.handleGridDivKeyPress({which: 97});
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(false, bubble);
+        },
+
+        testGridDivKeyPressHandlerHandlesCharacterKeysAndBubblesIfThereIsACellEditor: function() {
+            this.mockGrid.expects().getCellEditor().andReturn(this.mockCellEditor);
+
+            var bubble = this.gridIH.handleGridDivKeyPress({which: 97});
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(true, bubble);
+
+            this.mockControl.reset();
+            this.mockGrid.expects().getCellEditor().andReturn(this.mockCellEditor);
+            // 32 is important because it is space and lives among the non-printables
+            //  see testGridDivKeyPressHandlerHandlesNonCharacterKeys
+            bubble = this.gridIH.handleGridDivKeyPress({which: 32});
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(true, bubble);
+        },
+
+        testGridDivKeyPressHandlerHandlesNonCharacterKeys: function() {
+            for (var keyCode= 0; keyCode <= 47; keyCode++) {
+                if (keyCode != 32) {
+                    var bubble = this.gridIH.handleGridDivKeyPress(
+                        {which: keyCode}
+                    );
+                    this.mockControl.verify();
+                    YAHOO.util.Assert.areSame(true, bubble);
+                    this.mockControl.reset();
+                }
+            }
+        },
+
+        testGridDivKeyPressHandlerSkipsAndReturnsTrueForCtrl: function() {
+            var bubble = this.gridIH.handleGridDivKeyPress(
+                {which: 97, ctrlKey: true}
+            );
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(true, bubble);
+        },
+
+        testGridDivKeyPressHandlerSkipsAndReturnsTrueForAlt: function() {
+            var bubble = this.gridIH.handleGridDivKeyPress(
+                {which: 97, altKey: true}
+            );
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(true, bubble);
+        }
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "testUpdateFormulaBar",
+
+        setUp: function() {
+            $("#id_editor_container").append("<input id='id_formula_bar'></input>");
+            $('#id_formula_bar').val("Some random value that we won't use in a test");
+            this.mockControl = new MockControl();
+            this.mockGrid = this.mockControl.createMock({
+                getActiveCell: function() {},
+                getCellFormula: function() {}
+            });
+            this.mockData = {};
+        },
+
+        tearDown: function() {
+            $('#id_formula_bar').remove();
+        },
+
+        testUpdateFormulaBarShouldUpdateItWithCellFormula: function () {
+            var slickCellLocation = { row: 4, cell: 16 };
+            this.mockGrid.expects().getActiveCell().andReturn(
+                slickCellLocation
+            );
+            this.mockGrid.expects().getCellFormula(slickCellLocation).andReturn(
+                "=A1"
+            );
+
+            var gridIH = new Dirigible.GridInteractionHandler($, this.mockGrid, null);
+            gridIH.updateFormulaBar();
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(
+                "=A1",
+                $('#id_formula_bar').val()
+            );
+        },
+
+        testUpdateFormulaBarShouldMakeFormulaBarBlankIfNoCellFormula: function () {
+            var slickCellLocation = { row: 4, cell: 16 };
+            this.mockGrid.expects().getActiveCell().andReturn(
+                slickCellLocation
+            );
+            this.mockGrid.expects().getCellFormula(slickCellLocation).andReturn(
+                ""
+            );
+            // Start off with something to clear
+            $('#id_formula_bar').val("an old value");
+
+            var gridIH = new Dirigible.GridInteractionHandler($, this.mockGrid, null);
+            gridIH.updateFormulaBar();
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame(
+                "",
+                $('#id_formula_bar').val()
+            );
+        },
+
+        testUpdateFormulaBarShouldDoNothingIfNoActiveCell: function () {
+            this.mockGrid.expects().getActiveCell().andReturn(
+                null
+            );
+
+            var gridIH = new Dirigible.GridInteractionHandler($, this.mockGrid, null);
+            gridIH.updateFormulaBar();
+
+            this.mockControl.verify();
+        }
+
+    }),
+
+    new YAHOO.tool.TestCase({
+
+        name: "testFormulaBarClickHandler",
+
+        setUp: function() {
+            $("#id_editor_container").append("<input id='id_formula_bar'></input>");
+            $('#id_formula_bar').val("Some random value that we won't use in a test");
+            this.mockControl = new MockControl();
+            this.mockGrid = this.mockControl.createMock({
+                getCellEditor : function() {},
+                editActiveCell: function() {}
+            });
+            this.mockCellEditor = this.mockControl.createMock();
+        },
+
+        testFormulaBarClickHandlerDoesNotEditCellIfItsAlreadyEditing: function() {
+            this.mockGrid.expects().getCellEditor().andReturn(this.mockCellEditor);
+
+            var gridIH = new Dirigible.GridInteractionHandler($, this.mockGrid, null);
+            gridIH.handleFormulaBarClick();
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame($('#id_formula_bar')[0], document.activeElement);
+        },
+
+        testFormulaBarClickHandlerEditsCellIfItNeedsIt: function() {
+            this.mockGrid.expects().getCellEditor().andReturn(null);
+            this.mockGrid.expects().editActiveCell();
+
+            var gridIH = new Dirigible.GridInteractionHandler($, this.mockGrid, null);
+            gridIH.handleFormulaBarClick();
+
+            this.mockControl.verify();
+            YAHOO.util.Assert.areSame($('#id_formula_bar')[0], document.activeElement);
+        },
+
+        testFormulaBarClickHandlerCallsCaretToRestoreCursorAndSelectionPosition: function() {
+            // handleFormulaBarClick needs to call caret as is tested here in order
+            // to restore cursor position. We removed this logic once, thinking it
+            // not needed, but caused T2633 to break in IE, with a fail that is
+            // easy to reproduce manually. So don't remove the calls to caret without
+            // running all FTs.
+            var mockJQuery = this.mockControl.createMock({
+                find: function() {}
+            });
+            var mockFormulaBar = this.mockControl.createMock({
+                caret: function(){},
+                focus: function(){}
+            });
+            this.mockGrid.expects().getCellEditor().andReturn(null);
+            this.mockGrid.expects().editActiveCell();
+            mockJQuery.expects().find('#id_formula_bar').andReturn(mockFormulaBar);
+            mockFormulaBar.expects().caret().andReturn({start:1, end:321});
+            mockFormulaBar.expects().focus();
+            mockFormulaBar.expects().caret(1, 321);
+
+            var gridIH = new Dirigible.GridInteractionHandler(
+                mockJQuery.find, this.mockGrid, null);
+            gridIH.handleFormulaBarClick();
+
+            this.mockControl.verify();
+        }
+    })
+
+];
+</script>
+
+<script src="yuirunner.js"></script>
+</body>
+</html>
