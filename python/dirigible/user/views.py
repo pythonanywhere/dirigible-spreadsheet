@@ -55,7 +55,7 @@ def redirect_to_front_page(request):
 @login_required
 def user_dashboard(request):
     sheets = Sheet.objects.filter(owner=request.user)
-    return render_to_response('user_page.html', {'user':request.user, 'sheets':sheets})
+    return render_to_response('user_page.html', {'user': request.user, 'sheets': sheets})
 
 
 @login_required

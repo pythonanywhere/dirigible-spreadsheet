@@ -90,5 +90,6 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/'
 
 FEEDBACK_EMAIL = 'support@example.com'

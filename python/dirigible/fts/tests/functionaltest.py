@@ -369,7 +369,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             test_method_name = match.group(2)
             test_method_hash = hashlib.md5(test_method_name).hexdigest()[:7]
 
-            usernames.append(("%s_%s" % (test_task_id, test_method_hash))[:29] + str(user_index))
+            usernames.append(("tstusr_%s_%s" % (test_task_id, test_method_hash))[:29] + str(user_index))
         return usernames
 
 
@@ -382,19 +382,19 @@ class FunctionalTest(StaticLiveServerTestCase):
             return
 
         link = None
-        for possible_id in ('id_big_logo', 'id_small_header_logo'):
+        for possible_id in ('id_small_header_logo', 'id_big_logo'):
             try:
                 link = self.browser.find_element_by_xpath(
                     "//a[img[@id='{img_id}']]".format(img_id=possible_id)
                 )
+                self.assertEqual(link.get_attribute('href'), Url.ROOT)
+                return
             except NoSuchElementException:
                 pass
 
-        if link is None:
-            self.fail("Could not find a logo that is also a link on page {}".format(
-                self.browser.current_url
-            ))
-        self.assertEqual(link.get_attribute('href'), Url.ROOT)
+        self.fail("Could not find a logo that is also a link on page {}".format(
+            self.browser.current_url
+        ))
 
 
     def check_page_load(self, link_destination=None):
