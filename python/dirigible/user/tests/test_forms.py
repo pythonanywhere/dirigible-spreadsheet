@@ -4,8 +4,8 @@
 
 from registration.forms import RegistrationForm
 
-from dirigible.test_utils import ResolverTestCase
-from dirigible.user.forms import DirigibleRegistrationForm
+from test_utils import ResolverTestCase
+from user.forms import DirigibleRegistrationForm
 
 
 class DirigibleRegistrationFormTest(ResolverTestCase):

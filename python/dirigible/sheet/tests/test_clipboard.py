@@ -10,10 +10,10 @@ from mock import Mock, patch
 
 from django.contrib.auth.models import User
 
-from dirigible.test_utils import ResolverTestCase
+from test_utils import ResolverTestCase
 
-from dirigible.sheet.models import Clipboard, Sheet
-from dirigible.sheet.worksheet import Cell, Worksheet
+from sheet.models import Clipboard, Sheet
+from sheet.worksheet import Cell, Worksheet
 
 
 class ClipboardModelTest(ResolverTestCase):

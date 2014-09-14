@@ -22,16 +22,16 @@ from django.template.loader import get_template, render_to_string
 from django.template import Context
 from django.utils.html import escape
 
-from dirigible.sheet.forms import ImportCSVForm
-from dirigible.sheet.models import Clipboard, Sheet, copy_sheet_to_user
-from dirigible.sheet.ui_jsonifier import (
+from sheet.forms import ImportCSVForm
+from sheet.models import Clipboard, Sheet, copy_sheet_to_user
+from sheet.ui_jsonifier import (
     sheet_to_ui_json_grid_data, sheet_to_ui_json_meta_data
 )
-from dirigible.sheet.worksheet import worksheet_to_csv
-from dirigible.sheet.importer import (
+from sheet.worksheet import worksheet_to_csv
+from sheet.importer import (
         DirigibleImportError, worksheet_from_csv, worksheet_from_excel
 )
-from dirigible.user.models import AnonymousUser
+from user.models import AnonymousUser
 
 
 def fetch_users_sheet(view):

@@ -7,9 +7,9 @@ try:
 except ImportError:
     import unittest
 
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.parser.fl_row_reference_parse_node import FLRowReferenceParseNode
-from dirigible.sheet.parser.fl_reference_parse_node import FLReferenceParseNode
+from sheet.parser.parse_node import ParseNode
+from sheet.parser.fl_row_reference_parse_node import FLRowReferenceParseNode
+from sheet.parser.fl_reference_parse_node import FLReferenceParseNode
 
 
 class FLRowReferenceParseNodeTest(unittest.TestCase):

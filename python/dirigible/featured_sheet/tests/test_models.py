@@ -3,10 +3,10 @@
 #
 from django.contrib.auth.models import User
 
-from dirigible.test_utils import ResolverTestCase
-from dirigible.sheet.models import Sheet
+from test_utils import ResolverTestCase
+from sheet.models import Sheet
 
-from dirigible.featured_sheet.models import FeaturedSheet
+from featured_sheet.models import FeaturedSheet
 
 
 class TestFeaturedSheetModel(ResolverTestCase):

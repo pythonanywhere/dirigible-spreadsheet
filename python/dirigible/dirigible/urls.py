@@ -10,10 +10,10 @@ from django.views.generic.simple import direct_to_template
 
 from settings import LOGIN_URL
 
-from dirigible.info_pages.views import front_page_view, info_page_view
-from dirigible.featured_sheet.models import FeaturedSheet
-from dirigible.shared.views import redirect_to
-from dirigible.sheet.views import new_sheet
+from info_pages.views import front_page_view, info_page_view
+from featured_sheet.models import FeaturedSheet
+from shared.views import redirect_to
+from sheet.views import new_sheet
 
 admin.autodiscover()
 

@@ -11,15 +11,15 @@ except ImportError:
 
 from mock import Mock, patch, sentinel
 
-from dirigible.sheet.formula_interpreter import (
+from sheet.formula_interpreter import (
     get_dependencies_from_parse_tree, get_python_formula_from_parse_tree,
     rewrite
 )
-from dirigible.sheet.parser import FormulaError
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.parser.parse_node_constructors import FLCellReference
-from dirigible.sheet.parser.parser import parse
-from dirigible.test_utils import ResolverTestCase
+from sheet.parser import FormulaError
+from sheet.parser.parse_node import ParseNode
+from sheet.parser.parse_node_constructors import FLCellReference
+from sheet.parser.parser import parse
+from test_utils import ResolverTestCase
 
 
 class TestGetPythonFormulaFromParseTree(ResolverTestCase):

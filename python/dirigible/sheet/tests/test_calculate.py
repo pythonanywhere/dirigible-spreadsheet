@@ -14,20 +14,20 @@ from urllib import urlencode
 
 from mock import call, Mock, patch, sentinel
 
-from dirigible.test_utils import die, ResolverTestCase
+from test_utils import die, ResolverTestCase
 
 import dirigible.sheet.calculate as calculate_module
-from dirigible.sheet.calculate import (
+from sheet.calculate import (
     api_json_to_worksheet, calculate, calculate_with_timeout,
     create_cell_recalculator, CURRENT_API_VERSION, evaluate_formulae_in_context,
     execute_usercode, format_traceback, is_nan, load_constants, _raise, recalculate_cell,
     run_worksheet, MyStdout)
-from dirigible.sheet.cell import Cell, undefined
-from dirigible.sheet.dirigible_datetime import DateTime
-from dirigible.sheet.models import Sheet, User
-from dirigible.sheet.parser import FormulaError
-from dirigible.sheet.views_api_0_1 import _sheet_to_value_only_json
-from dirigible.sheet.worksheet import CellRange, Worksheet, worksheet_from_json, worksheet_to_json
+from sheet.cell import Cell, undefined
+from sheet.dirigible_datetime import DateTime
+from sheet.models import Sheet, User
+from sheet.parser import FormulaError
+from sheet.views_api_0_1 import _sheet_to_value_only_json
+from sheet.worksheet import CellRange, Worksheet, worksheet_from_json, worksheet_to_json
 
 
 

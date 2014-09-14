@@ -7,7 +7,7 @@ try:
 except ImportError:
     import unittest
 
-from dirigible.sheet.eval_constant import eval_constant
+from sheet.eval_constant import eval_constant
 
 
 class TestEvalConstant(unittest.TestCase):

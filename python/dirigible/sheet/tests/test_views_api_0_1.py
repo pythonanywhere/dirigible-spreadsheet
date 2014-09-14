@@ -24,13 +24,13 @@ from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.test.testcases import disable_transaction_methods, restore_transaction_methods
 
-from dirigible.sheet.models import Sheet
-from dirigible.sheet.worksheet import Worksheet
-from dirigible.sheet.tests.test_views import set_up_view_test
-from dirigible.test_utils import ResolverTestMixins
-from dirigible.user.models import OneTimePad
+from sheet.models import Sheet
+from sheet.worksheet import Worksheet
+from sheet.tests.test_views import set_up_view_test
+from test_utils import ResolverTestMixins
+from user.models import OneTimePad
 
-from dirigible.sheet.views_api_0_1 import calculate_and_get_json_for_api, _sheet_to_value_only_json
+from sheet.views_api_0_1 import calculate_and_get_json_for_api, _sheet_to_value_only_json
 
 
 pk_name = 'dirigible_l337_private_key'

@@ -10,9 +10,9 @@ except ImportError:
     import unittest
 from mock import Mock, patch, sentinel
 
-from dirigible.sheet.cell import Cell, undefined
-from dirigible.sheet.worksheet import Worksheet
-from dirigible.test_utils import ResolverTestCase
+from sheet.cell import Cell, undefined
+from sheet.worksheet import Worksheet
+from test_utils import ResolverTestCase
 
 
 class TestUndefined(unittest.TestCase):

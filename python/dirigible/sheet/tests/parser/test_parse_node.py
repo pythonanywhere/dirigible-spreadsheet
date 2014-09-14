@@ -7,7 +7,7 @@ try:
 except ImportError:
     import unittest
 
-from dirigible.sheet.parser.parse_node import ParseNode
+from sheet.parser.parse_node import ParseNode
 
 
 def Expr(children):

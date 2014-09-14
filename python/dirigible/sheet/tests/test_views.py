@@ -21,21 +21,21 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.test.testcases import disable_transaction_methods, restore_transaction_methods
 
-from dirigible.test_utils import (
+from test_utils import (
     assert_security_classes_exist, die, ResolverDjangoTestCase
 )
 
-from dirigible.sheet.cell import Cell, undefined
-from dirigible.sheet.forms import ImportCSVForm
-from dirigible.sheet.models import Clipboard, Sheet
-from dirigible.sheet.views import (
+from sheet.cell import Cell, undefined
+from sheet.forms import ImportCSVForm
+from sheet.models import Clipboard, Sheet
+from sheet.views import (
     calculate, clear_cells, clipboard, copy_sheet, export_csv, get_json_grid_data_for_ui,
     get_json_meta_data_for_ui, import_csv, import_xls, page, set_cell_formula,
     set_column_widths, set_sheet_name, set_sheet_security_settings,
     set_sheet_usercode, update_sheet_with_version_check
 )
-from dirigible.sheet.worksheet import Worksheet, worksheet_from_json
-from dirigible.sheet.importer import DirigibleImportError
+from sheet.worksheet import Worksheet, worksheet_from_json
+from sheet.importer import DirigibleImportError
 
 class SheetViewTestCase(ResolverDjangoTestCase):
 

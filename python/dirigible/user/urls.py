@@ -4,7 +4,7 @@
 
 from django.conf.urls.defaults import *
 
-from dirigible.user.views import change_password, redirect_to_front_page
+from user.views import change_password, redirect_to_front_page
 
 
 urlpatterns = patterns('',

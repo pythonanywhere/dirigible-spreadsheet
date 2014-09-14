@@ -16,11 +16,11 @@ from StringIO import StringIO
 from mock import Mock, patch
 from threading import Thread
 
-from dirigible.test_utils import ResolverTestCase
+from test_utils import ResolverTestCase
 
-from dirigible.sheet.cell import Cell, undefined
+from sheet.cell import Cell, undefined
 
-from dirigible.sheet.worksheet import (
+from sheet.worksheet import (
     Bounds, InvalidKeyError, Worksheet, worksheet_to_csv,
     worksheet_to_json, worksheet_from_json,
 )

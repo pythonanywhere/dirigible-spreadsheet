@@ -7,8 +7,8 @@ try:
 except ImportError:
     import unittest
 
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.parser.fl_named_column_reference_parse_node import FLNamedColumnReferenceParseNode
+from sheet.parser.parse_node import ParseNode
+from sheet.parser.fl_named_column_reference_parse_node import FLNamedColumnReferenceParseNode
 
 
 class FLNamedColumnReferenceParseNodeTest(unittest.TestCase):

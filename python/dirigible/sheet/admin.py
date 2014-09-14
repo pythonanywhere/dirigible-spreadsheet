@@ -1,7 +1,7 @@
 # Copyright (c) 2010 Resolver Systems Ltd, PythonAnywhere LLP
 # See LICENSE.md
 #
-from dirigible.sheet.models import Sheet
+from sheet.models import Sheet
 from django.contrib import admin
 
 

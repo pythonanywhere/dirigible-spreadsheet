@@ -2,9 +2,9 @@
 # See LICENSE.md
 #
 
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.parser.fl_reference_parse_node import FLReferenceParseNode
-from dirigible.sheet.utils.cell_name_utils import cell_name_to_coordinates, coordinates_to_cell_name
+from sheet.parser.parse_node import ParseNode
+from sheet.parser.fl_reference_parse_node import FLReferenceParseNode
+from sheet.utils.cell_name_utils import cell_name_to_coordinates, coordinates_to_cell_name
 
 class FLCellReferenceParseNode(FLReferenceParseNode):
 

@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-from dirigible.sheet.parser.parse_node import ParseNode
+from sheet.parser.parse_node import ParseNode
 
 class FLCellRangeParseNode(ParseNode):
 

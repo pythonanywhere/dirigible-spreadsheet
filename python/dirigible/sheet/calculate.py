@@ -19,14 +19,14 @@ NUM_THREADS = 10
 # API version used by internal calls
 CURRENT_API_VERSION = '0.1'
 
-from dirigible.sheet.cell import undefined
-from dirigible.sheet.dirigible_datetime import DateTime
-from dirigible.sheet.dependency_graph import build_dependency_graph
-from dirigible.sheet.eval_constant import eval_constant
-from dirigible.sheet.parser import FormulaError
-from dirigible.sheet.worksheet import CellRange, Worksheet
-from dirigible.sheet.utils.cell_name_utils import coordinates_to_cell_name
-from dirigible.sheet.utils.interruptable_thread import InterruptableThread
+from sheet.cell import undefined
+from sheet.dirigible_datetime import DateTime
+from sheet.dependency_graph import build_dependency_graph
+from sheet.eval_constant import eval_constant
+from sheet.parser import FormulaError
+from sheet.worksheet import CellRange, Worksheet
+from sheet.utils.cell_name_utils import coordinates_to_cell_name
+from sheet.utils.interruptable_thread import InterruptableThread
 
 
 INF = 1e9999

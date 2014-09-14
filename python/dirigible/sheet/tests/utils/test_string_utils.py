@@ -9,7 +9,7 @@ try:
 except ImportError:
     import unittest
 
-from dirigible.sheet.utils.string_utils import (
+from sheet.utils.string_utils import (
     correct_case, double_quote_repr_string, get_lstripped_part, get_rstripped_part
 )
 

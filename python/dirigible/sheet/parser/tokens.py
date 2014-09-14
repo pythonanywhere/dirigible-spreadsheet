@@ -4,7 +4,7 @@
 
 import re
 
-from dirigible.sheet.parser import FormulaError
+from sheet.parser import FormulaError
 
 
 

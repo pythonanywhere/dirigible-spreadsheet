@@ -9,7 +9,7 @@ except ImportError:
 
 from django.http import HttpRequest, HttpResponsePermanentRedirect
 
-from dirigible.shared.views import redirect_to
+from shared.views import redirect_to
 
 
 class TestRedirectTo(unittest.TestCase):

@@ -6,8 +6,8 @@ from datetime import datetime
 
 from django.contrib.auth.models import AnonymousUser, User
 
-from dirigible.test_utils import ResolverTestCase
-from dirigible.user.models import AnonymousProfile, OneTimePad, UserProfile
+from test_utils import ResolverTestCase
+from user.models import AnonymousProfile, OneTimePad, UserProfile
 
 
 class TestOneTimePads(ResolverTestCase):

@@ -4,7 +4,7 @@
 
 from django.db import models
 
-from dirigible.sheet.models import Sheet
+from sheet.models import Sheet
 
 class FeaturedSheet(models.Model):
     sheet = models.ForeignKey(Sheet)

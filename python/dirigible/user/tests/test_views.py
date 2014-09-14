@@ -12,13 +12,13 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 
-from dirigible.test_utils import assert_security_classes_exist, ResolverTestCase
+from test_utils import assert_security_classes_exist, ResolverTestCase
 
-from dirigible.user.views import (
+from user.views import (
     change_password, copy_sheet_for_new_user_callback, redirect_to_front_page,
     register, registration_complete, user_dashboard
 )
-from dirigible.sheet.models import copy_sheet_to_user, Sheet
+from sheet.models import copy_sheet_to_user, Sheet
 
 
 def set_up_view_test(self):

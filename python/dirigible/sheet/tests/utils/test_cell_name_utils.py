@@ -9,7 +9,7 @@ except ImportError:
 
 import sys
 
-from dirigible.sheet.utils.cell_name_utils import (
+from sheet.utils.cell_name_utils import (
     cell_name_to_coordinates, cell_range_as_string_to_coordinates,
     cell_ref_as_string_to_coordinates, _col_row_names_to_coordinates,
     column_index_to_name, column_name_to_index, coordinates_to_cell_name,

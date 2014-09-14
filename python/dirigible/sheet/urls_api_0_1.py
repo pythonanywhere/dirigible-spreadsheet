@@ -4,7 +4,7 @@
 
 from django.conf.urls.defaults import *
 
-from dirigible.sheet.views_api_0_1 import calculate_and_get_json_for_api
+from sheet.views_api_0_1 import calculate_and_get_json_for_api
 
 
 urlpatterns = patterns('',

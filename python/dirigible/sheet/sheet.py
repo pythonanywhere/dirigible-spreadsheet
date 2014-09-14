@@ -9,9 +9,9 @@ from uuid import uuid4
 from django.db import models, transaction
 from django.contrib.auth.models import User
 
-from dirigible.user.models import OneTimePad
-from dirigible.sheet.calculate import calculate_with_timeout
-from dirigible.sheet.worksheet import (
+from user.models import OneTimePad
+from sheet.calculate import calculate_with_timeout
+from sheet.worksheet import (
     Worksheet, worksheet_from_json, worksheet_to_json
 )
 

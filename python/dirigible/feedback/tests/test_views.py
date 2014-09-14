@@ -7,10 +7,10 @@ from textwrap import dedent
 
 from django.http import HttpRequest, HttpResponse
 
-from dirigible.settings import FEEDBACK_EMAIL, SERVER_EMAIL
-from dirigible.test_utils import ResolverTestCase
+from settings import FEEDBACK_EMAIL, SERVER_EMAIL
+from test_utils import ResolverTestCase
 
-from dirigible.feedback.views import submit
+from feedback.views import submit
 
 
 class SubmitTest(ResolverTestCase):

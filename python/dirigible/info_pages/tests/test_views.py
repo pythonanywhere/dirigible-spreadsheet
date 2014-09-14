@@ -9,9 +9,9 @@ except ImportError:
 
 from mock import patch, sentinel, Mock
 
-from dirigible.test_utils import ResolverTestCase
+from test_utils import ResolverTestCase
 
-from dirigible.info_pages.views import front_page_view, info_page_view, non_logged_in_front_page_view
+from info_pages.views import front_page_view, info_page_view, non_logged_in_front_page_view
 
 
 class TestFrontPageView(ResolverTestCase):

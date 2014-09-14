@@ -12,10 +12,10 @@ import os
 from threading import Lock, Thread
 import time
 
-from dirigible.sheet.parser import FormulaError
-from dirigible.sheet.parser.parser import parse
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.parser.parse_node_constructors import (
+from sheet.parser import FormulaError
+from sheet.parser.parser import parse
+from sheet.parser.parse_node import ParseNode
+from sheet.parser.parse_node_constructors import (
     AndTest,
     ArgList,
     Argument,

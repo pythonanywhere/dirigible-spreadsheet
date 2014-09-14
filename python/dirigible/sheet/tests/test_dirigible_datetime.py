@@ -8,8 +8,8 @@ except ImportError:
     import unittest
 
 import datetime
-from dirigible.sheet.dirigible_datetime import DateTime
-from dirigible.test_utils import ResolverTestCase
+from sheet.dirigible_datetime import DateTime
+from test_utils import ResolverTestCase
 
 class DateTimeTest(ResolverTestCase):
 

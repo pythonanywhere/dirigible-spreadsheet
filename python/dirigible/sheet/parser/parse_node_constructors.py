@@ -2,13 +2,13 @@
 # See LICENSE.md
 #
 
-from dirigible.sheet.parser.fl_cell_reference_parse_node import FLCellReferenceParseNode as FLCellReference
-from dirigible.sheet.parser.fl_cell_range_parse_node import FLCellRangeParseNode as FLCellRange
-from dirigible.sheet.parser.fl_column_reference_parse_node import FLColumnReferenceParseNode as FLColumnReference
-from dirigible.sheet.parser.fl_named_column_reference_parse_node import FLNamedColumnReferenceParseNode as FLNamedColumnReference
-from dirigible.sheet.parser.fl_named_row_reference_parse_node import FLNamedRowReferenceParseNode as FLNamedRowReference
-from dirigible.sheet.parser.fl_row_reference_parse_node import FLRowReferenceParseNode as FLRowReference
-from dirigible.sheet.parser.parse_node import ParseNode
+from sheet.parser.fl_cell_reference_parse_node import FLCellReferenceParseNode as FLCellReference
+from sheet.parser.fl_cell_range_parse_node import FLCellRangeParseNode as FLCellRange
+from sheet.parser.fl_column_reference_parse_node import FLColumnReferenceParseNode as FLColumnReference
+from sheet.parser.fl_named_column_reference_parse_node import FLNamedColumnReferenceParseNode as FLNamedColumnReference
+from sheet.parser.fl_named_row_reference_parse_node import FLNamedRowReferenceParseNode as FLNamedRowReference
+from sheet.parser.fl_row_reference_parse_node import FLRowReferenceParseNode as FLRowReference
+from sheet.parser.parse_node import ParseNode
 
 
 def ConcatExpr(children):

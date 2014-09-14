@@ -10,8 +10,8 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.views.generic.simple import direct_to_template
 import registration as django_registration
 
-from dirigible.sheet.models import copy_sheet_to_user, Sheet
-from dirigible.user.forms import DirigibleRegistrationForm
+from sheet.models import copy_sheet_to_user, Sheet
+from user.forms import DirigibleRegistrationForm
 
 
 def copy_sheet_for_new_user_callback(next_url):

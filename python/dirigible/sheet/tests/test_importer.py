@@ -13,11 +13,11 @@ from mock import Mock, patch
 from StringIO import StringIO
 import xlrd
 
-from dirigible.test_utils import ResolverTestCase
-from dirigible.sheet.importer import (
+from test_utils import ResolverTestCase
+from sheet.importer import (
         DirigibleImportError, worksheet_from_csv, worksheet_from_excel
 )
-from dirigible.sheet.worksheet import Worksheet
+from sheet.worksheet import Worksheet
 
 
 

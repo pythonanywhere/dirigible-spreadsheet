@@ -7,8 +7,8 @@ try:
 except ImportError:
     import unittest
 
-from dirigible.sheet.worksheet import Worksheet
-from dirigible.sheet.rewrite_formula_offset_cell_references import (
+from sheet.worksheet import Worksheet
+from sheet.rewrite_formula_offset_cell_references import (
     rewrite_formula, rewrite_source_sheet_formulae_for_cut,
 )
 

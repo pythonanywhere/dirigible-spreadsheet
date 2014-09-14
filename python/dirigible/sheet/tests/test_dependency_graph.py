@@ -5,16 +5,16 @@
 
 from mock import call, Mock, patch, sentinel
 
-from dirigible.test_utils import die, ResolverTestCase
+from test_utils import die, ResolverTestCase
 
-from dirigible.sheet.cell import Cell
-from dirigible.sheet.dependency_graph import (
+from sheet.cell import Cell
+from sheet.dependency_graph import (
     _add_location_dependencies, build_dependency_graph,
     _generate_cell_subgraph, Node)
-from dirigible.sheet.errors import (
+from sheet.errors import (
     CycleError, report_cell_error,
 )
-from dirigible.sheet.worksheet import Worksheet
+from sheet.worksheet import Worksheet
 
 
 class TestBuildDependencyGraph(ResolverTestCase):

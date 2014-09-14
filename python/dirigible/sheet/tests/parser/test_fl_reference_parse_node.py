@@ -9,7 +9,7 @@ except ImportError:
 
 from mock import sentinel
 
-from dirigible.sheet.parser.fl_reference_parse_node import FLReferenceParseNode, quote_fl_worksheet_name, unquote_fl_worksheet_name
+from sheet.parser.fl_reference_parse_node import FLReferenceParseNode, quote_fl_worksheet_name, unquote_fl_worksheet_name
 
 class FLReferenceParseNodeTest(unittest.TestCase):
 

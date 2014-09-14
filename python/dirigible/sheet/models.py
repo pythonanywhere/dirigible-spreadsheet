@@ -2,8 +2,8 @@
 # See LICENSE.md
 #
 
-from dirigible.sheet.clipboard import Clipboard
-from dirigible.sheet.sheet import Sheet
+from sheet.clipboard import Clipboard
+from sheet.sheet import Sheet
 from django.contrib.auth.models import User
 
 

@@ -15,11 +15,11 @@ except ImportError:
     import unittest
 
 
-from dirigible.sheet.ui_jsonifier import sheet_to_ui_json_grid_data, sheet_to_ui_json_meta_data
+from sheet.ui_jsonifier import sheet_to_ui_json_grid_data, sheet_to_ui_json_meta_data
 
-from dirigible.sheet.cell import Cell
-from dirigible.sheet.models import Sheet
-from dirigible.sheet.worksheet import Worksheet
+from sheet.cell import Cell
+from sheet.models import Sheet
+from sheet.worksheet import Worksheet
 
 
 class TestSheetToUIJsonGridData(unittest.TestCase):

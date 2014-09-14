@@ -4,7 +4,7 @@
 
 from django.shortcuts import render_to_response
 
-from dirigible.user.views import user_dashboard
+from user.views import user_dashboard
 
 
 def front_page_view(request):

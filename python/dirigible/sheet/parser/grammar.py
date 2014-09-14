@@ -4,12 +4,12 @@
 
 import sys
 
-from dirigible.sheet.utils.cell_name_utils import cell_name_to_coordinates, column_name_to_index
-from dirigible.sheet.utils.string_utils import get_lstripped_part, get_rstripped_part
+from sheet.utils.cell_name_utils import cell_name_to_coordinates, column_name_to_index
+from sheet.utils.string_utils import get_lstripped_part, get_rstripped_part
 
-from dirigible.sheet.parser import FormulaError
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.parser.parse_node_constructors import (
+from sheet.parser import FormulaError
+from sheet.parser.parse_node import ParseNode
+from sheet.parser.parse_node_constructors import (
     AndTest,
     ArgList,
     Argument,
@@ -63,7 +63,7 @@ from dirigible.sheet.parser.parse_node_constructors import (
     VarArgsList,
 )
 
-from dirigible.sheet.parser.tokens import DOT_RE, FLCELLREFLIKENAME_RE, tokens
+from sheet.parser.tokens import DOT_RE, FLCELLREFLIKENAME_RE, tokens
 
 
 # Rule to allow us to have the rest of the grammar in

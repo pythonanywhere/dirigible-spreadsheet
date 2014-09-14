@@ -5,7 +5,7 @@
 from django.conf.urls.defaults import *
 from registration.views import activate
 
-from dirigible.user.views import register, registration_complete
+from user.views import register, registration_complete
 
 
 urlpatterns = patterns('',

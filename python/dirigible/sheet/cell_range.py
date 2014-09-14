@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-from dirigible.sheet.utils.cell_name_utils import coordinates_to_cell_name
+from sheet.utils.cell_name_utils import coordinates_to_cell_name
 
 
 

@@ -9,12 +9,12 @@ import StringIO
 from django.db import models
 from django.contrib.auth.models import User
 
-from dirigible.sheet.cell import Cell
-from dirigible.sheet.rewrite_formula_offset_cell_references import (
+from sheet.cell import Cell
+from sheet.rewrite_formula_offset_cell_references import (
     rewrite_formula, rewrite_source_sheet_formulae_for_cut
 )
-from dirigible.sheet.sheet import Sheet
-from dirigible.sheet.worksheet import (
+from sheet.sheet import Sheet
+from sheet.worksheet import (
     CellRange, dump_cell_to_json_stream,
 )
 

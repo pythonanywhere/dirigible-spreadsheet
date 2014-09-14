@@ -4,10 +4,10 @@
 
 import re
 
-from dirigible.sheet.parser import FormulaError
-from dirigible.sheet.parser.tokens import t_LITTLEARROW
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.parser.parse_node_constructors import (
+from sheet.parser import FormulaError
+from sheet.parser.tokens import t_LITTLEARROW
+from sheet.parser.parse_node import ParseNode
+from sheet.parser.parse_node_constructors import (
     Atom, ArgList, Name, Number, SubscriptList, Subscript, Trailer,
 )
 

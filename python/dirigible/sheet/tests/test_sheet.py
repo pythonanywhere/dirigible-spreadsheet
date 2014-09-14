@@ -8,11 +8,11 @@ from textwrap import dedent
 
 from django.contrib.auth.models import User
 
-from dirigible.test_utils import ResolverDjangoTestCase
+from test_utils import ResolverDjangoTestCase
 
-from dirigible.sheet.models import copy_sheet_to_user, Sheet
-from dirigible.user.models import OneTimePad
-from dirigible.sheet.worksheet import Worksheet, worksheet_to_json
+from sheet.models import copy_sheet_to_user, Sheet
+from user.models import OneTimePad
+from sheet.worksheet import Worksheet, worksheet_to_json
 
 
 

@@ -2,11 +2,11 @@
 # See LICENSE.md
 #
 
-from dirigible.sheet.formula_interpreter import (
+from sheet.formula_interpreter import (
         get_dependencies_from_parse_tree,
         get_python_formula_from_parse_tree
 )
-from dirigible.sheet.parser import FormulaError, parser
+from sheet.parser import FormulaError, parser
 
 
 

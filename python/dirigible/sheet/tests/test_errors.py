@@ -10,9 +10,9 @@ except ImportError:
 
 from mock import sentinel, Mock
 
-from dirigible.sheet.cell import undefined
-from dirigible.sheet.errors import CycleError, report_cell_error
-from dirigible.sheet.worksheet import Worksheet
+from sheet.cell import undefined
+from sheet.errors import CycleError, report_cell_error
+from sheet.worksheet import Worksheet
 
 
 class TestCycleError(unittest.TestCase):

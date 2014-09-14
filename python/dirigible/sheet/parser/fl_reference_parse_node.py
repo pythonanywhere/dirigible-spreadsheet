@@ -3,8 +3,8 @@
 #
 import re
 
-from dirigible.sheet.parser.parse_node import ParseNode
-from dirigible.sheet.utils.string_utils import correct_case, get_rstripped_part
+from sheet.parser.parse_node import ParseNode
+from sheet.utils.string_utils import correct_case, get_rstripped_part
 
 
 _worksheetNameRegex = re.compile(r"^[A-Za-z]\w*$")

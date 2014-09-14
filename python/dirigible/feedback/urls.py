@@ -4,7 +4,7 @@
 
 from django.conf.urls.defaults import *
 
-from dirigible.feedback.views import submit
+from feedback.views import submit
 
 
 urlpatterns = patterns('',

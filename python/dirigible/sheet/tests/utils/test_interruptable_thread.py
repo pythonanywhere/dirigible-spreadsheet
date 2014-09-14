@@ -9,7 +9,7 @@ try:
 except ImportError:
     import unittest
 
-from dirigible.sheet.utils.interruptable_thread import InterruptableThread
+from sheet.utils.interruptable_thread import InterruptableThread
 
 class TestInterruptableThread(unittest.TestCase):
 
