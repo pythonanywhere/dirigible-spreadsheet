@@ -8,3 +8,4 @@ ply==3.4
 simplejson==3.5.2
 wsgiref==0.1.2
 xlrd==0.9.3
+selenium

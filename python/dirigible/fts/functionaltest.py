@@ -9,9 +9,6 @@ from email.parser import Parser
 from functools import wraps
 import hashlib
 from imapclient import IMAPClient
-from process_utils import (
-    get_browser_process_ids, kill_processes
-)
 import re
 from textwrap import dedent
 from threading import Thread
@@ -19,13 +16,9 @@ import time
 import urllib
 import urllib2
 from urlparse import urljoin, urlparse, urlunparse
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-
-from dirigible_selenium import DirigibleSelenium
+from selenium import webdriver
 
 # Only used on Windows for the test run, but we need to be able to
 # import the module on nell in order to create the users for the
@@ -35,9 +28,6 @@ try:
 except:
     pass
 
-from browser_settings import (
-    BROWSER, BUILDER_ID, SELENIUM_HOST, SELENIUM_PORT, SERVER_IP
-)
 import key_codes
 
 IMAP_HOST = ""
@@ -52,7 +42,7 @@ CURRENT_API_VERSION = '0.1'
 
 
 class Url(object):
-    ROOT = 'http://%s/' % (SERVER_IP,)
+    ROOT = 'http://localhost:8081/'
     LOGIN = urljoin(ROOT, '/login/')
     LOGOUT = urljoin(ROOT, '/logout')
     NEW_SHEET = urljoin(ROOT, '/new_sheet')
@@ -128,7 +118,7 @@ def convert_rgb_to_hex(value):
     return '#%X%X%X' % (int(r), int(g), int(b))
 
 
-class FunctionalTest(unittest.TestCase):
+class FunctionalTest(StaticLiveServerTestCase):
     user_count = 1
 
     def wait_for(self, condition_function, msg_function, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT, allow_exceptions=False):
@@ -279,38 +269,27 @@ class FunctionalTest(unittest.TestCase):
         )
 
 
+    def create_users(self):
+        from django.contrib.auth.models import User
+        for username in self.get_my_usernames():
+            user = User.objects.create(username=username)
+            user.set_password('p4ssw0rd')
+            user.save()
+            profile = user.get_profile()
+            profile.has_seen_sheet_page = True
+            profile.save()
+
     def setUp(self):
         print "%s ##### Running test %s" % (datetime.datetime.now(), self.id())
-
-        self.non_selenium_browser_process_ids = get_browser_process_ids(BROWSER)
-        if self.non_selenium_browser_process_ids:
-            print "%s Found non-Selenium browser processes with PIDs %s" % (datetime.datetime.now(), self.non_selenium_browser_process_ids)
-            if BUILDER_ID != 'dev':
-                print "%s Not in a dev environment, killing unexpected browsers" % (datetime.datetime.now(),)
-                kill_processes(self.non_selenium_browser_process_ids)
-                self.non_selenium_browser_process_ids = []
-
-        self.start_time = time.clock()
-        self.selenium = DirigibleSelenium(
-            SELENIUM_HOST, SELENIUM_PORT, BROWSER,
-            Url.ROOT
-        )
-        self.selenium.start()
-        self.selenium.window_maximize()
+        self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(2)
 
 
     def tearDown(self):
         try:
             self.logout()
         finally:
-            self.selenium.set_context('\nTiming for test: %s took %ds' % (self.id(), time.clock() - self.start_time))
-            self.selenium.stop()
-            time.sleep(2)
-            current_browser_process_ids = get_browser_process_ids(BROWSER)
-            new_browser_process_ids = [pid for pid in current_browser_process_ids if pid not in self.non_selenium_browser_process_ids]
-            if new_browser_process_ids:
-                print "%s Found unexpected %s processes %s.  Killing them." % (datetime.datetime.now(), BROWSER, new_browser_process_ids)
-                kill_processes(new_browser_process_ids)
+            self.browser.quit()
             print "%s ##### Finished test %s" % (datetime.datetime.now(), self.id())
 
 
@@ -358,7 +337,7 @@ class FunctionalTest(unittest.TestCase):
         return self.create_new_sheet(username=username)
 
 
-    def get_my_usernames(self, username_prefix=BUILDER_ID):
+    def get_my_usernames(self):
         usernames = []
         for user_index in range(self.user_count):
             capture_test_details = re.compile(r'test_(\d+)_[^\.]*\.[^\.]*\.test_(.*)$')
@@ -367,12 +346,12 @@ class FunctionalTest(unittest.TestCase):
             test_method_name = match.group(2)
             test_method_hash = hashlib.md5(test_method_name).hexdigest()[:7]
 
-            usernames.append(("%s_%s_%s" % (username_prefix, test_task_id, test_method_hash))[:29] + str(user_index))
+            usernames.append(("%s_%s" % (test_task_id, test_method_hash))[:29] + str(user_index))
         return usernames
 
 
-    def get_my_username(self, username_prefix=BUILDER_ID):
-        return self.get_my_usernames(username_prefix=username_prefix)[0]
+    def get_my_username(self):
+        return self.get_my_usernames()[0]
 
 
     def _check_page_doctype(self, link_destination):
