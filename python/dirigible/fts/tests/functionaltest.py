@@ -246,6 +246,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         return self.get_element(locator).text
 
 
+    def get_value(self, locator):
+        return self.get_element(locator).get_attribute('value')
+
+
     def is_element_enabled(self, element_id):
         #self.selenium.get_attribute is unreliable (Harry, Jonathan)
         disabled = self.selenium.get_eval('window.$("#%s").attr("disabled")' % (element_id,))

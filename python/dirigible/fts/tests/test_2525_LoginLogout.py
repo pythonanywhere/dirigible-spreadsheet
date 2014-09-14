@@ -18,21 +18,52 @@ class Test_2525_LoginLogout(FunctionalTest):
         )
 
 
+    def test_login_happy_path(self):
+        # Harold logs in
+        self.go_to_url(Url.LOGIN)
+
+        # Finally, he enters the correct username and password.
+        self.get_element('id=id_username').clear()
+        self.get_element('id=id_password').clear()
+        self.get_element('id=id_username').send_keys(self.get_my_username())
+        self.get_element('id=id_password').send_keys('p4ssw0rd')
+        self.click_link('id_login')
+
+        # He is taken to a page entitled "XXXX's Dashboard: Dirigible" at the site's root URL.
+        self.assertEquals(
+            self.browser.title,
+            "{}'s Dashboard: Dirigible".format(self.get_my_username())
+        )
+        _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
+        self.assertEquals(path, '/')
+
+        # He sees links to the terms and conditions and suchlike at the bottom of the page.
+        self.assert_has_useful_information_links()
+
+        # On the page is a "Log Out" link
+        self.assertEquals(self.get_text('id=id_logout_link'), "Log out")
+
+
     @snapshot_on_error
     def test_login(self):
         # Harold goes to a specific URL.
         self.go_to_url(Url.LOGIN)
 
+        print('title')
         # He sees a web page with "Login: Dirigible" in the title bar.
         self.assertEquals(self.browser.title, 'Login: Dirigible')
         welcome_url = self.browser.current_url
 
+        print('focus')
         # and notices that his cursor is in the username field
         self.assertTrue(self.is_element_focused('id=id_username'))
 
+        print('userful info')
         # He sees links to the terms and conditions and suchlike at the bottom of the page.
         self.assert_has_useful_information_links()
 
+        print('links')
+        # He sees links to the terms and conditions and suchlike at the bottom of the page.
         # He notices a login link on the page and sees that it leads back to this page
         login_link = self.get_element('css=a#id_login_link')
         self.assertEqual(login_link.get_attribute('href'), Url.LOGIN)
@@ -41,12 +72,14 @@ class Test_2525_LoginLogout(FunctionalTest):
         signup_link = self.get_element('css=a#id_signup_link')
         self.assertEqual(signup_link.get_attribute('href'), Url.SIGNUP)
 
+        print('inputs')
         # The page also contains places where he can enter a user name and a password, and
         # a login button.
         self.get_element('css=input#id_username')
         self.get_element('css=input#id_password')
         self.get_element('css=input#id_login[type=submit]')
 
+        print('first click')
         # He enters neither, and clicks the login button.
         self.click_link('id_login')
 
@@ -61,7 +94,7 @@ class Test_2525_LoginLogout(FunctionalTest):
         # He is taken back to a copy of the login page where he is told he must enter a
         # password.  The username is still there.
         self.assert_login_error_shown()
-        self.assertEquals(self.get_text('id=id_username'), 'confused_user')
+        self.assertEquals(self.get_value('id=id_username'), 'confused_user')
 
         # He enters a password but no username
         self.get_element('id=id_username').clear()
@@ -69,47 +102,55 @@ class Test_2525_LoginLogout(FunctionalTest):
         self.click_link('id_login')
 
         # He is taken back to a copy of the login page that patiently reminds him that he
-        # should enter a username.  The password is still there (albeit masked by *s)
+        # should enter a username.  The password is cleared
         self.assert_login_error_shown()
-        self.assertEquals(self.get_text('id=id_username'), '')
-        self.assertEquals(self.get_text('id=id_password'), 'confused_pass')
+        self.assertEquals(self.get_value('id=id_username'), '')
+        self.assertEquals(self.get_value('id=id_password'), '')
 
         # He enters the wrong username and password
+        self.get_element('id=id_username').clear()
+        self.get_element('id=id_password').clear()
         self.get_element('id=id_username').send_keys('wrong user')
         self.get_element('id=id_password').send_keys('wrong password')
         self.click_link('id_login')
 
         # He is taken back to a copy of the login page telling him that the username/password
-        # combo wasn't recognised.  Both username and masked password are still there.
+        # combo wasn't recognised.  username stays, password goes
         self.assert_login_error_shown()
-        self.assertEquals(self.get_text('id=id_username'), 'wrong user')
-        self.assertEquals(self.get_text('id=id_password'), 'wrong password')
+        self.assertEquals(self.get_value('id=id_username'), 'wrong user')
+        self.assertEquals(self.get_value('id=id_password'), '')
 
         # He corrects the username, but enters the wrong password
         username = self.get_my_username()
+        self.get_element('id=id_username').clear()
+        self.get_element('id=id_password').clear()
         self.get_element('id=id_username').send_keys(username)
         self.get_element('id=id_password').send_keys('wrong password')
         self.click_link('id_login')
 
         # He is taken back to a copy of the login page telling him that the username/password
-        # combo wasn't recognised.  Both username and masked password are still there.
+        # combo wasn't recognised.  username stays, password goes
         self.assert_login_error_shown()
-        self.assertEquals(self.get_text('id=id_username'), username)
-        self.assertEquals(self.get_text('id=id_password'), 'wrong password')
+        self.assertEquals(self.get_value('id=id_username'), username)
+        self.assertEquals(self.get_value('id=id_password'), '')
 
         # He enters the correct password, but takes the opportunity to make the username
         # incorrect.
+        self.get_element('id=id_username').clear()
+        self.get_element('id=id_password').clear()
         self.get_element('id=id_username').send_keys('wrong user')
-        self.assertEquals(self.get_text('id=id_password'), 'p4ssw0rd')
+        self.get_element('id=id_password').send_keys('p4ssw0rd')
         self.click_link('id_login')
 
         # He is taken back to a copy of the login page telling him that the username/password
-        # combo wasn't recognised.  Both username and masked password are still there.
+        # combo wasn't recognised.  username stays, password goes
         self.assert_login_error_shown()
-        self.assertEquals(self.get_text('id=id_username'), 'wrong user')
-        self.assertEquals(self.get_text('id=id_password'), 'p4ssw0rd')
+        self.assertEquals(self.get_value('id=id_username'), 'wrong user')
+        self.assertEquals(self.get_value('id=id_password'), '')
 
         # Finally, he enters the correct username and password.
+        self.get_element('id=id_username').clear()
+        self.get_element('id=id_password').clear()
         self.get_element('id=id_username').send_keys(username)
         self.get_element('id=id_password').send_keys('p4ssw0rd')
         self.click_link('id_login')
