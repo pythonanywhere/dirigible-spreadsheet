@@ -297,6 +297,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             profile.save()
 
     def setUp(self):
+        self.create_users()
         print "%s ##### Running test %s" % (datetime.datetime.now(), self.id())
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(2)
