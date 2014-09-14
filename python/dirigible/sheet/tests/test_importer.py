@@ -234,7 +234,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
                 (3,0) : (0x17, '=#REF!'),
                 (4,0) : (0x1d, '=#NAME?'),
                 (5,0) : (0x24, '=#NUM!'),
-                (6,0) : (0x2a, '=#N/A!'),
+                (6,0) : (0x2a, '=#N/A'),
 
         }
         def mock_cell(row, col):
