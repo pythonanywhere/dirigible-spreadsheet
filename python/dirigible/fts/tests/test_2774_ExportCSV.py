@@ -114,10 +114,10 @@ class Test_2774_ExportCSV(FunctionalTest):
         # tries again using the international version
         self.assertEquals(self.selenium.get_title(), "CSV Export Error: Dirigible")
         self.assertEquals(
-            self.selenium.get_text("id=id_server_error_title"),
+            self.get_text("id=id_server_error_title"),
             "Could not export CSV file"
         )
-        error_text = self.selenium.get_text("id=id_server_error_text")
+        error_text = self.get_text("id=id_server_error_text")
         msg = "Sorry, your spreadsheet contains characters that cannot be saved in Excel CSV format"
         self.assertTrue(msg in error_text)
         msg = "Please try again using the international version"

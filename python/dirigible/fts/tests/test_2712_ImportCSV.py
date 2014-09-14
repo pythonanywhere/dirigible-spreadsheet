@@ -199,10 +199,10 @@ class Test_2712_ImportCSV(FunctionalTest):
         # * He is presented with an appropriate error page
         self.assertEquals(self.selenium.get_title(), "CSV Import Error: Dirigible")
         self.assertEquals(
-            self.selenium.get_text("id=id_server_error_title"),
+            self.get_text("id=id_server_error_title"),
             "Could not import CSV file"
         )
-        error_text = self.selenium.get_text("id=id_server_error_text")
+        error_text = self.get_text("id=id_server_error_text")
         msg = "Sorry, the file you uploaded was not in a recognised CSV format"
         self.assertTrue(msg  in error_text)
 

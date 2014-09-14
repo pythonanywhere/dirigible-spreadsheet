@@ -242,7 +242,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
             possible_error_locators = ('id=summary', 'id=id_server_error_title')
             for error_locator in possible_error_locators:
-                if self.selenium.is_element_present(error_locator) and str(error_code) in self.selenium.get_text(error_locator):
+                if self.selenium.is_element_present(error_locator) and str(error_code) in self.get_text(error_locator):
                     return
             self.fail('%d not raised, got: %s' % (error_code, self.selenium.get_title()))
 
@@ -302,8 +302,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def wait_for_element_text(self, locator, text, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
         self.wait_for(
-            lambda : self.selenium.get_text(locator) == text,
-            lambda : "Element %s to contain text %r. Contained %r" % (locator, text, self.selenium.get_text(locator)),
+            lambda : self.get_text(locator) == text,
+            lambda : "Element %s to contain text %r. Contained %r" % (locator, text, self.get_text(locator)),
             timeout_seconds=timeout_seconds
         )
 
@@ -425,7 +425,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.selenium.type('id=edit-id_sheet_name', name)
         self.human_key_press(key_codes.ENTER)
         self.wait_for(
-            lambda: self.selenium.get_text('id=id_sheet_name') == name,
+            lambda: self.get_text('id=id_sheet_name') == name,
             lambda: 'sheet name to be updated'
         )
 
@@ -651,7 +651,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_text(self, column, row):
         self.scroll_cell_row_into_view(column, row)
-        return self.selenium.get_text(self.get_cell_locator(column, row))
+        return self.get_text(self.get_cell_locator(column, row))
 
 
     def get_cell_editor_content(self):
@@ -673,7 +673,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         if not self.selenium.is_element_present(formula_locator):
             return None
 
-        return self.selenium.get_text(formula_locator)
+        return self.get_text(formula_locator)
 
 
     def assert_cell_shown_formula(self, column, row, formula):

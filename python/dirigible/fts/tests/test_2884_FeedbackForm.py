@@ -25,16 +25,16 @@ class Test_2884_FeedbackForm(FunctionalTest):
 
         #  * titled:
         self.assertEquals('Help us improve',
-            self.selenium.get_text('css=.ui-dialog-title')
+            self.get_text('css=.ui-dialog-title')
         )
         #  * with some friendly text:
         self.assertEquals(
             "It's always a pleasure to hear from you!",
-            self.selenium.get_text('css=#id_feedback_dialog_blurb_big')
+            self.get_text('css=#id_feedback_dialog_blurb_big')
         )
         self.assertEquals(
             "Ask us a question, or tell us what you love or hate about Dirigible:",
-            self.selenium.get_text('css=#id_feedback_dialog_blurb_small')
+            self.get_text('css=#id_feedback_dialog_blurb_small')
         )
         #   * with a big freeform input field
         #     which has the focus
@@ -124,16 +124,16 @@ class Test_2884_FeedbackForm(FunctionalTest):
 
         #  * titled:
         self.assertEquals('Help us improve',
-            self.selenium.get_text('css=.ui-dialog-title')
+            self.get_text('css=.ui-dialog-title')
         )
         #  * with some friendly text:
         self.assertEquals(
             "It's always a pleasure to hear from you!",
-            self.selenium.get_text('css=#id_feedback_dialog_blurb_big')
+            self.get_text('css=#id_feedback_dialog_blurb_big')
         )
         self.assertEquals(
             "Ask us a question, or tell us what you love or hate about Dirigible:",
-            self.selenium.get_text('css=#id_feedback_dialog_blurb_small')
+            self.get_text('css=#id_feedback_dialog_blurb_small')
         )
         #   * with a big freeform input field
         #     which has the focus

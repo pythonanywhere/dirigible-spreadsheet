@@ -273,7 +273,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         # It says 'free' and everyfink.
         self.wait_for_element_to_appear('id=id_login_signup_link')
         self.wait_for_element_to_appear('id=id_login_signup_blurb')
-        self.assertTrue("free" in self.selenium.get_text('id=id_login_signup_blurb'))
+        self.assertTrue("free" in self.get_text('id=id_login_signup_blurb'))
 
         # Hugh goes through the whole registration rigmarole,
         self.selenium.click('id=id_login_signup_link')

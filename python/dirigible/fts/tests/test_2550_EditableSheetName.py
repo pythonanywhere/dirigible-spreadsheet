@@ -19,7 +19,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
         #   where xx is the sheet id
         sheet_id = self.browser.current_url.split(r'/')[-2]
         self.assertEquals(
-            self.selenium.get_text('id=id_sheet_name'),
+            self.get_text('id=id_sheet_name'),
             'Sheet %s' % (sheet_id,))
 
         # * He mouses over the sheet name and notes that the appearance
@@ -50,7 +50,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
 
         #   The sheetname is modified
         self.wait_for(
-            lambda: self.selenium.get_text('id=id_sheet_name') == 'margarita',
+            lambda: self.get_text('id=id_sheet_name') == 'margarita',
             lambda: 'sheet name to be updated'
         )
         # and the title to the page becomes "user's sheet_name: Dirigible"
@@ -62,7 +62,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
 
         #   The new sheetname persists
         self.wait_for(
-            lambda: self.selenium.get_text('id=id_sheet_name') == 'margarita',
+            lambda: self.get_text('id=id_sheet_name') == 'margarita',
             lambda: 'sheet name to be updated'
         )
         # and the title to the page remains "user's sheet_name: Dirigible"
@@ -94,11 +94,11 @@ class Test_2550_EdittableSheetName(FunctionalTest):
 
         # * The recalculation finishes normally and his sheet has a new name
         self.wait_for_cell_value(1, 1, 'recalced', timeout_seconds=21)
-        self.assertEquals(self.selenium.get_text('id=id_sheet_name'), 'new sheet name')
+        self.assertEquals(self.get_text('id=id_sheet_name'), 'new sheet name')
 
         # * he checks that the new sheetname sticks after a page refresh
         self.refresh_sheet_page()
-        self.assertEquals(self.selenium.get_text('id=id_sheet_name'), 'new sheet name')
+        self.assertEquals(self.get_text('id=id_sheet_name'), 'new sheet name')
 
 
 

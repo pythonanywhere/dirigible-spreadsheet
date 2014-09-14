@@ -69,7 +69,7 @@ class Test_2565_JSONAPIAuth(FunctionalTest):
         self.assertFalse(self.is_element_enabled('id_security_form_json_api_url'))
 
         self.assertEquals(
-            self.selenium.get_text('css=label[for="id_security_form_json_enabled_checkbox"]'),
+            self.get_text('css=label[for="id_security_form_json_enabled_checkbox"]'),
             'Allow JSON API access'
         )
         self.assertEquals(self.selenium.get_value('id=id_security_form_json_enabled_checkbox'), 'off')

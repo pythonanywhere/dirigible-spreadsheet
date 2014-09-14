@@ -23,7 +23,7 @@ class Test_2546_ListSheetsOnDashboard(FunctionalTest):
         if sheet_name is None:
             sheet_name = 'Sheet %s' % (sheet_id,)
         expected_url = '/user/%s/sheet/%s/' % (self.get_my_username(), sheet_id)
-        link_text = self.selenium.get_text(
+        link_text = self.get_text(
             'css=a[href="%s"]' % (expected_url,))
             # "xpath=//a[contains(@href, '%s')]" % (expected_url,))
         self.assertEquals(link_text, sheet_name)

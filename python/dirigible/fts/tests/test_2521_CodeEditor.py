@@ -60,7 +60,7 @@ class Test_2521_CodeEditor(FunctionalTest):
 
         def assert_error(line, message):
             self.wait_for_element_to_appear(error_locator)
-            self.assertEquals(self.selenium.get_text(error_locator), str(line))
+            self.assertEquals(self.get_text(error_locator), str(line))
             self.assertEquals(
                 self.selenium.get_attribute('%s@title' % error_locator),
                 message

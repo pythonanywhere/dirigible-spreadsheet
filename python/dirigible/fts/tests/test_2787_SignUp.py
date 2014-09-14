@@ -58,19 +58,19 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He is told off.
         self.assertEquals(
-            self.selenium.get_text('id=id_username_error'),
+            self.get_text('id=id_username_error'),
             "Please enter a username."
         )
         self.assertEquals(
-            self.selenium.get_text('id=id_email_error'),
+            self.get_text('id=id_email_error'),
             "Please enter your email address."
         )
         self.assertEquals(
-            self.selenium.get_text('id=id_password1_error'),
+            self.get_text('id=id_password1_error'),
             "Please enter a password."
         )
         self.assertEquals(
-            self.selenium.get_text('id=id_password2_error'),
+            self.get_text('id=id_password2_error'),
             "Please enter a password."
         )
 
@@ -96,7 +96,7 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He is told off.
         self.assertEquals(
-            self.selenium.get_text('id=id_username_error'),
+            self.get_text('id=id_username_error'),
             "This username is already taken. Please choose another."
         )
 
@@ -117,7 +117,7 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He is told off.
         self.assertEquals(
-            self.selenium.get_text('id=id_email_error'),
+            self.get_text('id=id_email_error'),
             "Please enter a valid email address."
         )
 
@@ -150,7 +150,7 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He is told off.
         self.assertEquals(
-            self.selenium.get_text('id=id_non_field_errors'),
+            self.get_text('id=id_non_field_errors'),
             "You must type the same password each time"
         )
 
@@ -230,7 +230,7 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He sees a dialog box promoting the tutorial
         self.wait_for_element_visibility('id_tutorial_promo_dialog', True)
-        dialog_text = self.selenium.get_text('id=id_tutorial_promo_dialog')
+        dialog_text = self.get_text('id=id_tutorial_promo_dialog')
         self.assertTrue('tutorial' in dialog_text.lower())
 
         # He notes that even when the spinner stops, the focus stays on the dialog's OK
