@@ -8,7 +8,7 @@ from textwrap import dedent
 
 from django.contrib.auth.models import User
 
-from dirigible.test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverDjangoTestCase
 
 from dirigible.sheet.models import copy_sheet_to_user, Sheet
 from dirigible.user.models import OneTimePad
@@ -16,7 +16,7 @@ from dirigible.sheet.worksheet import Worksheet, worksheet_to_json
 
 
 
-class CopySheetForUserTest(ResolverTestCase):
+class CopySheetForUserTest(ResolverDjangoTestCase):
 
     def test_copy_sheet_allows_other_users_to_copy_public_sheets(self):
         user = User(username='Slartibartfast')
@@ -44,7 +44,7 @@ class CopySheetForUserTest(ResolverTestCase):
         self.assertNotEquals(retval.id, original_sheet_id)
 
 
-class SheetModelTest(ResolverTestCase):
+class SheetModelTest(ResolverDjangoTestCase):
 
     def test_creation(self):
         user = User(username='sheet_creation')
@@ -143,7 +143,7 @@ class SheetModelTest(ResolverTestCase):
 
     @patch('dirigible.sheet.sheet.jsonlib')
     def test_roundtrip_column_widths_to_db(self, mock_jsonlib):
-        COLUMN_WIDTHS = {'1':11, '2':22, '3':33}
+        COLUMN_WIDTHS = {'1': 11, '2': 22, '3': 33}
         mock_jsonlib.loads.return_value = COLUMN_WIDTHS
         mock_jsonlib.dumps.return_value = sentinel.json
         user = User(username='sheet_roundtrip_column_widths')
@@ -151,13 +151,16 @@ class SheetModelTest(ResolverTestCase):
         sheet = Sheet(owner=user)
         DEFAULT_COLUMN_WIDTHS_JSON = '{}'
         self.assertEquals(
-                mock_jsonlib.loads.call_args,
-                ((DEFAULT_COLUMN_WIDTHS_JSON,), {}))
+            mock_jsonlib.loads.call_args,
+            ((DEFAULT_COLUMN_WIDTHS_JSON,), {})
+        )
         sheet.column_widths = COLUMN_WIDTHS
 
         sheet.save()
-        self.assertTrue(mock_jsonlib.dumps.call_args,
-                ((COLUMN_WIDTHS,), {}))
+        self.assertEqual(
+            mock_jsonlib.dumps.call_args,
+            ((COLUMN_WIDTHS,), {})
+        )
         pk = sheet.id
 
         sheet2 = Sheet.objects.get(pk=pk)
@@ -194,27 +197,28 @@ class SheetModelTest(ResolverTestCase):
     def test_merge_non_calc_attrs_should_copy_some_attrs(self):
         s1 = Sheet()
         s1.name = 's1'
-        s1.column_widths = {'s1':0}
+        s1.column_widths = {'s1': 0}
         s1.contents_json = sentinel.sheet1
         s2 = Sheet()
         s2.name = 's2'
-        s2.column_widths = {'s2':0}
+        s2.column_widths = {'s2': 0}
         s2.contents_json = sentinel.sheet2
 
         s1.merge_non_calc_attrs(s2)
 
         self.assertEquals(s1.name, 's2')
-        self.assertEquals(s1.column_widths, {'s2':0})
+        self.assertEquals(s1.column_widths, {'s2': 0})
         self.assertEquals(s1.contents_json, sentinel.sheet1)
 
 
-    @patch('dirigible.sheet.sheet.chroot_calculate')
-    def test_calculate_starts_and_calls_server_in_chroot_jail_with_private_key_using_json_and_stores_json_results(
-        self, mock_chroot_calculate
+    @patch('dirigible.sheet.sheet.calculate_with_timeout')
+    def test_calculate_calls_calculate_with_unjsonified_worksheet_and_saves_recalced_json(
+        self, mock_calculate
     ):
         sheet = Sheet()
+        sheet.jsonify_worksheet = Mock()
+        sheet.unjsonify_worksheet = Mock()
         sheet.usercode = sentinel.usercode
-        sheet.contents_json = sentinel.contents_json
         sheet.timeout_seconds = sentinel.timeout_seconds
         sheet.create_private_key = Mock()
         sheet.otp = Mock()
@@ -222,29 +226,27 @@ class SheetModelTest(ResolverTestCase):
         sheet.calculate()
 
         self.assertCalledOnce(
-            mock_chroot_calculate,
-            sentinel.contents_json, sentinel.usercode,
-            sentinel.timeout_seconds, sheet.create_private_key.return_value
+            mock_calculate,
+            sheet.unjsonify_worksheet.return_value,
+            sheet.usercode,
+            sheet.timeout_seconds,
+            sheet.create_private_key.return_value
         )
-        self.assertEquals(sheet.contents_json, mock_chroot_calculate.return_value)
+        self.assertCalledOnce(sheet.jsonify_worksheet, sheet.unjsonify_worksheet.return_value)
 
-    @patch('dirigible.sheet.sheet.chroot_calculate')
+
+    @patch('dirigible.sheet.sheet.calculate_with_timeout')
     def test_calculate_always_deletes_private_key_in_finally_block(
-        self, mock_chroot_calculate
+        self, mock_calculate
     ):
         def raiser(*a, **kw):
             raise Exception()
-        mock_chroot_calculate.side_effect = raiser
+        mock_calculate.side_effect = raiser
         sheet = Sheet()
         user = User(username='geoff')
         user.save()
         sheet.owner = user
         sheet._delete_private_key = Mock()
-        sheet._delete_private_key.side_effect = lambda : sheet.otp.delete()
-
-        sheet.usercode = sentinel.usercode
-        sheet.contents_json = sentinel.contents_json
-        sheet.timeout_seconds = sentinel.timeout_seconds
 
         self.assertRaises(Exception, sheet.calculate)
 

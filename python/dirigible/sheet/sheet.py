@@ -10,7 +10,7 @@ from django.db import models, transaction
 from django.contrib.auth.models import User
 
 from dirigible.user.models import OneTimePad
-from dirigible.sheet.utils.process_utils import chroot_calculate
+from dirigible.sheet.calculate import calculate_with_timeout
 from dirigible.sheet.worksheet import (
     Worksheet, worksheet_from_json, worksheet_to_json
 )
@@ -95,13 +95,12 @@ class Sheet(models.Model):
 
     def calculate(self):
         private_key = self.create_private_key()
+        worksheet = self.unjsonify_worksheet()
         transaction.commit()
         try:
-            self.contents_json = chroot_calculate(
-                self.contents_json, self.usercode,
-                self.timeout_seconds, private_key
-            )
+            calculate_with_timeout(worksheet, self.usercode, self.timeout_seconds, private_key)
         finally:
             self._delete_private_key()
+        self.jsonify_worksheet(worksheet)
 
 
