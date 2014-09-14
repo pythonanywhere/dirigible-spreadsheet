@@ -17,12 +17,11 @@ from django.http import (
     Http404, HttpRequest, HttpResponse, HttpResponseForbidden,
     HttpResponseRedirect
 )
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from django.test.testcases import disable_transaction_methods, restore_transaction_methods, TransactionTestCase
 
 from dirigible.test_utils import (
-    assert_security_classes_exist, die, ResolverTestCase, ResolverDjangoTestCase
+    assert_security_classes_exist, die, ResolverTestCase
 )
 
 from sheet.cell import Cell, undefined
@@ -41,9 +40,9 @@ class SheetViewTestCase(TransactionTestCase, ResolverTestCase):
     maxDiff = None
 
     def assertMockUpdaterCalledOnceWithWorksheet(
-            self, mock_update_sheet_with_version_check, sheet,
-            expected_worksheet
-        ):
+        self, mock_update_sheet_with_version_check, sheet,
+        expected_worksheet
+    ):
         self.assertEquals(
             len(mock_update_sheet_with_version_check.call_args_list),
             1
@@ -229,6 +228,7 @@ class ImportXLSTest(SheetViewTestCase):
     def test_import_xls_closes_and_deletes_tempfile(self, mock_os, mock_mkstemp):
         mock_mkstemp.return_value = (sentinel.handle, sentinel.filename)
         mock_file = Mock()
+
         def die(*_):
             raise Exception('urk')
         mock_os.write.side_effect = die
@@ -244,10 +244,10 @@ class ImportXLSTest(SheetViewTestCase):
         self.assertTrue(isinstance(response, HttpResponse))
         self.assertEquals(
             response.content,
-            render_to_response(
+            render(
+                self.request,
                 'import_xls_error.html',
                 {},
-                context_instance=RequestContext(self.request)
             ).content
         )
 
@@ -358,8 +358,8 @@ a, b,c,d
 
 ImportCSVSecurityTest = create_view_security_test(
     "ImportCSVSecurityTest", import_csv,
-    post_dict={ "column": "1", "row" : "1"},
-    files_dict={'file':'file'}
+    post_dict={"column": "1", "row": "1"},
+    files_dict={'file': 'file'}
 )
 
 class ImportCSVTest(SheetViewTestCase):
@@ -372,8 +372,8 @@ class ImportCSVTest(SheetViewTestCase):
         self, mock_update_sheet_with_version_check
     ):
         worksheet = Worksheet()
-        for column in range(2,7):
-            for row in range(3,9):
+        for column in range(2, 7):
+            for row in range(3, 9):
                 worksheet[(column, row)].formula = 'old'
         self.sheet.jsonify_worksheet(worksheet)
         self.sheet.save()
@@ -430,7 +430,7 @@ class ImportCSVTest(SheetViewTestCase):
 
     @patch('sheet.views.ImportCSVForm')
     def test_import_csv_handles_null_file(self, mock_import_csv_form):
-        mock_import_csv_form.side_effect = lambda *args, **kwargs : ImportCSVForm(*args, **kwargs)
+        mock_import_csv_form.side_effect = lambda *args, **kwargs: ImportCSVForm(*args, **kwargs)
 
         self.request.POST['column'] = 3
         self.request.POST['row'] = 4
@@ -440,8 +440,9 @@ class ImportCSVTest(SheetViewTestCase):
         response = import_csv(self.request, self.user.username, self.sheet.id)
 
         self.assertEquals(
-                mock_import_csv_form.call_args_list,
-                [((self.request.POST, self.request.FILES), {})])
+            mock_import_csv_form.call_args_list,
+            [((self.request.POST, self.request.FILES), {})]
+        )
 
         self.assertTrue(isinstance(response, HttpResponse))
         self.assertTrue('not in a recognised CSV format' in response.content)
@@ -697,33 +698,35 @@ class PageViewTest(SheetViewTestCase):
         self.assertEquals(response.status_code, 200)
 
 
-    @patch('sheet.views.render_to_response')
+    @patch('sheet.views.render')
     @patch('sheet.views.get_object_or_404')
     @patch('sheet.views.ImportCSVForm')
     def test_page_should_render_template_with_correct_stuff_before_setting_userprofile_flag(
-        self, mock_import_csv_form, mock_get_object_or_404, mock_render_to_response
+        self, mock_import_csv_form, mock_get_object_or_404, mock_render
     ):
         mock_get_object_or_404.return_value = self.sheet
+
         def check_userprofile_flag_not_set(*args, **kwargs):
             self.assertEquals(
-                    self.user.get_profile().has_seen_sheet_page,
-                    False,
-                    'user profile has_seen_sheet_page set to True before first render'
+                self.user.get_profile().has_seen_sheet_page,
+                False,
+                'user profile has_seen_sheet_page set to True before first render'
             )
             return sentinel.response
-        mock_render_to_response.side_effect = check_userprofile_flag_not_set
+        mock_render.side_effect = check_userprofile_flag_not_set
 
         actual = page(self.request, self.user.username, self.sheet.id)
 
         self.assertCalledOnce(
-                mock_render_to_response,
-                'sheet_page.html',
-                {
-                    'sheet': self.sheet,
-                    'user' : self.user,
-                    'profile' : self.user.get_profile(),
-                    'import_form' : mock_import_csv_form.return_value,
-                }
+            mock_render,
+            self.request,
+            'sheet_page.html',
+            {
+                'sheet': self.sheet,
+                'user': self.user,
+                'profile': self.user.get_profile(),
+                'import_form': mock_import_csv_form.return_value,
+            }
         )
         self.assertEquals(actual, sentinel.response)
         self.assertTrue(self.user.get_profile().has_seen_sheet_page)
@@ -735,26 +738,27 @@ class PageViewTest(SheetViewTestCase):
     def test_view_should_send_welcome_email_if_new_user(
             self, mock_send_mail, mock_get_template, mock_Context
     ):
-        _ = page(self.request, self.user.username, self.sheet.id)
+        page(self.request, self.user.username, self.sheet.id)
 
         self.assertCalledOnce(mock_get_template, 'welcome_email.txt')
         self.assertCalledOnce(mock_Context, dict(user=self.user))
         self.assertCalledOnce(
-                mock_get_template.return_value.render,
-                mock_Context.return_value
+            mock_get_template.return_value.render,
+            mock_Context.return_value
         )
         self.assertCalledOnce(
-                mock_send_mail,
-                'Welcome to Dirigible',
-                mock_get_template.return_value.render.return_value,
-                '',
-                [self.user.email],
-                fail_silently=True)
+            mock_send_mail,
+            'Welcome to Dirigible',
+            mock_get_template.return_value.render.return_value,
+            '',
+            [self.user.email],
+            fail_silently=True
+        )
 
 
-    @patch('sheet.views.render_to_response')
-    def test_page_allows_other_users_to_view_public_sheets(self, mock_render_to_response):
-        mock_render_to_response.side_effect = render_to_response
+    @patch('sheet.views.render')
+    def test_page_allows_other_users_to_view_public_sheets(self, mock_render):
+        mock_render.side_effect = render
         self.sheet.is_public = True
         self.sheet.save()
         other_user = User(username='Othello')
@@ -765,12 +769,14 @@ class PageViewTest(SheetViewTestCase):
 
         self.assertEquals(response.status_code, 200)
         self.assertTrue('id_usercode' in response.content)
-        self.assertTrue(mock_render_to_response.call_args[0][1]['sheet'].public_view_mode)
+        (request, template_name, context), kwargs = mock_render.call_args
+
+        self.assertTrue(context['sheet'].public_view_mode)
 
 
-    @patch('sheet.views.render_to_response')
-    def test_page_allows_anonymous_user_to_view_public_sheets(self, mock_render_to_response):
-        mock_render_to_response.side_effect = render_to_response
+    @patch('sheet.views.render')
+    def test_page_allows_anonymous_user_to_view_public_sheets(self, mock_render):
+        mock_render.side_effect = render
         self.sheet.is_public = True
         self.sheet.save()
         self.request.user = AnonymousUser()
@@ -781,12 +787,13 @@ class PageViewTest(SheetViewTestCase):
 
         self.assertEquals(response.status_code, 200)
         self.assertTrue('id_usercode' in response.content)
-        self.assertTrue(mock_render_to_response.call_args[0][1]['sheet'].public_view_mode)
+        (request, template_name, context), kwargs = mock_render.call_args
+        self.assertTrue(context['sheet'].public_view_mode)
 
 
 SetCellFormulaSecurityTest = create_view_security_test(
     "SetCellFormulaSecurityTest", set_cell_formula,
-    post_dict={ "column": "1", "row" : "1", "formula" : "woo" }
+    post_dict={"column": "1", "row": "1", "formula": "woo"}
 )
 
 class SetCellFormulaTest(SheetViewTestCase):
@@ -1461,7 +1468,7 @@ class VersionUpdatesTest(SheetViewTestCase):
             'never_cache',
             'os',
             'Q',
-            'render_to_response',
+            'render',
             'render_to_string',
             'RequestContext',
             'reverse',

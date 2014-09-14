@@ -13,5 +13,5 @@ See the <a href="/documentation/import_export.html">documentation</a> for more i
 
 
 {% block error_recovery_link %}
-<a id="id_sheet_link" href="{% url sheet_page sheet.owner.username sheet.id %}">Return to your sheet ({{sheet.name}})</a>
+<a id="id_sheet_link" href="{% url 'sheet_page' sheet.owner.username sheet.id %}">Return to your sheet ({{sheet.name}})</a>
 {% endblock %}
