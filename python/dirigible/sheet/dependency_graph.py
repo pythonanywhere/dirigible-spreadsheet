@@ -58,16 +58,6 @@ def build_dependency_graph(worksheet):
     return graph, leaves
 
 
-def _add_location_dependencies(graph, location, dependencies):
-    if location not in graph:
-        graph[location] = Node(location)
-    graph[location].children |= dependencies
-    for dependency in dependencies:
-        if dependency not in graph:
-            graph[dependency] = Node(dependency)
-        graph[dependency].parents.add(location)
-
-
 def _generate_cell_subgraph(worksheet, graph, loc, completed, path):
     if loc not in worksheet:
         return
@@ -104,3 +94,15 @@ def _generate_cell_subgraph(worksheet, graph, loc, completed, path):
                     raise cycle_error
         _add_location_dependencies(graph, loc, valid_dependencies)
     completed.add(loc)
+
+
+def _add_location_dependencies(graph, location, dependencies):
+    if location not in graph:
+        graph[location] = Node(location)
+    graph[location].children |= dependencies
+    for dependency in dependencies:
+        if dependency not in graph:
+            graph[dependency] = Node(dependency)
+        graph[dependency].parents.add(location)
+
+

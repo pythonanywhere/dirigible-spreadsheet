@@ -58,8 +58,13 @@ def set_cell_error_and_add_to_console(worksheet, location, exception):
     cell = worksheet[location]
     cell.value = undefined
     cell.error = "%s: %s" % (exception.__class__.__name__, str(exception))
-    worksheet.add_console_text("%s\n    Formula '%s' in %s\n" % (
-            cell.error, cell.formula, coordinates_to_cell_name(*location)))
+    worksheet.add_console_text(
+        "{error_text}\n    Formula '{formula}' in {cell_name}\n".format(
+            error_text=cell.error,
+            formula=cell.formula,
+            cell_name=coordinates_to_cell_name(*location)
+        )
+    )
 
 
 def recalculate_cell(location, leaf_queue, graph, context):
@@ -189,7 +194,8 @@ def format_traceback(frames):
         return "%s line %d%s%s" % (filename, line_no, function, source)
 
     return '\n'.join(
-        map(format_frame,
+        map(
+            format_frame,
             filter(frame_is_visible_to_user, frames)
         )
     )
