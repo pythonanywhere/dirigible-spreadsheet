@@ -151,6 +151,32 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.fail("Timeout waiting for condition: %s" % (msg_function(),))
 
 
+    def create_users(self):
+        from django.contrib.auth.models import User
+        for username in self.get_my_usernames():
+            user = User.objects.create(username=username)
+            user.set_password('p4ssw0rd')
+            user.save()
+            profile = user.get_profile()
+            profile.has_seen_sheet_page = True
+            profile.save()
+
+
+    def setUp(self):
+        self.create_users()
+        print "%s ##### Running test %s" % (datetime.datetime.now(), self.id())
+        self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(2)
+
+
+    def tearDown(self):
+        try:
+            self.logout()
+        finally:
+            self.browser.quit()
+            print "%s ##### Finished test %s" % (datetime.datetime.now(), self.id())
+
+
     @humanise_with_delay
     def human_key_press(self, key_code):
         self.selenium.key_press_native(key_code)
@@ -288,31 +314,6 @@ class FunctionalTest(StaticLiveServerTestCase):
             lambda : "Element %s to become%svisible" % (locator, visibility and ' ' or ' in'),
             timeout_seconds=timeout_seconds
         )
-
-
-    def create_users(self):
-        from django.contrib.auth.models import User
-        for username in self.get_my_usernames():
-            user = User.objects.create(username=username)
-            user.set_password('p4ssw0rd')
-            user.save()
-            profile = user.get_profile()
-            profile.has_seen_sheet_page = True
-            profile.save()
-
-    def setUp(self):
-        self.create_users()
-        print "%s ##### Running test %s" % (datetime.datetime.now(), self.id())
-        self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(2)
-
-
-    def tearDown(self):
-        try:
-            self.logout()
-        finally:
-            self.browser.quit()
-            print "%s ##### Finished test %s" % (datetime.datetime.now(), self.id())
 
 
     def login(self, username=None, password=USER_PASSWORD, already_on_login_page=False):
