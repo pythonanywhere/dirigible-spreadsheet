@@ -6,7 +6,7 @@
 
         <link rel="stylesheet" href="/static/dirigible/styles/base.css" type="text/css" media="screen" charset="utf-8" />
 
-        <script type="text/javascript" src="/static/jquery/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="/static/jquery/jquery-1.5.2.min.js"></script>
         <script type="text/javascript" src="/static/jquery/jquery-ui-1.8.10.custom.min.js"></script>
         <link rel="stylesheet" href="/static/jquery/jquery-ui-1.8.10.custom.css" type="text/css" media="screen" charset="utf-8" />
         
@@ -14,6 +14,20 @@
             var urls = {};
         </script>
         <script type="text/javascript" src="/static/dirigible/scripts/feedback_dialog.js"></script>
+        <script>
+var csrfToken = "{{ csrf_token }}";
+var csrfSafeMethod = function(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        }
+    }
+});
+        </script>
 
         {% block head %}
         {% endblock %}
