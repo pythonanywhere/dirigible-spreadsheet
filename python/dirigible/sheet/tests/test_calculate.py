@@ -8,16 +8,17 @@ from datetime import datetime
 from Queue import Queue
 import sys
 from textwrap import dedent
+from unittest import SkipTest
 from urllib import urlencode
 
+
 from mock import Mock, patch, sentinel
-import numpy
 
 from dirigible.test_utils import die, ResolverTestCase
 
 import dirigible.sheet.calculate as calculate_module
 from dirigible.sheet.calculate import (
-    api_json_to_worksheet,calculate, calculate_with_timeout,
+    api_json_to_worksheet, calculate, calculate_with_timeout,
     create_cell_recalculator, CURRENT_API_VERSION, evaluate_formulae_in_context,
     execute_usercode, format_traceback, is_nan, load_constants, _raise, recalculate_cell,
     run_worksheet, MyStdout)
@@ -29,6 +30,7 @@ from dirigible.sheet.views_api_0_1 import _sheet_to_value_only_json
 from dirigible.sheet.worksheet import CellRange, Worksheet, worksheet_from_json, worksheet_to_json
 
 
+
 class TestIsNan(ResolverTestCase):
 
     def test_is_nan(self):
@@ -36,8 +38,13 @@ class TestIsNan(ResolverTestCase):
         self.assertFalse(is_nan(23.3))
         self.assertFalse(is_nan(23))
 
+    def test_is_nan_with_numpy(self):
         # known to cause problems historically:
-        self.assertFalse(is_nan(numpy.array([1, 2, 3])))
+        try:
+            import numpy
+            self.assertFalse(is_nan(numpy.array([1, 2, 3])))
+        except ImportError:
+            raise SkipTest('No numpy')
 
 
 
