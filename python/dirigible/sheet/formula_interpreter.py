@@ -72,16 +72,32 @@ def rewrite_cell_range(node):
     ])
 
 
+CELL_REFERENCES = (
+    ParseNode.FL_CELL_REFERENCE, ParseNode.FL_INVALID_REFERENCE,
+    ParseNode.FL_DELETED_REFERENCE
+)
+CONTAIN_COLONS = (
+    ParseNode.LAMBDEF, ParseNode.DICT_MAKER, ParseNode.SUBSCRIPT,
+    ParseNode.SLICE_OP
+)
+
 def rewrite(parse_node):
     if isinstance(parse_node, ParseNode):
         if parse_node.type == ParseNode.FL_CELL_RANGE:
             return rewrite_cell_range(parse_node)
-        elif parse_node.type in (ParseNode.FL_CELL_REFERENCE, ParseNode.FL_INVALID_REFERENCE, ParseNode.FL_DELETED_REFERENCE):
+
+        elif parse_node.type in CELL_REFERENCES:
             return rewrite_cell_reference(parse_node)
-        elif parse_node.type in (ParseNode.LAMBDEF, ParseNode.DICT_MAKER, ParseNode.SUBSCRIPT, ParseNode.SLICE_OP):
-            parse_node.children = map(rewrite, [transform_arrow(child) for child in parse_node.children])
+
+        elif parse_node.type in CONTAIN_COLONS:
+            parse_node.children = map(
+                rewrite,
+                [transform_arrow(child) for child in parse_node.children]
+            )
+
         else:
             parse_node.children = map(rewrite, parse_node.children)
+
     return parse_node
 
 

@@ -38,7 +38,7 @@ class Cell(object):
                     self._python_formula = get_python_formula_from_parse_tree(parsed_formula)
                 except FormulaError, e:
                     self.dependencies = []
-                    self._python_formula = '_raise(FormulaError("%s"))' % (e,)
+                    self._python_formula = '_raise(FormulaError("{}"))'.format(e)
         else:
             raise TypeError('cell formula must be str or unicode')
 

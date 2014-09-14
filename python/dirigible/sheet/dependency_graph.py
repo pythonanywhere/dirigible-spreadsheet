@@ -49,10 +49,12 @@ def build_dependency_graph(worksheet):
             _generate_cell_subgraph(worksheet, graph, loc, visited, [])
         except CycleError:
             pass # Deal with escapees
+
     leaves = []
     for loc, deps in graph.iteritems():
         if not deps.children:
             leaves.append(loc)
+
     return graph, leaves
 
 

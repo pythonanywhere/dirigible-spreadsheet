@@ -3,12 +3,12 @@ from dirigible.test_utils import *
 from dirigible.sheet.tests.test_sheet import *
 from dirigible.sheet.tests.test_clipboard import *
 from dirigible.sheet.tests.test_calculate import *
-import dirigible.sheet.tests.test_calculate
 from dirigible.sheet.tests.test_calculate_server import *
 from dirigible.sheet.tests.test_cell import *
 from dirigible.sheet.tests.test_cell_range import *
 from dirigible.sheet.tests.test_dirigible_datetime import *
 from dirigible.sheet.tests.test_dependency_graph import *
+from dirigible.sheet.tests.test_eval_constant import *
 from dirigible.sheet.tests.test_errors import *
 from dirigible.sheet.tests.test_formula_interpreter import *
 from dirigible.sheet.tests.test_importer import *

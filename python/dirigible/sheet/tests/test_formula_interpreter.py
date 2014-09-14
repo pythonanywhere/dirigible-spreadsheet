@@ -12,8 +12,8 @@ except ImportError:
 from mock import Mock, patch, sentinel
 
 from dirigible.sheet.formula_interpreter import (
-        get_dependencies_from_parse_tree, get_python_formula_from_parse_tree,
-        rewrite
+    get_dependencies_from_parse_tree, get_python_formula_from_parse_tree,
+    rewrite
 )
 from dirigible.sheet.parser import FormulaError
 from dirigible.sheet.parser.parse_node import ParseNode
@@ -25,7 +25,7 @@ from dirigible.test_utils import ResolverTestCase
 class TestGetPythonFormulaFromParseTree(ResolverTestCase):
 
     @patch('dirigible.sheet.formula_interpreter.rewrite')
-    def test_get_python_formula_from_parse_tree_should_flatten_rewrite_and_remove_1st_char(self, mock_rewrite):
+    def test_flattens_rewrites_and_removes_1st_char(self, mock_rewrite):
         mock_rewrite.return_value = Mock()
         mock_rewrite.return_value.flatten.return_value = '123'
 
@@ -36,22 +36,29 @@ class TestGetPythonFormulaFromParseTree(ResolverTestCase):
         self.assertEquals(result, '23')
 
 
-    def test_get_python_formula_from_parse_tree_should_convert_formula_starting_with_equals(self):
+    def test_converts_formula_starting_with_equals(self):
         self.assertEquals(get_python_formula_from_parse_tree(parse('=1')), "1")
         self.assertEquals(get_python_formula_from_parse_tree(parse('=1+2')), "1+2")
 
 
-    def test_get_python_formula_from_parse_tree_should_convert_cell_references_and_add_space_to_avoid_following_keywords(self):
-        self.assertEquals(get_python_formula_from_parse_tree(parse('=A1')), "worksheet[(1,1)].value ")
-
-
-    def test_get_python_formula_from_parse_tree_should_produce_correct_python(self):
+    def test_converts_cell_references_and_adds_space(self):
         self.assertEquals(
-            get_python_formula_from_parse_tree(parse('=[x * A1 for x in range(5)]')),
+            get_python_formula_from_parse_tree(parse('=A1')),
+            "worksheet[(1,1)].value "
+        )
+
+
+    def test_produces_correct_python(self):
+        self.assertEquals(
+            get_python_formula_from_parse_tree(parse(
+                '=[x * A1 for x in range(5)]'
+            )),
             '[x * worksheet[(1,1)].value for x in range(5)]'
         )
         self.assertEquals(
-            get_python_formula_from_parse_tree(parse('=[x in A1:B3 for x in range(5)]')),
+            get_python_formula_from_parse_tree(parse(
+                '=[x in A1:B3 for x in range(5)]'
+            )),
             '[x in CellRange(worksheet,(1,1),(2,3)) for x in range(5)]'
         )
         self.assertEquals(
