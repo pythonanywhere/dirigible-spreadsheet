@@ -16,7 +16,7 @@ from mock import call, Mock, patch, sentinel
 
 from test_utils import die, ResolverTestCase
 
-import dirigible.sheet.calculate as calculate_module
+import sheet.calculate as calculate_module
 from sheet.calculate import (
     api_json_to_worksheet, calculate, calculate_with_timeout,
     create_cell_recalculator, CURRENT_API_VERSION, evaluate_formulae_in_context,
@@ -50,7 +50,7 @@ class TestIsNan(ResolverTestCase):
 
 class TestLoadConstants(ResolverTestCase):
 
-    @patch('dirigible.sheet.calculate.eval_constant')
+    @patch('sheet.calculate.eval_constant')
     def test_load_constants_should_call_eval_constant_only_on_every_constant_location(self, mock_eval_constant):
         worksheet = Worksheet()
         worksheet[11,1].formula = "=formula1"
@@ -191,7 +191,7 @@ class TestRecalculateCell(ResolverTestCase):
 
 class TestCreateCellRecalculator(ResolverTestCase):
 
-    @patch('dirigible.sheet.calculate.recalculate_cell')
+    @patch('sheet.calculate.recalculate_cell')
     def test_create_cell_recalculator_should(self, mock_recalculate):
         unrecalculated_queue = Queue()
         unrecalculated_queue.put(1)
@@ -227,7 +227,7 @@ class TestCreateCellRecalculator(ResolverTestCase):
             [ ((), {}), ((), {}), ]
         )
 
-    @patch('dirigible.sheet.calculate.recalculate_cell')
+    @patch('sheet.calculate.recalculate_cell')
     def test_create_cell_recalculator_should_handle_exceptions_from_recalc_cell(self, mock_recalculate):
         mock_recalculate.side_effect = die()
         unrecalculated_queue = Queue()
@@ -250,11 +250,11 @@ class TestCreateCellRecalculator(ResolverTestCase):
 
 class TestEvaluateFormulaeInContext(ResolverTestCase):
 
-    @patch('dirigible.sheet.calculate.NUM_THREADS', 2)
-    @patch('dirigible.sheet.calculate.build_dependency_graph')
-    @patch('dirigible.sheet.calculate.Thread')
-    @patch('dirigible.sheet.calculate.Queue')
-    @patch('dirigible.sheet.calculate.create_cell_recalculator')
+    @patch('sheet.calculate.NUM_THREADS', 2)
+    @patch('sheet.calculate.build_dependency_graph')
+    @patch('sheet.calculate.Thread')
+    @patch('sheet.calculate.Queue')
+    @patch('sheet.calculate.create_cell_recalculator')
     def test_evaluate_formulae_in_context_builds_dependency_graph_and_recalculates_it_on_threads(
         self, mock_create_cell_recalculator, mock_queue_class, mock_thread_class,
         mock_build_dependency_graph
@@ -333,8 +333,8 @@ SANITY_CHECK_USERCODE = dedent("""
 """)
 class TestCalculate(ResolverTestCase):
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
-    @patch('dirigible.sheet.calculate.evaluate_formulae_in_context')
+    @patch('sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.evaluate_formulae_in_context')
     def test_calculate_should_execute_usercode_with_correct_context_and_curried_evaluate_formulae_in_context(
         self, mock_evaluate_formulae_in_context, mock_execute_usercode
     ):
@@ -364,7 +364,7 @@ class TestCalculate(ResolverTestCase):
             ((sentinel.worksheet, context), {})
         )
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.execute_usercode')
     def test_calculate_patches_sys_stdout(
         self, mock_execute_usercode
     ):
@@ -385,8 +385,8 @@ class TestCalculate(ResolverTestCase):
         self.assertEquals(ws._console_text, ws2._console_text)
 
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
-    @patch('dirigible.sheet.calculate.run_worksheet')
+    @patch('sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.run_worksheet')
     def test_calculate_puts_curried_run_worksheet_into_context(self, mock_run_worksheet, mock_execute_usercode):
         worksheet = Worksheet()
         calculate(worksheet, sentinel.usercode, sentinel.private_key)
@@ -402,7 +402,7 @@ class TestCalculate(ResolverTestCase):
         self.assertCalledOnce(mock_run_worksheet, sentinel.urls, sentinel.overrides, sentinel.private_key)
 
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.execute_usercode')
     def test_calculate_clears_previous_worksheet_cell_values_before_executing_usercode(
         self, mock_execute_usercode
     ):
@@ -418,9 +418,9 @@ class TestCalculate(ResolverTestCase):
         self.assertEquals(calls_list, ['clear values', 'execute usercode'])
 
 
-    @patch('dirigible.sheet.calculate.execute_usercode', Mock())
-    @patch('dirigible.sheet.calculate.evaluate_formulae_in_context', Mock())
-    @patch('dirigible.sheet.calculate.time')
+    @patch('sheet.calculate.execute_usercode', Mock())
+    @patch('sheet.calculate.evaluate_formulae_in_context', Mock())
+    @patch('sheet.calculate.time')
     def test_calculate_clears_previous_worksheet_console_text_and_reports_time(self, mock_time):
         recalc_times = [1.3245, 0]
         def mock_time_fn():
@@ -437,9 +437,9 @@ class TestCalculate(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.calculate.evaluate_formulae_in_context', Mock())
-    @patch('dirigible.sheet.calculate.execute_usercode')
-    @patch('dirigible.sheet.calculate.time')
+    @patch('sheet.calculate.evaluate_formulae_in_context', Mock())
+    @patch('sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.time')
     def test_calculate_clears_previous_worksheet_console_text_and_reports_time_when_theres_an_error(self, mock_time, mock_execute_usercode):
         recalc_times = [1.3245, 0]
         def mock_time_fn():
@@ -460,8 +460,8 @@ class TestCalculate(ResolverTestCase):
             (('Took 1.32s',),{'log_type':'system'}),
         )
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
-    @patch('dirigible.sheet.calculate.evaluate_formulae_in_context')
+    @patch('sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.evaluate_formulae_in_context')
     def test_calculate_clears_previous_worksheet_usercode_error(self, mock_evaluate_formulae_in_context, mock_execute_usercode):
         worksheet = Worksheet()
         worksheet._usercode_error = "Argh!"
@@ -470,8 +470,8 @@ class TestCalculate(ResolverTestCase):
 
 
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
-    @patch('dirigible.sheet.calculate.evaluate_formulae_in_context', Mock())
+    @patch('sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.evaluate_formulae_in_context', Mock())
     def test_calculate_catches_usercode_exceptions(self, mock_execute_usercode):
         worksheet = Worksheet()
         def execute_usercode(_, __):
@@ -483,8 +483,8 @@ class TestCalculate(ResolverTestCase):
             self.fail("Unhandled exception when executing broken usercode")
 
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
-    @patch('dirigible.sheet.calculate.evaluate_formulae_in_context')
+    @patch('sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.evaluate_formulae_in_context')
     def test_calculate_catches_and_reports_exceptions_in_worksheet_usercode_error_field(self, mock_evaluate_formulae_in_context, mock_execute_usercode):
         worksheet = Worksheet()
         def execute_usercode(_, __):
@@ -552,8 +552,8 @@ class TestCalculate(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.calculate.execute_usercode')
-    @patch('dirigible.sheet.calculate.evaluate_formulae_in_context')
+    @patch('sheet.calculate.execute_usercode')
+    @patch('sheet.calculate.evaluate_formulae_in_context')
     def test_calculate_catches_and_reports_syntax_errors_to_console(self, mock_evaluate_formulae_in_context, mock_execute_usercode):
         worksheet = Worksheet()
         worksheet.add_console_text = Mock()
@@ -600,7 +600,7 @@ class TestCalculate(ResolverTestCase):
 
 class TestCalculateWithTimeout(ResolverTestCase):
 
-    @patch('dirigible.sheet.calculate.calculate')
+    @patch('sheet.calculate.calculate')
     def test_calculate_with_timeout_calls_calculate_function_with_contents_and_usercode(
         self, mock_calculate
     ):
@@ -616,7 +616,7 @@ class TestCalculateWithTimeout(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.calculate.InterruptableThread')
+    @patch('sheet.calculate.InterruptableThread')
     def test_calculate_with_timeout_uses_interruptable_thread_with_correct_timeout(
         self, mock_ithread_class
     ):
@@ -635,8 +635,8 @@ class TestCalculateWithTimeout(ResolverTestCase):
                           )
 
 
-    @patch('dirigible.sheet.calculate.InterruptableThread')
-    @patch('dirigible.sheet.calculate.sleep')
+    @patch('sheet.calculate.InterruptableThread')
+    @patch('sheet.calculate.sleep')
     def test_calculate_with_timeout_tries_to_interrupt_timed_out_thread(
         self, mock_sleep, mock_ithread_class
     ):
@@ -679,8 +679,8 @@ class TestRaise(ResolverTestCase):
 
 class TestRunWorksheet(ResolverTestCase):
 
-    @patch('dirigible.sheet.calculate.urllib2')
-    @patch('dirigible.sheet.calculate.api_json_to_worksheet')
+    @patch('sheet.calculate.urllib2')
+    @patch('sheet.calculate.api_json_to_worksheet')
     def test_run_worksheet_no_overrides(self, mock_api_json_to_worksheet, mock_urllib2):
         mock_api_json_to_worksheet.return_value = Worksheet()
         worksheet_url = 'ws_url/'
@@ -697,9 +697,9 @@ class TestRunWorksheet(ResolverTestCase):
         self.assertEquals(result, mock_api_json_to_worksheet.return_value)
 
 
-    @patch('dirigible.sheet.calculate.urlencode')
-    @patch('dirigible.sheet.calculate.urllib2')
-    @patch('dirigible.sheet.calculate.api_json_to_worksheet')
+    @patch('sheet.calculate.urlencode')
+    @patch('sheet.calculate.urllib2')
+    @patch('sheet.calculate.api_json_to_worksheet')
     def test_run_worksheet_with_overrides(self, mock_api_json_to_worksheet, mock_urllib2, mock_urlencode):
         overrides = {'a1': 55}
         str_overrides = {'a1': '55', 'dirigible_l337_private_key': sentinel.private_key}
@@ -721,7 +721,7 @@ class TestRunWorksheet(ResolverTestCase):
         self.assertEquals(result, mock_api_json_to_worksheet.return_value)
 
 
-    @patch('dirigible.sheet.calculate.urllib2')
+    @patch('sheet.calculate.urllib2')
     def test_run_worksheet_with_error(self, mock_urllib2):
         mock_opener = mock_urllib2.build_opener.return_value
         mock_urlopen_file = mock_opener.open.return_value
@@ -732,8 +732,8 @@ class TestRunWorksheet(ResolverTestCase):
         self.assertEquals(str(mngr.exception), 'run_worksheet: error')
 
 
-    @patch('dirigible.sheet.calculate.urllib2')
-    @patch('dirigible.sheet.calculate.api_json_to_worksheet')
+    @patch('sheet.calculate.urllib2')
+    @patch('sheet.calculate.api_json_to_worksheet')
     def test_run_worksheet_passes_private_key_in_params(self, mock_api_json_to_worksheet, mock_urllib2):
         worksheet_url = 'ws_url/'
         target_url = '%sv%s/json/' % (worksheet_url, CURRENT_API_VERSION)
@@ -944,7 +944,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
         self.assertEquals(worksheet[1, 2].formula, '=foo(3)')
 
 
-    @patch('dirigible.sheet.calculate.urllib2')
+    @patch('sheet.calculate.urllib2')
     def test_run_worksheet_should_return_worksheet_with_calculated_values_only(self, mock_urllib2):
         self.maxDiff = None
 
@@ -984,7 +984,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
         self.assertEquals(result, expected_sheet)
 
 
-    @patch('dirigible.sheet.calculate.urllib2')
+    @patch('sheet.calculate.urllib2')
     def test_run_worksheet_with_overrides(self, mock_urllib2):
         self.maxDiff = None
 

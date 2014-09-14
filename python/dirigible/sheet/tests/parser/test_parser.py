@@ -3359,7 +3359,7 @@ class ParserModuleTest(unittest.TestCase):
         # read.
         parseTabWriteTime = os.path.getmtime("sheet/parser/parsetab.py")
 
-        import dirigible.sheet.parser.parser as ParserModule
+        import sheet.parser.parser as ParserModule
         reload(ParserModule)
         self.assertEquals(os.path.getmtime("sheet/parser/parsetab.py"),
                           parseTabWriteTime,

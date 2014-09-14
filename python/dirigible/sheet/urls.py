@@ -131,7 +131,7 @@ urlpatterns = patterns('',
 
     url(
         r'%sv0\.1/' % (URL_BASE,),
-        include('dirigible.sheet.urls_api_0_1'),
+        include('sheet.urls_api_0_1'),
     ),
 
 )

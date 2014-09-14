@@ -119,7 +119,7 @@ class TestBuildDependencyGraph(ResolverTestCase):
         self.assertEquals(leaves, [(1, 1)])
 
 
-    @patch('dirigible.sheet.dependency_graph.report_cell_error')
+    @patch('sheet.dependency_graph.report_cell_error')
     def test_puts_errors_on_cells_in_cycles_and_omits_them_from_graph(self, mock_report_cell_error):
         mock_report_cell_error.side_effect = report_cell_error
         worksheet = Worksheet()
@@ -151,8 +151,8 @@ class TestBuildDependencyGraph(ResolverTestCase):
 
 class TestGenerateCellSubgraph(ResolverTestCase):
 
-    @patch('dirigible.sheet.dependency_graph._generate_cell_subgraph')
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies')
+    @patch('sheet.dependency_graph._generate_cell_subgraph')
+    @patch('sheet.dependency_graph._add_location_dependencies')
     def test_should_recursively_call_itself_on_dependencies_before_adding_dependencies_to_graph(
         self, mock_add_location_dependencies, mock_generate_cell_subgraph
     ):
@@ -188,7 +188,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies')
+    @patch('sheet.dependency_graph._add_location_dependencies')
     def test_should_add_dependencies_to_graph(
         self, mock_add_location_dependencies
     ):
@@ -206,7 +206,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies')
+    @patch('sheet.dependency_graph._add_location_dependencies')
     def test_should_remove_dependencies_with_errors_and_empty_cells(
         self, mock_add_location_dependencies
     ):
@@ -224,9 +224,9 @@ class TestGenerateCellSubgraph(ResolverTestCase):
                               graph, (1, 11), set())
 
 
-    @patch('dirigible.sheet.dependency_graph._generate_cell_subgraph', die(CycleError([])))
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies')
-    @patch('dirigible.sheet.dependency_graph.report_cell_error')
+    @patch('sheet.dependency_graph._generate_cell_subgraph', die(CycleError([])))
+    @patch('sheet.dependency_graph._add_location_dependencies')
+    @patch('sheet.dependency_graph.report_cell_error')
     def test_should_report_cell_error_and_not_add_location_on_recursive_call_raising_cycle_error_if_location_is_not_in_cycle_path(
         self, mock_report_cell_error, mock_add_location_dependencies
     ):
@@ -240,7 +240,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         self.assertCalledOnce(mock_report_cell_error, worksheet, (1, 11), CycleError([]))
 
 
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies')
+    @patch('sheet.dependency_graph._add_location_dependencies')
     def test_should_add_cell_to_graph_if_formula_not_set_but_python_formula_is(
         self, mock_add_location_dependencies
     ):
@@ -252,7 +252,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         self.assertCalledOnce(mock_add_location_dependencies, sentinel.graph, (1, 2), set())
 
 
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies')
+    @patch('sheet.dependency_graph._add_location_dependencies')
     def test_should_not_reprocess_locations_already_in_visited_even_if_it_is_in_worksheet(
         self, mock_add_location_dependencies
     ):
@@ -266,8 +266,8 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         self.assertFalse(mock_add_location_dependencies.called)
 
 
-    @patch('dirigible.sheet.dependency_graph._generate_cell_subgraph')
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies', Mock())
+    @patch('sheet.dependency_graph._generate_cell_subgraph')
+    @patch('sheet.dependency_graph._add_location_dependencies', Mock())
     def test_should_add_location_to_visited_set_after_recursing_deps(
         self, mock_generate_cell_subgraph
     ):
@@ -292,7 +292,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         _generate_cell_subgraph(empty_worksheet, sentinel.graph, (1, 2), set(), [])
 
 
-    @patch('dirigible.sheet.dependency_graph.report_cell_error')
+    @patch('sheet.dependency_graph.report_cell_error')
     def test_should_report_then_raise_cycle_error_when_there_is_a_cycle(
         self, mock_report_cell_error
     ):
@@ -325,9 +325,9 @@ class TestGenerateCellSubgraph(ResolverTestCase):
             self.fail("No Exception raised")
 
 
-    @patch('dirigible.sheet.dependency_graph._generate_cell_subgraph')
-    @patch('dirigible.sheet.dependency_graph.report_cell_error')
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies', Mock())
+    @patch('sheet.dependency_graph._generate_cell_subgraph')
+    @patch('sheet.dependency_graph.report_cell_error')
+    @patch('sheet.dependency_graph._add_location_dependencies', Mock())
     def test_should_reraise_cycle_error_after_reporting_if_its_in_the_cycle_path(
         self, mock_report_cell_error, mock_recursive_call
     ):
@@ -348,9 +348,9 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         self.assertEquals(visited, set([(1, 2)]))
 
 
-    @patch('dirigible.sheet.dependency_graph._generate_cell_subgraph')
-    @patch('dirigible.sheet.dependency_graph.report_cell_error')
-    @patch('dirigible.sheet.dependency_graph._add_location_dependencies', Mock())
+    @patch('sheet.dependency_graph._generate_cell_subgraph')
+    @patch('sheet.dependency_graph.report_cell_error')
+    @patch('sheet.dependency_graph._add_location_dependencies', Mock())
     def test_should_not_reraise_cycle_error_if_its_outside_the_cycle_path(
         self, mock_report_cell_error, mock_recursive_call
     ):
@@ -362,7 +362,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         _generate_cell_subgraph(worksheet, sentinel.graph, (1, 3), set(), []) # should not raise
 
 
-    @patch('dirigible.sheet.dependency_graph._generate_cell_subgraph')
+    @patch('sheet.dependency_graph._generate_cell_subgraph')
     def test_should_not_recurse_into_existing_cycle_errors_or_include_them_in_its_deps(
         self, mock_recursive_call
     ):
@@ -397,7 +397,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         self.assertEquals(visited, set([(1, 2), (1, 3), (1, 1)]))
 
 
-    @patch('dirigible.sheet.dependency_graph.report_cell_error')
+    @patch('sheet.dependency_graph.report_cell_error')
     def test_reports_error_once_per_cell(self, mock_report_cell_error):
         mock_report_cell_error.side_effect = report_cell_error
         worksheet = Worksheet()

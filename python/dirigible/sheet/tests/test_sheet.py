@@ -120,7 +120,7 @@ class SheetModelTest(ResolverDjangoTestCase):
         self.assertEquals(len(OneTimePad.objects.all()), 0)
 
 
-    @patch('dirigible.sheet.sheet.worksheet_from_json')
+    @patch('sheet.sheet.worksheet_from_json')
     def test_unjsonify_worksheet_should_return_worksheet(self, mock_worksheet_from_json):
         sheet = Sheet()
         sheet.contents_json = sentinel.contents_json
@@ -131,7 +131,7 @@ class SheetModelTest(ResolverDjangoTestCase):
         self.assertCalledOnce(mock_worksheet_from_json, sentinel.contents_json)
 
 
-    @patch('dirigible.sheet.sheet.worksheet_to_json')
+    @patch('sheet.sheet.worksheet_to_json')
     def test_jsonify_worksheet_should_write_json_to_contents_json_field(self, mock_worksheet_to_json):
         sheet = Sheet()
 
@@ -141,7 +141,7 @@ class SheetModelTest(ResolverDjangoTestCase):
         self.assertEquals(sheet.contents_json, mock_worksheet_to_json.return_value)
 
 
-    @patch('dirigible.sheet.sheet.jsonlib')
+    @patch('sheet.sheet.jsonlib')
     def test_roundtrip_column_widths_to_db(self, mock_jsonlib):
         COLUMN_WIDTHS = {'1': 11, '2': 22, '3': 33}
         mock_jsonlib.loads.return_value = COLUMN_WIDTHS
@@ -211,7 +211,7 @@ class SheetModelTest(ResolverDjangoTestCase):
         self.assertEquals(s1.contents_json, sentinel.sheet1)
 
 
-    @patch('dirigible.sheet.sheet.calculate_with_timeout')
+    @patch('sheet.sheet.calculate_with_timeout')
     def test_calculate_calls_calculate_with_unjsonified_worksheet_and_saves_recalced_json(
         self, mock_calculate
     ):
@@ -235,7 +235,7 @@ class SheetModelTest(ResolverDjangoTestCase):
         self.assertCalledOnce(sheet.jsonify_worksheet, sheet.unjsonify_worksheet.return_value)
 
 
-    @patch('dirigible.sheet.sheet.calculate_with_timeout')
+    @patch('sheet.sheet.calculate_with_timeout')
     def test_calculate_always_deletes_private_key_in_finally_block(
         self, mock_calculate
     ):

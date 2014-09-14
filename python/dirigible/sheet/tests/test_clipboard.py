@@ -124,7 +124,7 @@ class ClipboardModelTest(ResolverTestCase):
         self.assertEquals(clipboard.source_sheet, sheet)
 
 
-    @patch('dirigible.sheet.clipboard.StringIO')
+    @patch('sheet.clipboard.StringIO')
     def test_clipboard_remembers_to_close_stingIO_stream(self, mock_stringio):
         sheet = Sheet()
         clipboard = Clipboard()
@@ -377,7 +377,7 @@ class ClipboardModelTest(ResolverTestCase):
 
 class FormulaRewriteTest(ResolverTestCase):
 
-    @patch('dirigible.sheet.clipboard.rewrite_formula')
+    @patch('sheet.clipboard.rewrite_formula')
     def test_formulae_are_rewritten(self, mock_rewrite):
         mock_rewrite.return_value = '=C8'
 
@@ -396,7 +396,7 @@ class FormulaRewriteTest(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.clipboard.rewrite_source_sheet_formulae_for_cut')
+    @patch('sheet.clipboard.rewrite_source_sheet_formulae_for_cut')
     def test_paste_from_cut_rewrites_source_worksheet_formulae_before_pasting(
             self, mock_rewrite_source_sheet_formulae):
         source_worksheet = Worksheet()
@@ -422,7 +422,7 @@ class FormulaRewriteTest(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.clipboard.rewrite_source_sheet_formulae_for_cut')
+    @patch('sheet.clipboard.rewrite_source_sheet_formulae_for_cut')
     def test_paste_from_copy_does_not_rewrite_source_sheet_formulae(
             self, mock_rewrite_source_sheet_formulae):
         source_worksheet = Worksheet()
@@ -445,7 +445,7 @@ class FormulaRewriteTest(ResolverTestCase):
         self.assertFalse( mock_rewrite_source_sheet_formulae.called )
 
 
-    @patch('dirigible.sheet.clipboard.rewrite_source_sheet_formulae_for_cut')
+    @patch('sheet.clipboard.rewrite_source_sheet_formulae_for_cut')
     def test_paste_onto_different_sheet_from_cut_does_not_rewrite_source_sheet_formulae(
             self, mock_rewrite_source_sheet_formulae
         ):

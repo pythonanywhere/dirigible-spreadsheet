@@ -149,9 +149,9 @@ class TestCell(ResolverTestCase):
         self.assertEquals(cell.python_formula, None)
 
 
-    @patch('dirigible.sheet.cell.get_dependencies_from_parse_tree')
-    @patch('dirigible.sheet.cell.get_python_formula_from_parse_tree')
-    @patch('dirigible.sheet.cell.parser')
+    @patch('sheet.cell.get_dependencies_from_parse_tree')
+    @patch('sheet.cell.get_python_formula_from_parse_tree')
+    @patch('sheet.cell.parser')
     def test_setting_formula_parses_formula_sets_dependencies_then_sets_python_formula(
             self, mock_parser, mock_get_python_formula_from_parse_tree, mock_get_dependencies_from_parse_tree
     ):

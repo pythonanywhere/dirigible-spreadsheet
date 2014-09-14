@@ -28,8 +28,8 @@ from sheet.worksheet import (
 
 class WorksheetToCsvTest(ResolverTestCase):
 
-    @patch('dirigible.sheet.worksheet.csv')
-    @patch('dirigible.sheet.worksheet.StringIO')
+    @patch('sheet.worksheet.csv')
+    @patch('sheet.worksheet.StringIO')
     def test_should_use_stringio_and_return_result(self, mock_stringio_class, mock_csv):
         mock_stringio_object = mock_stringio_class.return_value
 
@@ -46,7 +46,7 @@ class WorksheetToCsvTest(ResolverTestCase):
         self.assertCalledOnce(mock_stringio_object.close)
 
 
-    @patch('dirigible.sheet.worksheet.csv')
+    @patch('sheet.worksheet.csv')
     def test_should_handle_empty_worksheet(self, mock_csv):
         ws = Worksheet()
 
@@ -107,7 +107,7 @@ class WorksheetToCsvTest(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.worksheet.csv')
+    @patch('sheet.worksheet.csv')
     def test_should_process_contents_in_raster_order(self, mock_csv):
         ws = Worksheet()
         ws.A1.value = 1
@@ -129,7 +129,7 @@ class WorksheetToCsvTest(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.worksheet.csv')
+    @patch('sheet.worksheet.csv')
     def test_should_include_everything_from_A1_outwards(self, mock_csv):
         ws = Worksheet()
         ws.B3.value = 5
@@ -163,7 +163,7 @@ class WorksheetJSONificationTest(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.worksheet.StringIO')
+    @patch('sheet.worksheet.StringIO')
     def test_worksheet_to_json_remembers_to_close_stringIO_stream(self, mock_stringio):
         worksheet = Worksheet()
         mock_stringio.return_value = Mock()
@@ -366,7 +366,7 @@ class WorksheetJSONificationTest(ResolverTestCase):
         self.assertIsNotNone(worksheet._console_lock)
 
 
-    @patch('dirigible.sheet.worksheet.jsonlib')
+    @patch('sheet.worksheet.jsonlib')
     def test_worksheet_from_json_uses_jsonlib(self, mock_jsonlib):
         mock_jsonlib.read.return_value = {}
         worksheet_from_json('{}')
@@ -547,7 +547,7 @@ class WorksheetTest(unittest.TestCase):
         self.assertEquals( ws.__getitem__.call_args_list, [(('A1',), {})] )
 
 
-    @patch('dirigible.sheet.worksheet.cell_name_to_coordinates')
+    @patch('sheet.worksheet.cell_name_to_coordinates')
     def test_setattr_should_delegate_to_setitem_if_attr_name_is_valid_cell_name(
         self, mock_name_to_coords
     ):
@@ -566,7 +566,7 @@ class WorksheetTest(unittest.TestCase):
         self.assertEquals( ws.__setitem__.call_args_list, [(((2, 3), 23), {})] )
 
 
-    @patch('dirigible.sheet.worksheet.cell_name_to_coordinates', lambda _: None)
+    @patch('sheet.worksheet.cell_name_to_coordinates', lambda _: None)
     def test_setattr_should_not_delegate_to_setitem_if_attr_name_is_not_valid_cell_name(self):
         ws = Worksheet()
         ws.__setitem__ = Mock()

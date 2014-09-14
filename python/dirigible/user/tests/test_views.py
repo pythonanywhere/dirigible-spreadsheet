@@ -68,7 +68,7 @@ class UserDashboardTest(django.test.TestCase):
         actual = user_dashboard(self.request)
         self.assertTrue(isinstance(actual, HttpResponse))
 
-    @patch('dirigible.user.views.render_to_response')
+    @patch('user.views.render_to_response')
     def test_userpage_has_list_of_sheets(self, mock_render_to_response):
         sheets = [
             Sheet(owner=self.user),
@@ -183,8 +183,8 @@ class ChangePasswordTest(django.test.TestCase):
 
 class RegistrationViewsTest(ResolverTestCase):
 
-    @patch('dirigible.user.views.DirigibleRegistrationForm')
-    @patch('dirigible.user.views.django_registration')
+    @patch('user.views.DirigibleRegistrationForm')
+    @patch('user.views.django_registration')
     def test_register_puts_email_address_into_session_if_form_is_valid(self, mock_registration_module, mock_form_class):
         """
         There seems to be no way of getting the user's details from the
@@ -206,7 +206,7 @@ class RegistrationViewsTest(ResolverTestCase):
         self.assertEquals(mock_request.session['email-address'], sentinel.email)
 
 
-    @patch('dirigible.user.views.copy_sheet_to_user')
+    @patch('user.views.copy_sheet_to_user')
     def test_copy_sheet_for_new_user_callback_copies_sheet_specified_in_next_url(self, mock_copy_sheet_to_user):
         from_user = User(username='from_user')
         from_user.save()
@@ -224,8 +224,8 @@ class RegistrationViewsTest(ResolverTestCase):
         self.assertCalledOnce(mock_copy_sheet_to_user, from_sheet, to_user)
 
 
-    @patch('dirigible.user.views.DirigibleRegistrationForm')
-    @patch('dirigible.user.views.django_registration')
+    @patch('user.views.DirigibleRegistrationForm')
+    @patch('user.views.django_registration')
     def test_register_doesnt_put_email_address_into_session_if_form_is_not_valid(self, mock_registration_module, mock_form_class):
         """
         There seems to be no way of getting the user's details from the
@@ -246,9 +246,9 @@ class RegistrationViewsTest(ResolverTestCase):
         self.assertTrue('email-address' not in mock_request.session)
 
 
-    @patch('dirigible.user.views.DirigibleRegistrationForm')
-    @patch('dirigible.user.views.django_registration')
-    @patch('dirigible.user.views.copy_sheet_for_new_user_callback')
+    @patch('user.views.DirigibleRegistrationForm')
+    @patch('user.views.django_registration')
+    @patch('user.views.copy_sheet_for_new_user_callback')
     def test_register_delegates_to_django_registration_with_form(self, mock_copy_sheet_callback, mock_registration_module, mock_form_class):
         mock_form = mock_form_class.return_value
         mock_form.is_valid.return_value = False
@@ -276,8 +276,8 @@ class RegistrationViewsTest(ResolverTestCase):
         )
 
 
-    @patch('dirigible.user.views.DirigibleRegistrationForm')
-    @patch('dirigible.user.views.django_registration')
+    @patch('user.views.DirigibleRegistrationForm')
+    @patch('user.views.django_registration')
     def test_register_provides_extra_context_only_if_its_provided(self, mock_registration_module, mock_form_class):
         mock_form = mock_form_class.return_value
         mock_form.is_valid.return_value = False
@@ -308,7 +308,7 @@ class RegistrationViewsTest(ResolverTestCase):
 
 
 
-    @patch('dirigible.user.views.render')
+    @patch('user.views.render')
     def test_registration_complete_renders_template_with_email_address_from_session(self, mock_render):
         """
         There seems to be no way of getting the user's details from the
@@ -329,7 +329,7 @@ class RegistrationViewsTest(ResolverTestCase):
 
 
 
-    @patch('dirigible.user.views.render')
+    @patch('user.views.render')
     def test_registration_complete_renders_template_with_blank_email_address_if_none_in_session(self, mock_render):
         """
         There seems to be no way of getting the user's details from the

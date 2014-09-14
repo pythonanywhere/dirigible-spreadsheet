@@ -17,7 +17,7 @@ urlpatterns = patterns(
 
     url(
         r'^(?P<username>[^/]+)/sheet/',
-        include('dirigible.sheet.urls'),
+        include('sheet.urls'),
     ),
 
     url(

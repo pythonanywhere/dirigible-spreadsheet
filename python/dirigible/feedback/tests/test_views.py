@@ -15,7 +15,7 @@ from feedback.views import submit
 
 class SubmitTest(ResolverTestCase):
 
-    @patch('dirigible.feedback.views.send_mail')
+    @patch('feedback.views.send_mail')
     def test_submit_with_message_and_email_address_and_username_sends_admin_email_with_all_three(self, mock_send_mail):
         request = HttpRequest()
         request.POST["message"] = "a test message"

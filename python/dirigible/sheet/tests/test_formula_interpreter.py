@@ -24,7 +24,7 @@ from test_utils import ResolverTestCase
 
 class TestGetPythonFormulaFromParseTree(ResolverTestCase):
 
-    @patch('dirigible.sheet.formula_interpreter.rewrite')
+    @patch('sheet.formula_interpreter.rewrite')
     def test_flattens_rewrites_and_removes_1st_char(self, mock_rewrite):
         mock_rewrite.return_value = Mock()
         mock_rewrite.return_value.flatten.return_value = '123'
@@ -102,7 +102,7 @@ class TestRewrite(ResolverTestCase):
         self.assertEquals(rewrite(input), input)
 
 
-    @patch('dirigible.sheet.formula_interpreter.rewrite')
+    @patch('sheet.formula_interpreter.rewrite')
     def test_rewrite_parse_node_should_return_parse_node_with_children_rewritten(self, mock_recursive_rewrite):
         node_type = "junk node type"
         children = [ParseNode(node_type, None), ParseNode(node_type, None)]

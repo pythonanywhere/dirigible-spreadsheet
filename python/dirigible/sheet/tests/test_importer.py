@@ -141,7 +141,7 @@ class WorksheetFromCSVTest(ResolverTestCase):
         )
 
 
-    @patch('dirigible.sheet.importer.UniversalDetector')
+    @patch('sheet.importer.UniversalDetector')
     def test_autodetect_import_csv_raises_on_failure_to_detect_encoding(
             self, mock_UniversalDetector
     ):
@@ -196,7 +196,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
                 self.assertEquals(worksheet[col + 1, row + 1].formula, '%s' % (col + row + 0.1, ))
 
 
-    @patch('dirigible.sheet.importer.xldate_as_tuple')
+    @patch('sheet.importer.xldate_as_tuple')
     def test_converts_excel_dates_to_python_datetime(self, mock_xlrd_date_as_tuple):
         mock_excel_worksheet = Mock()
         def mock_cell(row, col):
@@ -224,7 +224,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
                 )
 
 
-    @patch('dirigible.sheet.importer.xldate_as_tuple')
+    @patch('sheet.importer.xldate_as_tuple')
     def test_handles_excel_errors(self, mock_xlrd_date_as_tuple):
         mock_excel_worksheet = Mock()
         errors = {

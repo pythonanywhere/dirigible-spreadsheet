@@ -167,9 +167,9 @@ class ImportXLSTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.mkstemp')
-    @patch('dirigible.sheet.views.os')
-    @patch('dirigible.sheet.views.xlrd')
+    @patch('sheet.views.mkstemp')
+    @patch('sheet.views.os')
+    @patch('sheet.views.xlrd')
     def test_import_xls_creates_sheets_for_non_empty_worksheets_using_tempfiles(
             self, mock_xlrd, mock_os, mock_mkstemp
     ):
@@ -219,8 +219,8 @@ class ImportXLSTest(SheetViewTestCase):
         self.assertCalledOnce(mock_os.unlink, sentinel.filename)
 
 
-    @patch('dirigible.sheet.views.mkstemp')
-    @patch('dirigible.sheet.views.os')
+    @patch('sheet.views.mkstemp')
+    @patch('sheet.views.os')
     def test_import_xls_closes_and_deletes_tempfile(self, mock_os, mock_mkstemp):
         mock_mkstemp.return_value = (sentinel.handle, sentinel.filename)
         mock_file = Mock()
@@ -247,9 +247,9 @@ class ImportXLSTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.xlrd')
-    @patch('dirigible.sheet.views.os')
-    @patch('dirigible.sheet.views.worksheet_from_excel')
+    @patch('sheet.views.xlrd')
+    @patch('sheet.views.os')
+    @patch('sheet.views.worksheet_from_excel')
     def test_import_xls_imports_values_and_calls_calculate_on_each_sheet(
         self, mock_worksheet_from_excel, mock_os, mock_xlrd
     ):
@@ -313,10 +313,10 @@ class ImportXLSTest(SheetViewTestCase):
         self.assertEquals(response['Location'], '/')
 
 
-    @patch('dirigible.sheet.views.calculate', die())
-    @patch('dirigible.sheet.views.xlrd')
-    @patch('dirigible.sheet.views.os')
-    @patch('dirigible.sheet.views.worksheet_from_excel')
+    @patch('sheet.views.calculate', die())
+    @patch('sheet.views.xlrd')
+    @patch('sheet.views.os')
+    @patch('sheet.views.worksheet_from_excel')
     def test_import_xls_reports_success_on_exception_from_calculate(
         self, mock_worksheet_from_excel, mock_os, mock_xlrd
     ):
@@ -362,7 +362,7 @@ class ImportCSVTest(SheetViewTestCase):
     setUp = set_up_view_test
 
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_import_csv_should_import_csv_and_update_sheet_with_version_check(
         self, mock_update_sheet_with_version_check
     ):
@@ -423,7 +423,7 @@ class ImportCSVTest(SheetViewTestCase):
             )
 
 
-    @patch('dirigible.sheet.views.ImportCSVForm')
+    @patch('sheet.views.ImportCSVForm')
     def test_import_csv_handles_null_file(self, mock_import_csv_form):
         mock_import_csv_form.side_effect = lambda *args, **kwargs : ImportCSVForm(*args, **kwargs)
 
@@ -442,8 +442,8 @@ class ImportCSVTest(SheetViewTestCase):
         self.assertTrue('not in a recognised CSV format' in response.content)
 
 
-    @patch('dirigible.sheet.views.worksheet_from_csv')
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.worksheet_from_csv')
+    @patch('sheet.views.get_object_or_404')
     def test_view_uses_and_handles_errors_from_worksheet_from_csv(
             self, mock_get_object_or_404, mock_worksheet_from_csv
     ):
@@ -476,9 +476,9 @@ class ImportCSVTest(SheetViewTestCase):
             mock_worksheet_from_csv.reset_mock()
 
 
-    @patch('dirigible.sheet.views.worksheet_from_csv')
-    @patch('dirigible.sheet.views.calculate')
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.worksheet_from_csv')
+    @patch('sheet.views.calculate')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_calls_calculate_view_after_update_sheet(
         self, mock_update_sheet_with_version_check, mock_calculate,
         mock_worksheet_from_csv
@@ -510,8 +510,8 @@ class ExportCSVTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.get_object_or_404')
-    @patch('dirigible.sheet.views.worksheet_to_csv')
+    @patch('sheet.views.get_object_or_404')
+    @patch('sheet.views.worksheet_to_csv')
     def test_export_excel_csv_should_produce_csv_with_correct_http_headers_and_content(
         self, mock_worksheet_to_csv, mock_get_object
     ):
@@ -538,8 +538,8 @@ class ExportCSVTest(SheetViewTestCase):
         self.assertEquals(response.content, expected_content)
 
 
-    @patch('dirigible.sheet.views.get_object_or_404')
-    @patch('dirigible.sheet.views.worksheet_to_csv')
+    @patch('sheet.views.get_object_or_404')
+    @patch('sheet.views.worksheet_to_csv')
     def test_export_unicode_csv_should_produce_csv_with_correct_http_headers_and_content(
         self, mock_worksheet_to_csv, mock_get_object
     ):
@@ -688,9 +688,9 @@ class PageViewTest(SheetViewTestCase):
         self.assertEquals(response.status_code, 200)
 
 
-    @patch('dirigible.sheet.views.render_to_response')
-    @patch('dirigible.sheet.views.get_object_or_404')
-    @patch('dirigible.sheet.views.ImportCSVForm')
+    @patch('sheet.views.render_to_response')
+    @patch('sheet.views.get_object_or_404')
+    @patch('sheet.views.ImportCSVForm')
     def test_page_should_render_template_with_correct_stuff_before_setting_userprofile_flag(
         self, mock_import_csv_form, mock_get_object_or_404, mock_render_to_response
     ):
@@ -720,9 +720,9 @@ class PageViewTest(SheetViewTestCase):
         self.assertTrue(self.user.get_profile().has_seen_sheet_page)
 
 
-    @patch('dirigible.sheet.views.Context')
-    @patch('dirigible.sheet.views.get_template')
-    @patch('dirigible.sheet.views.send_mail')
+    @patch('sheet.views.Context')
+    @patch('sheet.views.get_template')
+    @patch('sheet.views.send_mail')
     def test_view_should_send_welcome_email_if_new_user(
             self, mock_send_mail, mock_get_template, mock_Context
     ):
@@ -743,7 +743,7 @@ class PageViewTest(SheetViewTestCase):
                 fail_silently=True)
 
 
-    @patch('dirigible.sheet.views.render_to_response')
+    @patch('sheet.views.render_to_response')
     def test_page_allows_other_users_to_view_public_sheets(self, mock_render_to_response):
         mock_render_to_response.side_effect = render_to_response
         self.sheet.is_public = True
@@ -759,7 +759,7 @@ class PageViewTest(SheetViewTestCase):
         self.assertTrue(mock_render_to_response.call_args[0][1]['sheet'].public_view_mode)
 
 
-    @patch('dirigible.sheet.views.render_to_response')
+    @patch('sheet.views.render_to_response')
     def test_page_allows_anonymous_user_to_view_public_sheets(self, mock_render_to_response):
         mock_render_to_response.side_effect = render_to_response
         self.sheet.is_public = True
@@ -782,7 +782,7 @@ class SetCellFormulaTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_should_set_cell_formula_and_update_sheet_with_version_check(
         self, mock_update_sheet_with_version_check
     ):
@@ -845,7 +845,7 @@ class ClearCellsTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_should_clear_range_given_and_update_sheet_with_version_check(
         self, mock_update_sheet_with_version_check
     ):
@@ -874,7 +874,7 @@ class ClearCellsTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_should_return_ok_if_successful(
         self, mock_update_sheet_with_version_check
     ):
@@ -888,7 +888,7 @@ class ClearCellsTest(SheetViewTestCase):
         self.assertEquals(response.content, "OK")
 
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_should_return_fail_if_update_fails(
         self, mock_update_sheet_with_version_check
     ):
@@ -912,7 +912,7 @@ class SetSheetUsercodeTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_should_set_sheet_usercode_and_updates_version(self, mock_update_sheet_with_version_check):
         expected_usercode = 'mary had a leg of lamb'
         self.request.POST["usercode"] = str(expected_usercode)
@@ -955,7 +955,7 @@ class SetSheetSecuritySettingsTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.get_object_or_404')
     def test_view_should_set_sheet_security_settings(self, mock_get_object):
         mock_sheet = mock_get_object.return_value
         mock_sheet.owner = self.user
@@ -1002,7 +1002,7 @@ class SetSheetNameTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.get_object_or_404')
     def test_view_should_set_sheet_name(self, mock_get_object):
         expected_sheet_name = 'mary had a leg of lamb'
         self.request.POST["new_value"] = expected_sheet_name
@@ -1049,7 +1049,7 @@ class SetColumnWidthsTest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.get_object_or_404')
     def test_view_should_set_column_widths_and_save(self, mock_get_object):
         self.request.POST["column_widths"] = '{"2":22, "3":33}'
 
@@ -1081,8 +1081,8 @@ class CalculateTest(SheetViewTestCase):
     setUp = set_up_view_test
 
 
-    @patch('dirigible.sheet.views.get_object_or_404')
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.get_object_or_404')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_should_use_managed_transaction_and_update_sheet_with_version_check(
         self, mock_update_sheet_with_version_check, mock_get_object_or_404
     ):
@@ -1114,7 +1114,7 @@ class CalculateTest(SheetViewTestCase):
 
 
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_response_if_update_sheet_with_version_check_fails(
         self, mock_update_sheet_with_version_check
     ):
@@ -1131,10 +1131,10 @@ class CalculateTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.get_object_or_404')
-    @patch('dirigible.sheet.views.Sheet.objects.get')
-    @patch('dirigible.sheet.views.transaction.commit')
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.get_object_or_404')
+    @patch('sheet.views.Sheet.objects.get')
+    @patch('sheet.views.transaction.commit')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_view_merges_any_minor_changes_using_transaction(
         self, mock_update_sheet_with_version_check, mock_commit, mock_sheet_get, mock_get_object_or_404
     ):
@@ -1176,7 +1176,7 @@ class CalculateTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.get_object_or_404')
     def test_view_rolls_back_and_reraises_if_sheet_calculate_raises_with_uncommitted_changes(
         self, mock_get_object_or_404
     ):
@@ -1217,7 +1217,7 @@ class CalculateTest(SheetViewTestCase):
             disable_transaction_methods()
 
 
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.get_object_or_404')
     def test_view_rolls_back_and_reraises_if_get_object_raises_with_uncommitted_changes(
         self, mock_get_object_or_404
     ):
@@ -1262,8 +1262,8 @@ class GetJsonGridDataForUITest(SheetViewTestCase):
     setUp = set_up_view_test
 
 
-    @patch('dirigible.sheet.views.sheet_to_ui_json_grid_data')
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.sheet_to_ui_json_grid_data')
+    @patch('sheet.views.get_object_or_404')
     def test_returns_json_grid_data_for_range_using_get_object_or_404_if_range_specified(
         self, mock_get_object, mock_sheet_to_ui_json_grid_data
     ):
@@ -1318,8 +1318,8 @@ class GetJsonMetaDataForUITest(SheetViewTestCase):
 
     setUp = set_up_view_test
 
-    @patch('dirigible.sheet.views.sheet_to_ui_json_meta_data')
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.sheet_to_ui_json_meta_data')
+    @patch('sheet.views.get_object_or_404')
     def test_get_json_meta_data_for_ui_should_return_unrecalculated_sheet_to_ui_json_using_get_object_or_404(
         self, mock_get_object, mock_sheet_to_ui_json_meta_data
     ):
@@ -1457,8 +1457,8 @@ class VersionUpdatesTest(SheetViewTestCase):
             'xlrd',
         ]
 
-        import dirigible.sheet.views
-        for view_name in dir(dirigible.sheet.views):
+        import sheet.views
+        for view_name in dir(sheet.views):
             if not re.match("__.*__", view_name):
                 if (view_name not in version_update_view and
                     view_name not in no_version_update_view and
@@ -1581,7 +1581,7 @@ class ClipboardViewTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_paste_offsets_range_and_updates_sheet_with_version_check(
             self, mock_update_sheet_with_version_check):
         def update_sheet_with_check(sheet, **kwargs):
@@ -1617,8 +1617,8 @@ class ClipboardViewTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.Clipboard')
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.Clipboard')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_failing_paste_returns_failure_message_and_doesnt_save_clipboard(
             self, mock_update_sheet_with_version_check, mockClipboard):
         mock_clipboard = Mock()
@@ -1636,8 +1636,8 @@ class ClipboardViewTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
-    @patch('dirigible.sheet.views.get_object_or_404')
+    @patch('sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.get_object_or_404')
     def test_cut_populates_and_saves_clipboard_then_removes_cells_and_saves_sheet(
         self, mock_get_object_or_404, mock_update_sheet_with_version_check
     ):
@@ -1704,8 +1704,8 @@ class ClipboardViewTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.Clipboard')
-    @patch('dirigible.sheet.views.update_sheet_with_version_check')
+    @patch('sheet.views.Clipboard')
+    @patch('sheet.views.update_sheet_with_version_check')
     def test_failing_cut_returns_failure_message_and_doesnt_save_clipboard(
             self, mock_update_sheet_with_version_check, mockClipboard):
         mock_clipboard = Mock()
@@ -1723,7 +1723,7 @@ class ClipboardViewTest(SheetViewTestCase):
         )
 
 
-    @patch('dirigible.sheet.views.Clipboard')
+    @patch('sheet.views.Clipboard')
     def test_copy_then_paste_both_save_clipboard_appropriately(self, mockClipboard):
         mock_clipboard = Mock()
         mockClipboard.objects.get_or_create.return_value = mock_clipboard, False
@@ -1740,7 +1740,7 @@ class ClipboardViewTest(SheetViewTestCase):
         self.assertCalledOnce(mock_clipboard.save)
 
 
-    @patch('dirigible.sheet.views.Clipboard')
+    @patch('sheet.views.Clipboard')
     def test_cut_then_paste_to_same_sheet(self, mockClipboard):
         mock_clipboard = Mock()
         mockClipboard.objects.get_or_create.return_value = mock_clipboard, False

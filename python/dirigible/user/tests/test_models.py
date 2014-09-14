@@ -12,7 +12,7 @@ from user.models import AnonymousProfile, OneTimePad, UserProfile
 
 class TestOneTimePads(ResolverTestCase):
 
-    @patch('dirigible.user.models.uuid4')
+    @patch('user.models.uuid4')
     def test_OneTimePad_init(self, mock_uuid4):
         user = User(username='Alice, traditionally')
         user.save()

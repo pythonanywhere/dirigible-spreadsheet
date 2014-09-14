@@ -72,7 +72,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertTrue(json.loads(actual.content), {'name': self.sheet.name})
 
 
-    @patch('dirigible.sheet.views_api_0_1.OneTimePad')
+    @patch('sheet.views_api_0_1.OneTimePad')
     def test_api_view_erm_checks_private_key_using_correct_filter(
         self, mock_Otp):
 
@@ -138,8 +138,8 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertTrue(json.loads(actual.content), {'name': self.sheet.name})
 
 
-    @patch('dirigible.sheet.views_api_0_1.transaction')
-    @patch('dirigible.sheet.views_api_0_1.get_object_or_404')
+    @patch('sheet.views_api_0_1.transaction')
+    @patch('sheet.views_api_0_1.get_object_or_404')
     def test_api_view_should_call_sheet_calculate_with_transaction(
         self, mock_get_object, mock_transaction
     ):
@@ -167,7 +167,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertCalledOnce(mock_transaction.commit)
 
 
-    @patch('dirigible.sheet.views_api_0_1.get_object_or_404')
+    @patch('sheet.views_api_0_1.get_object_or_404')
     def test_api_view_rolls_back_and_reraises_if_get_object_raises_with_uncommitted_changes(
         self, mock_get_object_or_404
     ):
@@ -202,7 +202,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
             disable_transaction_methods()
 
 
-    @patch('dirigible.sheet.views_api_0_1.get_object_or_404')
+    @patch('sheet.views_api_0_1.get_object_or_404')
     def test_api_view_adds_access_control_header(
         self, mock_get_object
     ):
@@ -225,8 +225,8 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertEquals(actual['Access-Control-Allow-Origin'], '*')
 
 
-    @patch('dirigible.sheet.views_api_0_1.transaction')
-    @patch('dirigible.sheet.views_api_0_1.get_object_or_404')
+    @patch('sheet.views_api_0_1.transaction')
+    @patch('sheet.views_api_0_1.get_object_or_404')
     def test_api_view_commits_transaction_even_on_sheet_calculate_exception(
         self, mock_get_object, mock_transaction
     ):
@@ -245,7 +245,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertEquals(actual.content, 'should not be called')
 
 
-    @patch('dirigible.sheet.views_api_0_1.get_object_or_404')
+    @patch('sheet.views_api_0_1.get_object_or_404')
     def test_api_view_should_return_errors_and_no_values_if_unjsonify_worksheet_result_has_errors(self, mock_get_object):
         mock_sheet = mock_get_object.return_value
         mock_sheet.owner = self.user
@@ -280,7 +280,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         raise AssertionError('should not be called')
 
 
-    @patch('dirigible.sheet.views_api_0_1.get_object_or_404')
+    @patch('sheet.views_api_0_1.get_object_or_404')
     def test_api_view_should_handle_cell_formula_overrides_from_POST(self, mock_get_object):
         mock_sheet = mock_get_object.return_value = Sheet()
         mock_sheet.owner = self.user
@@ -324,7 +324,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
 
 
-    @patch('dirigible.sheet.views_api_0_1.get_object_or_404')
+    @patch('sheet.views_api_0_1.get_object_or_404')
     def test_api_view_should_handle_cell_formula_overrides_from_GET(self, mock_get_object):
         mock_sheet = mock_get_object.return_value = Sheet()
         mock_sheet.owner = self.user
