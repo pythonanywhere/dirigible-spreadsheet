@@ -17,7 +17,6 @@ from .views import rollback_on_exception
 from user.models import OneTimePad
 
 
-@transaction.commit_manually
 @rollback_on_exception
 def calculate_and_get_json_for_api(request, username, sheet_id):
     sheet = get_object_or_404(Sheet, pk=sheet_id, owner__username=username)
