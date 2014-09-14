@@ -86,7 +86,7 @@ def _generate_cell_subgraph(worksheet, graph, loc, completed, path):
                 if not dep_cell.python_formula:
                     continue
                 valid_dependencies.add(dep_loc)
-            except CycleError, cycle_error:
+            except CycleError as cycle_error:
                 if not loc in completed:
                     report_cell_error(worksheet, loc, cycle_error)
                 if loc in cycle_error.path:

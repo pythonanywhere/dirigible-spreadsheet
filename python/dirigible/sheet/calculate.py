@@ -85,7 +85,7 @@ def create_cell_recalculator(leaf_queue, unrecalculated_queue, graph, context):
     def cell_recalculator():
         while not unrecalculated_queue.empty():
             try:
-                leaf = leaf_queue.get(block=True,timeout=0.1)
+                leaf = leaf_queue.get(block=True, timeout=0.1)
             except:
                 continue
             try:
