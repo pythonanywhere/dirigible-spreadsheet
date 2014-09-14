@@ -8,7 +8,6 @@ import datetime
 from email.parser import Parser
 from functools import wraps
 import hashlib
-from imapclient import IMAPClient
 import re
 from textwrap import dedent
 from threading import Thread
@@ -64,7 +63,13 @@ class Url(object):
         return urljoin(cls.sheet_page(username, sheet_id), 'v%s/json/' % (CURRENT_API_VERSION,))
 
 
+import os
+SCREEN_DUMP_LOCATION = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), 'screendumps')
+)
+
 def snapshot_on_error(test):
+
     @wraps(test)
     def inner(*args, **kwargs):
         try:
@@ -72,11 +77,15 @@ def snapshot_on_error(test):
         except:
             test_object = args[0]
 
-            timestamp = datetime.datetime.now().isoformat().replace(':', '')
-            filename = r'\\127.0.0.1\buildshare\screenshots\%s_%s.png' % (test_object.id(), timestamp)
-
             try:
-                test_object.selenium.capture_screenshot(filename)
+                timestamp = datetime.datetime.now().isoformat().replace(':', '.')[:19]
+                filename = '{folder}/{test_id}-{timestamp}.png'.format(
+                    folder=SCREEN_DUMP_LOCATION,
+                    test_id=test_object.id(),
+                    timestamp=timestamp
+                )
+                print('screenshot to {}'.format(filename))
+                test_object.browser.get_screenshot_as_file(filename)
             except:
                 pass
 
@@ -354,136 +363,38 @@ class FunctionalTest(StaticLiveServerTestCase):
         return self.get_my_usernames()[0]
 
 
-    def _check_page_doctype(self, link_destination):
-        get_doctype_js = """
-        (function() {
-            var document = window.document;
-            if (typeof document.namespaces != "undefined") {
-                /* IE */
-                if (document.all[0].nodeType == 8) {
-                    /* The first node in the document is a "comment", which is what IE thinks a doctype is */
-                    return "<!" + document.all[0].nodeValue + ">";
-                } else {
-                    return null;
-                }
-            } else {
-                if (document.doctype === null) {
-                    return null;
-                }
-                return '<!DOCTYPE HTML PUBLIC "' + document.doctype.publicId + '" "' + document.doctype.systemId + '">'
-            }
-        })();
-        """
-        doctype_tag = self.selenium.get_eval(get_doctype_js)
-
-        # sporadic fails, only ever seen on Chrome (buildbot and local).
-        # More diagnostic added. Harry & Jonathan, 5 Aug 2010
-        strict = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'
-        transitional = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-        if self.selenium.get_location().startswith(Url.DOCUMENTATION):
-            expected = transitional
-        else:
-            expected = strict
-
-        text = 'Bad doctype. Got %s\n\tExpected=%s\n\tsent to url=%s\n\tended up at url=%s\n\tpage title=%s' % (
-            doctype_tag,
-            expected,
-            link_destination,
-            self.selenium.get_location(),
-            self.selenium.get_title()
-        )
-        self.assertEquals(doctype_tag.upper().replace('\n ', ''), expected.upper(), text)
-
-
-    def _check_page_google_analytics(self):
-        def normalize_html(s):
-            return (
-                re.sub(r'\s+', ' ', s).
-                strip().
-                lower().
-                replace('type=text/javascript', 'type="text/javascript"')
-            )
-
-        ga_code = normalize_html(
-            """
-                <script type="text/javascript">
-
-                  var _gaq = _gaq || [];
-                  _gaq.push(['_setAccount', 'UA-18014859-2']);
-                  _gaq.push(['_trackPageview']);
-
-                  (function() {
-                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-                  })();
-
-                </script>
-            """
-        )
-
-        self.assertTrue(
-            ga_code in normalize_html(self.selenium.get_html_source()),
-            "Could not find Google Analytics code on page %s" % (self.selenium.get_location(),)
-        )
-
-
-    def _check_page_rss_link(self):
-        link_tags = self.selenium.get_eval(dedent("""
-            (function() {
-                var rss_links = [];
-                var links = window.document.getElementsByTagName('link');
-                var link;
-                for (var i=0; i<links.length; i++) {
-                    link = links[i];
-                    if (
-                        (link.getAttribute('rel') === 'alternate') &&
-                        (link.getAttribute('type') === 'application/rss+xml')
-                    ){
-                        rss_links.push( [
-                            link.getAttribute('href'),
-                            link.getAttribute('title')
-                        ] )
-                    }
-                }
-                return rss_links;
-            })();
-        """))
-        self.assertEquals(
-            link_tags,
-            'http://blog.projectdirigible.com/?feed=rss2\\,Dirigible Blog',
-            'should be a <link> tag to the blog RSS feed on this page'
-        )
-
-
     def _check_page_link_home(self):
 
-        if self.selenium.get_location().startswith(Url.DOCUMENTATION):
+        if self.browser.current_url.startswith(Url.DOCUMENTATION):
             return
 
         link = None
-        for possible_link_images in ('id_big_logo', 'id_small_header_logo'):
+        for possible_link_image in ('id_big_logo', 'id_small_header_logo'):
             try:
-                link = self.selenium.get_attribute("xpath=//a[img[@id='%s']]@href" % (possible_link_images,))
+                link = self.browser.find_element_by_xpath(
+                    "//a[img[@id='{img_id}']]@href".format(
+                        img_id=possible_link_image
+                    )
+                )
             except:
                 pass
             else:
                 break
         if link is None:
-            self.fail("Could not find a logo that is also a link on page %s" % (self.selenium.get_location(),))
+            self.fail(
+                "Could not find a logo that is also a link on page {}".format(
+                    self.browser.current_url
+                )
+            )
         self.assertTrue(link in ("/", Url.ROOT))
 
 
     def check_page_load(self, link_destination=None):
-        self._check_page_doctype(link_destination)
-        self._check_page_google_analytics()
-        self._check_page_rss_link()
         self._check_page_link_home()
 
 
     def go_to_url(self, url):
-        self.selenium.open(url)
-        self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
+        self.browser.get(url)
         self.check_page_load(url)
 
 
@@ -1064,6 +975,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def _pop_email_for_client_once(self, email_address, content_filter=None):
+        from imapclient import IMAPClient
         message = None
         messages_to_delete = []
         server = IMAPClient(IMAP_HOST, ssl=True)
@@ -1084,6 +996,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def clear_email_for_address(self, email_address, content_filter=None):
+        from imapclient import IMAPClient
         server = IMAPClient(IMAP_HOST, ssl=True)
         messages_to_delete = []
         for m_id, parsed_headers, body_text in self.all_emails(server):
