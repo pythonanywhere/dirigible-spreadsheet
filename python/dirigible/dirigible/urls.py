@@ -71,17 +71,17 @@ urlpatterns = patterns(
 
     url(
         r'^user/',
-        include('dirigible.user.urls')
+        include('user.urls')
     ),
 
     url(
         r'^signup/',
-        include('dirigible.user.signup_urls')
+        include('user.signup_urls')
     ),
 
     url(
         r'^feedback/',
-        include('dirigible.feedback.urls')
+        include('feedback.urls')
     ),
 
     url(
