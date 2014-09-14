@@ -30,17 +30,22 @@ def calculate_and_get_json_for_api(request, username, sheet_id):
 
     if 'api_key' in params:
         if not sheet.allow_json_api_access:
+            transaction.rollback()
             return HttpResponseForbidden()
         elif params['api_key'] != sheet.api_key:
+            transaction.rollback()
             return HttpResponseForbidden()
     elif 'dirigible_l337_private_key' in params:
         pads = OneTimePad.objects.filter(
-                user=sheet.owner,
-                guid=params['dirigible_l337_private_key'])
+            user=sheet.owner,
+            guid=params['dirigible_l337_private_key']
+        )
         too_old = datetime.now() - timedelta(36000)
         if len(pads) != 1 or pads[0].creation_time < too_old:
+            transaction.rollback()
             return HttpResponseForbidden()
     else:
+        transaction.rollback()
         return HttpResponseForbidden()
 
     worksheet = sheet.unjsonify_worksheet()
@@ -56,9 +61,9 @@ def calculate_and_get_json_for_api(request, username, sheet_id):
         worksheet = sheet.unjsonify_worksheet()
         if worksheet._usercode_error:
             return HttpResponse(json.dumps({
-                "usercode_error" : {
-                    "message" : worksheet._usercode_error["message"],
-                    "line" : str(worksheet._usercode_error["line"])
+                "usercode_error": {
+                    "message": worksheet._usercode_error["message"],
+                    "line": str(worksheet._usercode_error["line"])
                 }
             }))
         response = HttpResponse(

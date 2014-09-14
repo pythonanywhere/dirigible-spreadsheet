@@ -943,7 +943,7 @@ class SetSheetUsercodeTest(SheetViewTestCase):
 
         ((call_args, call_kwargs),) = mock_update_sheet_with_version_check.call_args_list
         self.assertEquals(call_args, (self.sheet,))
-        self.assertEquals(call_kwargs, { 'usercode' : expected_usercode })
+        self.assertEquals(call_kwargs, {'usercode': expected_usercode})
 
 
     def test_view_set_sheet_usercode_fixes_windows_line_endings(self):
@@ -963,8 +963,8 @@ class SetSheetUsercodeTest(SheetViewTestCase):
 SetSheetSecuritySettingsSecurityTest = create_view_security_test(
     "SetSheetSecuritySettingsSecurityTest", set_sheet_security_settings,
     post_dict={
-        "is_public" : "false",
-        "api_key" : "this_is_the_api_key",
+        "is_public": "false",
+        "api_key": "this_is_the_api_key",
         "allow_json_api_access": "true"
     }
 )
@@ -1006,14 +1006,14 @@ class SetSheetSecuritySettingsTest(SheetViewTestCase):
 
         self.assertEquals(
             mock_sheet.method_calls,
-            [ ('save', (), {}), ]
+            [('save', (), {}), ]
         )
 
 
 
 SetSheetNameSecurityTest = create_view_security_test(
     "SetSheetNameSecurityTest", set_sheet_name,
-    post_dict={ "new_value" : "New name" }
+    post_dict={"new_value": "New name"}
 )
 
 class SetSheetNameTest(SheetViewTestCase):

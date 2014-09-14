@@ -2,21 +2,10 @@
 # See LICENSE.md
 #
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
-try:
-    import unittest2 as unittest
-except ImportError:
-    import sys
-    assert sys.version.startswith('2.7')
-    import unittest
-
-
+import json
 from datetime import datetime, timedelta
 from mock import Mock, patch
+import unittest
 
 import django
 from django.contrib.auth.models import User
@@ -37,7 +26,9 @@ pk_name = 'dirigible_l337_private_key'
 
 
 
-class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins):
+class CalculateAndGetJsonForApiViewTest(
+    django.test.TransactionTestCase, ResolverTestMixins
+):
 
     setUp = set_up_view_test
 
@@ -45,7 +36,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         User.objects.all().delete()
 
 
-    def test_api_view_should_return_404_if_sheet_owner_does_not_match_username_from_url(self):
+    def test_should_return_404_if_sheet_owner_does_not_match_username_from_url(self):
         #standard security test
         self.sheet.allow_json_api_access = False
         self.sheet.save()
@@ -53,19 +44,19 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertRaises(Http404, lambda: calculate_and_get_json_for_api(self.request, 'some_random_user', self.sheet.id))
 
 
-    def test_api_view_returns_403_if_neither_private_nor_api_keys_provided(self):
+    def test_returns_403_if_neither_private_nor_api_keys_provided(self):
         actual = calculate_and_get_json_for_api(self.request, self.sheet.owner.username, self.sheet.id)
         self.assertTrue(isinstance(actual, HttpResponseForbidden))
 
 
-    def test_api_view_returns_403_if_incorrect_private_key_provided(self):
+    def test_returns_403_if_incorrect_private_key_provided(self):
         self.request.method = 'POST'
         self.request.POST = {pk_name: 'an incorrect key'}
         actual = calculate_and_get_json_for_api(self.request, self.sheet.owner.username, self.sheet.id)
         self.assertTrue(isinstance(actual, HttpResponseForbidden))
 
 
-    def test_api_view_works_if_correct_private_key_provided(self):
+    def test_works_if_correct_private_key_provided(self):
         self.request.method = 'POST'
         self.request.POST = {pk_name: self.sheet.create_private_key()}
         actual = calculate_and_get_json_for_api(self.request, self.sheet.owner.username, self.sheet.id)
@@ -73,7 +64,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
 
     @patch('sheet.views_api_0_1.OneTimePad')
-    def test_api_view_erm_checks_private_key_using_correct_filter(
+    def test_erm_checks_private_key_using_correct_filter(
         self, mock_Otp):
 
         mock_Otp.objects.filter.return_value = []
@@ -91,7 +82,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
             user=self.sheet.owner, guid=guid)
 
 
-    def test_api_view_ignores_old_private_key_things(self):
+    def test_ignores_old_private_key_things(self):
         otp = OneTimePad(user=self.user)
         otp.save()
         otp.creation_time = datetime.today() - timedelta(36000)
@@ -103,13 +94,14 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         actual = calculate_and_get_json_for_api(
             self.request,
             self.sheet.owner.username,
-            self.sheet.id)
+            self.sheet.id
+        )
 
         self.assertTrue(isinstance(actual, HttpResponseForbidden))
 
 
 
-    def test_api_view_403s_if_no_private_key_and_api_access_not_allowed_even_if_correct_api_key_provided(self):
+    def test_403s_if_no_private_key_and_api_access_not_allowed_even_if_correct_api_key_provided(self):
         self.sheet.allow_json_api_access = False
         self.sheet.api_key = 'correct key'
         self.sheet.save()
@@ -119,7 +111,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertTrue(isinstance(actual, HttpResponseForbidden))
 
 
-    def test_api_view_403s_if_api_access_allowed_but_incorrect_api_key_provided(self):
+    def test_403s_if_api_access_allowed_but_incorrect_api_key_provided(self):
         self.sheet.allow_json_api_access = True
         self.sheet.save()
         self.request.method = 'POST'
@@ -128,7 +120,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
         self.assertTrue(isinstance(actual, HttpResponseForbidden))
 
 
-    def test_api_view_works_if_correct_api_key_provided_and_access_allowed(self):
+    def test_works_if_correct_api_key_provided_and_access_allowed(self):
         self.sheet.allow_json_api_access = True
         self.sheet.api_key = 'sekrit'
         self.sheet.save()
@@ -140,7 +132,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
     @patch('sheet.views_api_0_1.transaction')
     @patch('sheet.views_api_0_1.get_object_or_404')
-    def test_api_view_should_call_sheet_calculate_with_transaction(
+    def test_should_call_sheet_calculate_with_transaction(
         self, mock_get_object, mock_transaction
     ):
         mock_sheet = mock_get_object.return_value
@@ -168,7 +160,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
 
     @patch('sheet.views_api_0_1.get_object_or_404')
-    def test_api_view_rolls_back_and_reraises_if_get_object_raises_with_uncommitted_changes(
+    def test_rolls_back_and_reraises_if_get_object_raises_with_uncommitted_changes(
         self, mock_get_object_or_404
     ):
         try:
@@ -203,7 +195,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
 
     @patch('sheet.views_api_0_1.get_object_or_404')
-    def test_api_view_adds_access_control_header(
+    def test_adds_access_control_header(
         self, mock_get_object
     ):
         calculation_result = Worksheet()
@@ -227,7 +219,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
     @patch('sheet.views_api_0_1.transaction')
     @patch('sheet.views_api_0_1.get_object_or_404')
-    def test_api_view_commits_transaction_even_on_sheet_calculate_exception(
+    def test_commits_transaction_even_on_sheet_calculate_exception(
         self, mock_get_object, mock_transaction
     ):
         mock_sheet = mock_get_object.return_value
@@ -246,7 +238,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
 
     @patch('sheet.views_api_0_1.get_object_or_404')
-    def test_api_view_should_return_errors_and_no_values_if_unjsonify_worksheet_result_has_errors(self, mock_get_object):
+    def test_should_return_errors_and_no_values_if_unjsonify_worksheet_result_has_errors(self, mock_get_object):
         mock_sheet = mock_get_object.return_value
         mock_sheet.owner = self.user
 
@@ -281,7 +273,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
 
     @patch('sheet.views_api_0_1.get_object_or_404')
-    def test_api_view_should_handle_cell_formula_overrides_from_POST(self, mock_get_object):
+    def test_should_handle_cell_formula_overrides_from_POST(self, mock_get_object):
         mock_sheet = mock_get_object.return_value = Sheet()
         mock_sheet.owner = self.user
 
@@ -325,7 +317,7 @@ class CalculateAndGetJsonForApiViewTest(django.test.TestCase, ResolverTestMixins
 
 
     @patch('sheet.views_api_0_1.get_object_or_404')
-    def test_api_view_should_handle_cell_formula_overrides_from_GET(self, mock_get_object):
+    def test_should_handle_cell_formula_overrides_from_GET(self, mock_get_object):
         mock_sheet = mock_get_object.return_value = Sheet()
         mock_sheet.owner = self.user
 
