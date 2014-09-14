@@ -35,7 +35,7 @@ class Test_2540_FrontPage(FunctionalTest):
         self.go_to_url('http://%s/' % (SERVER_IP,))
 
         # He finds a page with the title  "Welcome to Dirigible"
-        self.assertEquals(self.selenium.get_title(), 'Welcome to Dirigible')
+        self.assertEquals(self.browser.title, 'Welcome to Dirigible')
 
         # The CSS files are all loaded correctly
         self.check_links_not_broken_for_tag_attribute("//link[@rel='stylesheet']", "href")

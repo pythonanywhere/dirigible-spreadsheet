@@ -282,7 +282,7 @@ class Test_2565_JSONAPIAuth(FunctionalTest):
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
 
         # containing a documentation page that explains it all
-        title = self.selenium.get_title()
+        title = self.browser.title
         self.assertTrue(title.startswith('The JSON API'))
         self.assertTrue(title.endswith('documentation'))
 

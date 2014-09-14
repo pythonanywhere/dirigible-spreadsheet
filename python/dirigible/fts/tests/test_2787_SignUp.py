@@ -220,7 +220,7 @@ class Test_2787_SignUp(FunctionalTest):
         self.login(username, password, already_on_login_page=True)
 
         # He is taken to his dashboard
-        self.assertEquals(self.selenium.get_title(), "%s's Dashboard: Dirigible" % (username,))
+        self.assertEquals(self.browser.title, "%s's Dashboard: Dirigible" % (username,))
         _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
         self.assertEquals(path, '/')
 
@@ -256,7 +256,7 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He finds himself on a page which contains the first tutorial
         expected_title = 'Tutorial part 1: First steps, adding Python to a spreadsheet'
-        self.assertTrue(expected_title in self.selenium.get_title())
+        self.assertTrue(expected_title in self.browser.title)
 
         # He goes back to the dashboard
         self.go_to_url(Url.ROOT)

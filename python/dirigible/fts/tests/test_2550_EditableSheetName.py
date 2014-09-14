@@ -54,7 +54,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
             lambda: 'sheet name to be updated'
         )
         # and the title to the page becomes "user's sheet_name: Dirigible"
-        self.assertEquals(self.selenium.get_title(), "%s's %s: Dirigible" %
+        self.assertEquals(self.browser.title, "%s's %s: Dirigible" %
             (self.get_my_username(), 'margarita'))
 
         # * He refreshes the page
@@ -67,7 +67,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
         )
         # and the title to the page remains "user's sheet_name: Dirigible"
         self.wait_for(
-            lambda: self.selenium.get_title() == "%s's %s: Dirigible" % (self.get_my_username(), 'margarita'),
+            lambda: self.browser.title == "%s's %s: Dirigible" % (self.get_my_username(), 'margarita'),
             lambda: 'page title to update'
         )
 

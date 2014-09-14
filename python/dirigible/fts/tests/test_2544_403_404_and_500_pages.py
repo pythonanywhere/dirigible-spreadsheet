@@ -33,7 +33,7 @@ class Test_2544_404And500Pages(FunctionalTest):
         # * He gets an appropriate Dirigible-specific 403 page.
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
         self.check_page_load(sheet_url)
-        self.assertEquals(self.selenium.get_title(), "Access Forbidden: Dirigible")
+        self.assertEquals(self.browser.title, "Access Forbidden: Dirigible")
         self.assertEquals(self.get_text("id=id_server_error_title"), "403 Access Forbidden")
         error_text = self.get_text("id=id_server_error_text")
         self.assertTrue("This page is private and belongs to someone else." in error_text)
@@ -60,7 +60,7 @@ class Test_2544_404And500Pages(FunctionalTest):
         # * He gets an appropriate Dirigible-specific 404 page.
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
         self.check_page_load(url)
-        self.assertEquals(self.selenium.get_title(), "Page not found: Dirigible")
+        self.assertEquals(self.browser.title, "Page not found: Dirigible")
         self.assertEquals(self.get_text("id=id_server_error_title"), "404 Not Found")
         error_text = self.get_text("id=id_server_error_text")
         self.assertTrue("The page that you seek" in error_text)
@@ -90,7 +90,7 @@ class Test_2544_404And500Pages(FunctionalTest):
         # * He gets an appropriate Dirigible-specific 500 page.
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
         self.check_page_load(url)
-        self.assertEquals(self.selenium.get_title(), "Server error: Dirigible")
+        self.assertEquals(self.browser.title, "Server error: Dirigible")
         self.assertEquals(self.get_text("id=id_server_error_title"), "500 Internal Server Error")
         error_text = self.get_text("id=id_server_error_text")
         self.assertTrue("Sorry, something has gone wrong!" in error_text)

@@ -244,7 +244,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             for error_locator in possible_error_locators:
                 if self.selenium.is_element_present(error_locator) and str(error_code) in self.get_text(error_locator):
                     return
-            self.fail('%d not raised, got: %s' % (error_code, self.selenium.get_title()))
+            self.fail('%d not raised, got: %s' % (error_code, self.browser.title))
 
 
     def assert_redirects(self, from_url, to_url):
@@ -441,7 +441,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def assert_page_title_contains(self, link_url, title):
         original_page = self.browser.current_url
         self.go_to_url(link_url)
-        self.assertTrue(title in self.selenium.get_title())
+        self.assertTrue(title in self.browser.title)
         self.go_to_url(original_page)
 
 

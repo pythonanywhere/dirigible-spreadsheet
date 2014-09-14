@@ -26,7 +26,7 @@ class Test_2571_Documentation(FunctionalTest):
         self.go_to_url(Url.DOCUMENTATION)
 
         # * He gets back a page, not a 404, the title of which which contains the words 'Dirigible' and 'documentation'
-        title = self.selenium.get_title().lower()
+        title = self.browser.title.lower()
         self.assertTrue("documentation" in title)
         self.assertTrue("dirigible" in title)
 

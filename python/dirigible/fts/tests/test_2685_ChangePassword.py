@@ -122,7 +122,7 @@ class Test_2685_ChangePassword(FunctionalTest):
 
         # It works.
         expected = "%s's Dashboard: Dirigible" % (self.get_my_username(),)
-        self.assertEquals(self.selenium.get_title(), expected)
+        self.assertEquals(self.browser.title, expected)
 
         # He celebrates.
 

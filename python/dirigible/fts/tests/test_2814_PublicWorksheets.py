@@ -361,7 +361,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
 
         # * and is taken to a documentation page that explains it all
-        title = self.selenium.get_title().lower()
+        title = self.browser.title.lower()
         self.assertTrue('public' in title)
         self.assertTrue('sheet' in title)
 

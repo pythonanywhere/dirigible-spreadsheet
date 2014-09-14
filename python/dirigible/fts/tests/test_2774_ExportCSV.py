@@ -112,7 +112,7 @@ class Test_2774_ExportCSV(FunctionalTest):
 
         # He is taken to an error page, with a helpful message suggesting he
         # tries again using the international version
-        self.assertEquals(self.selenium.get_title(), "CSV Export Error: Dirigible")
+        self.assertEquals(self.browser.title, "CSV Export Error: Dirigible")
         self.assertEquals(
             self.get_text("id=id_server_error_title"),
             "Could not export CSV file"
@@ -131,7 +131,7 @@ class Test_2774_ExportCSV(FunctionalTest):
         self.selenium.click('css=a[href="/documentation/import_export.html"]')
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
         self.assertTrue(
-                'Importing and Exporting' in self.selenium.get_title()
+                'Importing and Exporting' in self.browser.title
         )
 
         # He goes back to his sheet page

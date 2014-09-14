@@ -153,7 +153,7 @@ class Test_2711_Import_Excel(FunctionalTest):
 
         # * He is presented with an appropriate error page
         self.assertEquals(
-                self.selenium.get_title(), "Excel Import Error: Dirigible")
+                self.browser.title, "Excel Import Error: Dirigible")
         self.assertEquals(
                 self.get_text("id=id_server_error_title"),
                 "Could not import Excel file"

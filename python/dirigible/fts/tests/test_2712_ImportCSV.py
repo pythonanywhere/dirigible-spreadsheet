@@ -197,7 +197,7 @@ class Test_2712_ImportCSV(FunctionalTest):
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
 
         # * He is presented with an appropriate error page
-        self.assertEquals(self.selenium.get_title(), "CSV Import Error: Dirigible")
+        self.assertEquals(self.browser.title, "CSV Import Error: Dirigible")
         self.assertEquals(
             self.get_text("id=id_server_error_title"),
             "Could not import CSV file"

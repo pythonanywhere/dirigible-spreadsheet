@@ -36,7 +36,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.login()
 
         # * On his dashboard, he notes an option to create a new spreadsheet.  He chooses it.
-        self.assertEquals(self.selenium.get_title(), "%s's Dashboard: Dirigible" % (self.get_my_username(),))
+        self.assertEquals(self.browser.title, "%s's Dashboard: Dirigible" % (self.get_my_username(),))
         self.assertEquals(self.get_text('id=id_create_new_sheet'),
             "Create new sheet...")
         self.click_link('id_create_new_sheet')
@@ -57,7 +57,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         # * Now that the grid is loaded (and so the sheet's name is too), he notices
         #   that the title is something like: XXXX's sheet_name: Dirigible
         sheet_name = self.get_text('id=id_sheet_name')
-        self.assertEquals(self.selenium.get_title(), "%s's %s: Dirigible" %
+        self.assertEquals(self.browser.title, "%s's %s: Dirigible" %
            (self.get_my_username(), sheet_name))
 
 
