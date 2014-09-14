@@ -12,7 +12,7 @@ from unittest import SkipTest
 from urllib import urlencode
 
 
-from mock import Mock, patch, sentinel
+from mock import call, Mock, patch, sentinel
 
 from dirigible.test_utils import die, ResolverTestCase
 
@@ -547,7 +547,7 @@ class TestCalculate(ResolverTestCase):
                         User code line 4
                         User code line 3, in func\n""")[1:]
         self.assertIn(
-            ((expected_error_text,),{}),
+            call(expected_error_text),
             worksheet.add_console_text.call_args_list
         )
 
@@ -572,9 +572,9 @@ class TestCalculate(ResolverTestCase):
 
     def test_format_traceback_filters_frames_that_are_dirigible_code(self):
         frames = [
-            ("/home/dirigible/python/dirigible/sheet/calculate.py", 83,
+            ("/home/username/wherever/dirigible-spreadsheet/python/dirigible/sheet/calculate.py", 83,
                 'calculate', 'execute_usercode(usercode, context)'),
-            ("/home/dirigible/python/dirigible/sheet/calculate.py", 71,
+            ("/home/username/wherever/dirigible-spreadsheet/python/dirigible/sheet/calculate.py", 71,
                 'execute_usercode', 'exec(usercode, context)'),
             ("<string>", 14,
                 '<module>', None),
@@ -584,7 +584,7 @@ class TestCalculate(ResolverTestCase):
                 'loads', None),
             ("build/bdist.linux-i686/egg/simplejson/decoder.py", 402,
                 'decode', 'obj, end = self.raw_decode(s, idx=_w(s, 0).end())'),
-            ("/home/dirigible/python/dirigible/../dirigible/sheet/worksheet.py", 25,
+            ("/home/username/wherever/dirigible-spreadsheet/python/dirigible/../dirigible/sheet/worksheet.py", 25,
                 "__setitem__", 'raise TypeError("Worksheet locations must be Cell objects")'),
         ]
 

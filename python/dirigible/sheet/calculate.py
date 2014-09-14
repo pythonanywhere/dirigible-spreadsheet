@@ -169,7 +169,7 @@ def format_traceback(frames):
 
     def frame_is_visible_to_user(frame):
         filename, _, function, __ = frame
-        return not filename.startswith('/home/dirigible/python/dirigible')
+        return not '/python/dirigible/' in filename
 
 
     def format_frame(frame):
