@@ -7,17 +7,17 @@ from ply import lex
 from ply import yacc
 from threading import Lock
 
-import dirigible.sheet.parser.grammar
+from . import grammar, tokens
 
 
 _parser = yacc.yacc(
-    module=dirigible.sheet.parser.grammar,
+    module=grammar,
     outputdir=os.path.dirname(__file__),
     method="LALR",
     debug=0,
     tabmodule='dirigible.sheet.parser.parsetab'
 )
-_lexer = lex.lex(dirigible.sheet.parser.tokens)
+_lexer = lex.lex(tokens)
 
 _parser_lock = Lock()
 
