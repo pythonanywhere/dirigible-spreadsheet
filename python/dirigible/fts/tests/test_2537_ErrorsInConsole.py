@@ -12,7 +12,7 @@ class Test_2537_ErrorsInConsole(FunctionalTest):
         self.login_and_create_new_sheet()
 
         # * He notes that there is a console on the page
-        self.selenium.is_element_present('id=id_console')
+        self.is_element_present('id=id_console')
 
         original_usercode = self.get_usercode()
 

@@ -20,7 +20,7 @@ class Test_2635_SheetNameSelectedOnEdit(FunctionalTest):
         # * He clicks on the sheet name and enters a new one
         self.selenium.click('id=id_sheet_name')
         self.wait_for(
-            lambda: self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'editable sheetname to appear')
         self.human_key_press(key_codes.LETTER_A)
         self.human_key_press(key_codes.LETTER_B)

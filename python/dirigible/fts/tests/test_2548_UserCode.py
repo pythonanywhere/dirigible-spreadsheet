@@ -17,7 +17,7 @@ class Test_2548_UserCode(FunctionalTest):
         # * He notices that there is an Ace code editor on the page, which he
         #   has inexplicably not noticed before.
         self.assertTrue(
-                self.selenium.is_element_present('css=#id_usercode.ace_editor')
+                self.is_element_present('css=#id_usercode.ace_editor')
         )
 
         # * In the editor, there is some interesting-looking code

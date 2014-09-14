@@ -20,7 +20,7 @@ class Test_2521_CodeEditor(FunctionalTest):
 
         # * He notes that the code editor is an Ace editor (!)
         self.assertTrue(
-            self.selenium.is_element_present('css=#id_usercode.ace_editor'),
+            self.is_element_present('css=#id_usercode.ace_editor'),
             'editor component not present'
         )
 

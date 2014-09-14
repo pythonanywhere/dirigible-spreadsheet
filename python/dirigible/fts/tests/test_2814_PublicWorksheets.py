@@ -152,7 +152,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         self.selenium.click('id=id_sheet_name')
         time.sleep(1)
         self.wait_for(
-            lambda: not self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: not self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'ensure editable sheetname does not appear')
 
         def download_as_csv():

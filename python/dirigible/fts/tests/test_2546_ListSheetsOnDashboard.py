@@ -12,7 +12,7 @@ class Test_2546_ListSheetsOnDashboard(FunctionalTest):
     def rename_current_sheet(self, name):
         self.selenium.click('id=id_sheet_name')
         self.wait_for(
-            lambda: self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'edit sheetname textbox to appear')
         self.selenium.type('id=edit-id_sheet_name', name)
         self.human_key_press(key_codes.ENTER)
@@ -36,7 +36,7 @@ class Test_2546_ListSheetsOnDashboard(FunctionalTest):
 
         # * He notes that he is being told that he has no sheets.
         self.assertTrue(
-            self.selenium.is_element_present('id=id_no_sheets_message'),
+            self.is_element_present('id=id_no_sheets_message'),
             "Could not find 'no sheets' message"
         )
 
@@ -50,7 +50,7 @@ class Test_2546_ListSheetsOnDashboard(FunctionalTest):
 
         # He notes that the "no sheets" message is absent.
         self.assertFalse(
-            self.selenium.is_element_present('id=id_no_sheets_message'),
+            self.is_element_present('id=id_no_sheets_message'),
             "Found 'no sheets' message when it wasn't expected"
         )
 

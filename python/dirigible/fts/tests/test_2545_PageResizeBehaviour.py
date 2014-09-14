@@ -14,8 +14,8 @@ class Test_2545_PageResizeBehaviour(FunctionalTest):
         self.login_and_create_new_sheet()
 
         # He notes that there are splitter bars
-        self.assertTrue(self.selenium.is_element_present('css=.hsplitbar'))
-        self.assertTrue(self.selenium.is_element_present('css=.vsplitbar'))
+        self.assertTrue(self.is_element_present('css=.hsplitbar'))
+        self.assertTrue(self.is_element_present('css=.vsplitbar'))
 
         # He uses the vertical split bar to resize the grid to its minimum width
         self.selenium.drag_and_drop('css=.vsplitbar', '-4000, 0')

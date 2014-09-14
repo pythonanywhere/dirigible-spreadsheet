@@ -226,7 +226,7 @@ class Test_2633_CursorKeysMoveAroundGrid(FunctionalTest):
         # He notes that the cell shifts into edit mode (though it remains empty)
         full_editor_locator = self.get_cell_editor_locator(2, 1)
         self.wait_for(
-            lambda : self.selenium.is_element_present(full_editor_locator),
+            lambda : self.is_element_present(full_editor_locator),
             lambda : "Editor at (%s, %s) to be present" % (2, 1),
         )
         self.wait_for_cell_editor_content("")
@@ -250,7 +250,7 @@ class Test_2633_CursorKeysMoveAroundGrid(FunctionalTest):
         # He notes that the cell shifts into edit mode and shows the formula.
         full_editor_locator = self.get_cell_editor_locator(1, 1)
         self.wait_for(
-            lambda : self.selenium.is_element_present(full_editor_locator),
+            lambda : self.is_element_present(full_editor_locator),
             lambda : "Editor at (%s, %s) to be present" % (1, 1),
         )
         self.wait_for_cell_editor_content("=4567")

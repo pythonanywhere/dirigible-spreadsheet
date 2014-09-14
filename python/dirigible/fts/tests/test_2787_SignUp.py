@@ -14,8 +14,8 @@ class Test_2787_SignUp(FunctionalTest):
 
     def are_password_fields_showing_error(self):
         return (
-            self.selenium.is_element_present('css=#id_password1.error')
-            and self.selenium.is_element_present('css=#id_password2.error')
+            self.is_element_present('css=#id_password1.error')
+            and self.is_element_present('css=#id_password2.error')
         )
 
 
@@ -34,15 +34,15 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He notices a "sign up" form that requires a username, an email address,
         # and two copies of the same password.
-        self.assertTrue(self.selenium.is_element_present(
+        self.assertTrue(self.is_element_present(
             'css=input#id_username'))
-        self.assertTrue(self.selenium.is_element_present(
+        self.assertTrue(self.is_element_present(
             'css=input#id_email'))
-        self.assertTrue(self.selenium.is_element_present(
+        self.assertTrue(self.is_element_present(
             'css=input#id_password1'))
-        self.assertTrue(self.selenium.is_element_present(
+        self.assertTrue(self.is_element_present(
             'css=input#id_password2'))
-        self.assertTrue(self.selenium.is_element_present(
+        self.assertTrue(self.is_element_present(
             'css=input#id_signup_button'))
         self.assertEquals(
             self.selenium.get_attribute(
@@ -267,7 +267,7 @@ class Test_2787_SignUp(FunctionalTest):
         # And is happy that it isn't there,
         self.wait_for_grid_to_appear()
         self.assertFalse(
-                self.selenium.is_element_present('id=id_tutorial_promo_dialog')
+                self.is_element_present('id=id_tutorial_promo_dialog')
         )
 
         # He logs out

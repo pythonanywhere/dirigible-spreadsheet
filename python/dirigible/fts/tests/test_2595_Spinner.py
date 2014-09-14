@@ -29,4 +29,4 @@ class Test_2595_Throbber(FunctionalTest):
         # * When the recalc is done, he sees the spinner go away
         self.wait_for_cell_value(1, 1, 'ready', timeout_seconds=25)
 
-        self.assertTrue(self.selenium.is_element_present('css=#id_spinner_image.hidden'))
+        self.assertTrue(self.is_element_present('css=#id_spinner_image.hidden'))

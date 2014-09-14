@@ -19,7 +19,7 @@ class Test_2651_SaveSheetNameOnBlur(FunctionalTest):
         # * He clicks on the sheet name and enters a new one
         self.selenium.click('id=id_sheet_name')
         self.wait_for(
-            lambda: self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'editable sheetname to appear')
         self.selenium.type('id=edit-id_sheet_name', 'clicky namey')
 
@@ -33,7 +33,7 @@ class Test_2651_SaveSheetNameOnBlur(FunctionalTest):
         )
 
         # * and the sheet name is not in edit mode
-        self.assertFalse(self.selenium.is_element_present('id=edit-id_sheet_name'))
+        self.assertFalse(self.is_element_present('id=edit-id_sheet_name'))
 
 
     def test_cancel_instruction_present(self):
@@ -44,7 +44,7 @@ class Test_2651_SaveSheetNameOnBlur(FunctionalTest):
         original_name = self.get_text('id=id_sheet_name')
         self.selenium.click('id=id_sheet_name')
         self.wait_for(
-            lambda: self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'editable sheetname to appear')
 
         # * He enters a new name for the sheet

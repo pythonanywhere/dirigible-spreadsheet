@@ -39,10 +39,10 @@ class Test_2550_EdittableSheetName(FunctionalTest):
         # and remains when the mouse moves away
         self.selenium.click('id=id_sheet_name')
         self.wait_for(
-            lambda: self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'editable sheetname to appear')
         self.selenium.mouse_out('id=id_sheet_name')
-        self.assertTrue(self.selenium.is_element_present('id=edit-id_sheet_name'))
+        self.assertTrue(self.is_element_present('id=edit-id_sheet_name'))
 
         # * He types a new sheetname 'margarita', hits return.
         self.selenium.type('id=edit-id_sheet_name', 'margarita')
@@ -87,7 +87,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
         # * While the recalc is running, he changes the sheet name
         self.selenium.click('id=id_sheet_name')
         self.wait_for(
-            lambda: self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'editable sheetname to appear')
         self.selenium.type('id=edit-id_sheet_name', 'new sheet name')
         self.human_key_press(key_codes.ENTER)

@@ -288,7 +288,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
             possible_error_locators = ('id=summary', 'id=id_server_error_title')
             for error_locator in possible_error_locators:
-                if self.selenium.is_element_present(error_locator) and str(error_code) in self.get_text(error_locator):
+                if self.is_element_present(error_locator) and str(error_code) in self.get_text(error_locator):
                     return
             self.fail('%d not raised, got: %s' % (error_code, self.browser.title))
 
@@ -314,7 +314,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         else:
             failure_message = "Element %s to not exist" % (locator, ),
         self.wait_for(
-            lambda : present == self.selenium.is_element_present(locator),
+            lambda : present == self.is_element_present(locator),
             lambda : failure_message,
             timeout_seconds=timeout_seconds
         )
@@ -430,7 +430,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def set_sheet_name(self, name):
         self.selenium.click('id=id_sheet_name')
         self.wait_for(
-            lambda: self.selenium.is_element_present('id=edit-id_sheet_name'),
+            lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'editable sheetname to appear')
         self.selenium.type('id=edit-id_sheet_name', name)
         self.human_key_press(key_codes.ENTER)
@@ -475,7 +475,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_formatted_value_locator(self, column, row, raise_if_cell_missing=True):
         cell_css = self.get_cell_css(column, row)
-        if not self.selenium.is_element_present('css=%s' % (cell_css,)):
+        if not self.is_element_present('css=%s' % (cell_css,)):
             if raise_if_cell_missing:
                 raise Exception("Cell not present at %s, %s" % (column, row))
             else:
@@ -670,7 +670,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_shown_formula_locator(self, column, row, raise_if_cell_missing=True):
         cell_css = self.get_cell_css(column, row)
-        if not self.selenium.is_element_present('css=%s' % (cell_css,)):
+        if not self.is_element_present('css=%s' % (cell_css,)):
             if raise_if_cell_missing:
                 raise Exception("Cell not present at %s, %s" % (column, row))
             else:
@@ -680,7 +680,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_shown_formula(self, column, row, raise_if_cell_missing=True):
         formula_locator = self.get_cell_shown_formula_locator(column, row, raise_if_cell_missing)
-        if not self.selenium.is_element_present(formula_locator):
+        if not self.is_element_present(formula_locator):
             return None
 
         return self.get_text(formula_locator)
@@ -713,7 +713,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_error(self, column, row):
         error_img_id = 'id_%d_%d_error' % (column, row)
-        if self.selenium.is_element_present('id=%s' % (error_img_id,)):
+        if self.is_element_present('id=%s' % (error_img_id,)):
             return self.selenium.get_attribute('id=%s@title' % (error_img_id,))
 
 
@@ -725,7 +725,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def assert_cell_has_no_error(self, column, row):
         error_img_id = 'id_%d_%d_error' % (column, row)
-        self.assertFalse(self.selenium.is_element_present('id=%s' % (error_img_id,)),
+        self.assertFalse(self.is_element_present('id=%s' % (error_img_id,)),
                          'Error present for (%d, %d)' % (column, row))
 
 
@@ -787,7 +787,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def wait_for_cell_to_become_active(self, column, row, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
         locator = self.get_cell_locator(column,row, must_be_active=True)
         self.wait_for(
-            lambda : self.selenium.is_element_present(locator),
+            lambda : self.is_element_present(locator),
             lambda : "Cell at (%s, %s) was not active. Selection is: %s" %
                 (column, row, self.get_current_cell()),
             timeout_seconds=timeout_seconds
@@ -825,8 +825,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def is_spinner_visible(self):
         return (
-            self.selenium.is_element_present('css=#id_spinner_image')
-            and not self.selenium.is_element_present('css=#id_spinner_image.hidden')
+            self.is_element_present('css=#id_spinner_image')
+            and not self.is_element_present('css=#id_spinner_image.hidden')
         )
 
 
