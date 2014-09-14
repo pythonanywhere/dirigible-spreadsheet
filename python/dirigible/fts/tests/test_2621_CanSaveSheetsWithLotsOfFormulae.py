@@ -13,7 +13,7 @@ class Test_2621_CanSaveSheetsWithLotsOfFormulae(FunctionalTest):
     def test_can_save_lots_of_formulae(self):
         # * Harold logs in to Dirigible and creates a new sheet
         self.login_and_create_new_sheet()
-        sheet_page = self.selenium.get_location()
+        sheet_page = self.browser.current_url
 
         # * Typing tirelessly, he enters moderately-sized formulae in
         #   23 columns across 400 rows

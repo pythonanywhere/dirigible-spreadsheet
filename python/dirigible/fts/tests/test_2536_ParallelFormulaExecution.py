@@ -60,11 +60,11 @@ class Test_2536_ParallelFormulaExecution(FunctionalTest):
     def test_run_worksheet_executed_in_parallel(self):
         # * Harold logs in and creates a blank worker sheet
         self.login_and_create_new_sheet()
-        worker_sheet_url = self.selenium.get_location()
+        worker_sheet_url = self.browser.current_url
 
         # * He then goes to create a master sheet that makes several calls on the worker
         self.create_new_sheet()
-        master_sheet_url = self.selenium.get_location()
+        master_sheet_url = self.browser.current_url
 
         # * he enters formulae that use the worksheet in a number of run_worksheet calls
         run_worksheet_formula = '=run_worksheet("%s")[1, 1].value' % (worker_sheet_url,)

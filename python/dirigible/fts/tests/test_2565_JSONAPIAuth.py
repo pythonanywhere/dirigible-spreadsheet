@@ -32,7 +32,7 @@ class Test_2565_JSONAPIAuth(FunctionalTest):
 
         # * He logs in to Dirigible and creates a new sheet
         sheet_id = self.login_and_create_new_sheet()
-        base_json_url = urljoin(self.selenium.get_location(), 'v0.1/json/')
+        base_json_url = urljoin(self.browser.current_url, 'v0.1/json/')
 
         # * He enters some values and formulae
         self.enter_cell_text(1, 1, '5')
@@ -290,12 +290,12 @@ class Test_2565_JSONAPIAuth(FunctionalTest):
     def test_run_worksheet_with_json_disabled_sheets(self):
         # * Harold logs in to Dirigible and creates a new sheet, with some stuff in it
         self.login_and_create_new_sheet()
-        rws_sheet_url = self.selenium.get_location()
+        rws_sheet_url = self.browser.current_url
         self.enter_cell_text(1, 1, '5')
 
         # * He creates another new sheet
         self.create_new_sheet()
-        base_json_url = urljoin(self.selenium.get_location(), 'v0.1/json/')
+        base_json_url = urljoin(self.browser.current_url, 'v0.1/json/')
 
         # * and enables JSON API access
         self.selenium.click('id=id_security_button')

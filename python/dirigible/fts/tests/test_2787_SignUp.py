@@ -25,12 +25,12 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He notes that there are two "sign up" links, both pointing to the same URL
         self.click_link("id_signup_link")
-        signup_url = self.selenium.get_location()
+        signup_url = self.browser.current_url
         self.go_to_url('/')
 
         # He follows one of them
         self.click_link("id_signup_call_to_action")
-        self.assertEquals(self.selenium.get_location(), signup_url)
+        self.assertEquals(self.browser.current_url, signup_url)
 
         # He notices a "sign up" form that requires a username, an email address,
         # and two copies of the same password.
@@ -184,7 +184,7 @@ class Test_2787_SignUp(FunctionalTest):
         # There is a link to the Dirigible home page, which he follows and discovers
         # that it works.
         self.click_link('id_link_home')
-        self.assertEquals(self.selenium.get_location(), Url.ROOT)
+        self.assertEquals(self.browser.current_url, Url.ROOT)
 
         # He checks his email, and after a short wait finds a message
         # from the Dirigible server, that looks like the following string:
@@ -221,7 +221,7 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He is taken to his dashboard
         self.assertEquals(self.selenium.get_title(), "%s's Dashboard: Dirigible" % (username,))
-        _, __, path, ___, ____, _____ = urlparse(self.selenium.get_location())
+        _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
         self.assertEquals(path, '/')
 
         # He's super keen to get in on the Dirigible action, so when he sees the

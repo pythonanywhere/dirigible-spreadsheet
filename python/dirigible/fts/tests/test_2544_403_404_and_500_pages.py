@@ -15,7 +15,7 @@ class Test_2544_404And500Pages(FunctionalTest):
     def test_403(self):
         harriet = self.get_my_usernames()[1]
         self.login_and_create_new_sheet(harriet)
-        sheet_url = self.selenium.get_location()
+        sheet_url = self.browser.current_url
         self.logout()
 
         # * Harold goes to a page he should not have access to
@@ -41,7 +41,7 @@ class Test_2544_404And500Pages(FunctionalTest):
         # There is also a link to the Dirigible home page, which he follows and discovers
         # that it works.
         self.click_link('id_link_home')
-        self.assertEquals(self.selenium.get_location(), Url.ROOT)
+        self.assertEquals(self.browser.current_url, Url.ROOT)
 
 
 
@@ -70,14 +70,14 @@ class Test_2544_404And500Pages(FunctionalTest):
         # There is a link to the Dirigible home page, which he follows and discovers
         # that it works.
         self.click_link('id_link_home')
-        self.assertEquals(self.selenium.get_location(), Url.ROOT)
+        self.assertEquals(self.browser.current_url, Url.ROOT)
 
 
 
     def test_500(self):
         # * Harold somehow triggers an internal server error
         self.login_and_create_new_sheet()
-        url = urljoin(self.selenium.get_location(), 'set_cell_formula/')
+        url = urljoin(self.browser.current_url, 'set_cell_formula/')
         ## Older versions of Selenium (like the one we use for IE) signal errors
         ## with exceptions.  Newer ones don't.  We handle the former case by
         ## looking at the exception details; for the latter we rely on the checks
@@ -99,4 +99,4 @@ class Test_2544_404And500Pages(FunctionalTest):
         # There is a link to the Dirigible home page, which he follows and discovers
         # that it works.
         self.click_link('id_link_home')
-        self.assertEquals(self.selenium.get_location(), Url.ROOT)
+        self.assertEquals(self.browser.current_url, Url.ROOT)

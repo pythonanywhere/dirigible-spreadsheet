@@ -11,7 +11,7 @@ class Test_2535_RunWorksheet(FunctionalTest):
     def test_run_worksheet_no_overrides(self):
         # * Harold logs in, creates a new sheet and notes its id
         self.login_and_create_new_sheet()
-        target_sheet_url = self.selenium.get_location()
+        target_sheet_url = self.browser.current_url
 
         # * and enters a few calculations and constants
         self.enter_cell_text(1, 1, '2')
@@ -34,7 +34,7 @@ class Test_2535_RunWorksheet(FunctionalTest):
     def test_run_worksheet_with_overrides(self):
         # * Harold logs in, creates a new sheet and notes its id
         self.login_and_create_new_sheet()
-        target_sheet_url = self.selenium.get_location()
+        target_sheet_url = self.browser.current_url
 
         # * and enters a few calculations and constants
         self.enter_cell_text(1, 1, '2')
@@ -67,7 +67,7 @@ class Test_2535_RunWorksheet(FunctionalTest):
     def test_run_worksheet_with_error(self):
         # * Harold logs in, creates a new sheet and notes its id
         self.login_and_create_new_sheet()
-        target_sheet_url = self.selenium.get_location()
+        target_sheet_url = self.browser.current_url
 
         # * and enters an error
         self.prepend_usercode('import sys:')

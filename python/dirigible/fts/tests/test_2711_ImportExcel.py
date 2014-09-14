@@ -128,7 +128,7 @@ class Test_2711_Import_Excel(FunctionalTest):
 
         # * He logs in to Dirigible and creates a nice shiny new sheet
         self.login_and_create_new_sheet()
-        sheet_url = self.selenium.get_location()
+        sheet_url = self.browser.current_url
 
         # * He clicks the import button
         self.selenium.click('id=id_import_button')
@@ -166,5 +166,5 @@ class Test_2711_Import_Excel(FunctionalTest):
         self.click_link('id_account_link')
 
         # And finds himself back on his sheet page.
-        self.assertEquals(self.selenium.get_location(), Url.ROOT)
+        self.assertEquals(self.browser.current_url, Url.ROOT)
 

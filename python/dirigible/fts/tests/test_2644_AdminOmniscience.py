@@ -13,7 +13,7 @@ class Test_2644_AdminOmniscience(FunctionalTest):
         # super-sekrit data in it.
         self.login_and_create_new_sheet()
         self.enter_cell_text(1, 1, "My banking password")
-        harolds_sheet_url = self.selenium.get_location()
+        harolds_sheet_url = self.browser.current_url
         self.wait_for_cell_value(1, 1, 'My banking password')
 
         # He logs out, confident that it's safe from prying eyes.
@@ -33,7 +33,7 @@ class Test_2644_AdminOmniscience(FunctionalTest):
 
         # Harriet creates a sheet containing her private data.
         self.login_and_create_new_sheet(username=harriet)
-        harriets_sheet_url = self.selenium.get_location()
+        harriets_sheet_url = self.browser.current_url
         self.logout()
 
         # Before logging in, Harold tries to access Harriet's sheet using the

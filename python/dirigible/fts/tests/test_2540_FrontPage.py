@@ -22,7 +22,7 @@ class Test_2540_FrontPage(FunctionalTest):
 
     def check_links_not_broken_for_tag_attribute(self, tag_xpath, attribute):
         num_tags = self.selenium.get_xpath_count(tag_xpath)
-        base_file_location = self.selenium.get_location()
+        base_file_location = self.browser.current_url
         for i in range(1, num_tags + 1):
             src = self.selenium.get_attribute("xpath=(%s)[%s]@%s" % (tag_xpath, i, attribute))
             url = urlparse.urljoin(base_file_location, src)
@@ -47,7 +47,7 @@ class Test_2540_FrontPage(FunctionalTest):
         self.check_links_not_broken_for_tag_attribute("//a", "href")
 
         # He notes in particular that the "log in" link take him to the login page.
-        front_page = self.selenium.get_location()
+        front_page = self.browser.current_url
         login_url = self.selenium.get_attribute("xpath=//a[text() = 'Log in']@href")
         self.assert_sends_to_login_page(login_url)
         self.go_to_url(front_page)

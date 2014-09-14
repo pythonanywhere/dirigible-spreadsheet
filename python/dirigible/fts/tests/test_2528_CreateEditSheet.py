@@ -43,7 +43,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
 
         # * He is taken to a web page which has a URL like /user/XXXX/sheet/<num>
         #        where XXXX is his user name
-        _, __, path, ___, ____, _____ = urlparse(self.selenium.get_location())
+        _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
         self.assertRegexpMatches(path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
 
         # * The page has a grid.
@@ -150,7 +150,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         # * He logs in
         self.login(already_on_login_page=True)
         # * ... and gets take to a new sheet
-        url = urlparse(self.selenium.get_location())
+        url = urlparse(self.browser.current_url)
         self.assertEquals(url.netloc, '%s' % (SERVER_IP,))
         self.assertRegexpMatches(url.path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
 

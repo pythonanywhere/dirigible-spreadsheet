@@ -111,7 +111,7 @@ class Test_2884_FeedbackForm(FunctionalTest):
         self.assertEquals(subject, '[Django] User feedback from Dirigible')
         self.assertTrue(MESSAGE in body)
         self.assertTrue(SUBMITTED_EMAIL_ADDRESS in body)
-        self.assertTrue("Page: %s" % (self.selenium.get_location(),) in body)
+        self.assertTrue("Page: %s" % (self.browser.current_url,) in body)
 
 
     def test_feedback_dialog_from_logged_in_dashboard(self):
@@ -182,7 +182,7 @@ class Test_2884_FeedbackForm(FunctionalTest):
         self.assertEquals(subject, '[Django] User feedback from Dirigible')
         self.assertTrue(MESSAGE in body)
         self.assertTrue("Username: %s" % (self.get_my_username(),) in body)
-        self.assertTrue("Page: %s" % (self.selenium.get_location(),) in body)
+        self.assertTrue("Page: %s" % (self.browser.current_url,) in body)
 
 
     def test_feedback_dialog_displays_submission_status(self):

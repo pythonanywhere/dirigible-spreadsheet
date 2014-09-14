@@ -63,7 +63,7 @@ class Test_2774_ExportCSV(FunctionalTest):
         # does when a user starts a download. This is too hard to test with
         # Selenium.  Lets go shopping^W^W use urllib2
         download_url = self.selenium.get_attribute('id=id_export_csv_excel_version@href')
-        download_url = urljoin(self.selenium.get_location(), download_url)
+        download_url = urljoin(self.browser.current_url, download_url)
 
         stream = self.get_url_with_session_cookie(download_url)
         self.assertEquals(stream.info().gettype(), "text/csv")
@@ -96,7 +96,7 @@ class Test_2774_ExportCSV(FunctionalTest):
         self.enter_cell_text(1, 1, some_kanji)
         self.wait_for_spinner_to_stop()
 
-        page_url = self.selenium.get_location()
+        page_url = self.browser.current_url
 
         # * He clicks on a button that clearly allows him to export CSV data.
         self.wait_for_element_visibility('id=id_export_button', True)
@@ -143,7 +143,7 @@ class Test_2774_ExportCSV(FunctionalTest):
 
         # test unicode download
         download_url = self.selenium.get_attribute('id=id_export_csv_unicode_version@href')
-        download_url = urljoin(self.selenium.get_location(), download_url)
+        download_url = urljoin(self.browser.current_url, download_url)
 
         opener = urllib2.build_opener()
         session_cookie = self.selenium.get_cookie_by_name('sessionid')

@@ -14,7 +14,7 @@ class Test_2622_CellRanges(FunctionalTest):
         self.login_and_create_new_sheet()
 
         # * While perusing the documentation, he notices a reference to cell ranges.
-        sheet_url = self.selenium.get_location()
+        sheet_url = self.browser.current_url
         self.go_to_url(Url.API_DOCS)
         self.wait_for_element_to_appear("id=CellRange")
         self.wait_for_element_to_appear("id=Worksheet.cell_range")

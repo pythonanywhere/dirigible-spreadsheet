@@ -83,7 +83,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         self.waitForButtonToIndicateSheetIsPublic(True)
 
         # He notes down the URL and emails it to his colleague Harriet
-        harolds_url = self.selenium.get_location()
+        harolds_url = self.browser.current_url
 
         # He logs out
         self.logout()
@@ -159,7 +159,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
             self.selenium.click('id=id_export_button')
             self.wait_for_element_visibility('id=id_export_dialog', True)
             download_url = self.selenium.get_attribute('id=id_export_csv_excel_version@href')
-            download_url = urljoin(self.selenium.get_location(), download_url)
+            download_url = urljoin(self.browser.current_url, download_url)
 
             stream = self.get_url_with_session_cookie(download_url)
             self.assertEquals(stream.info().gettype(), "text/csv")
@@ -200,7 +200,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         self.wait_for_grid_to_appear()
 
         # It looks a lot like Harold's but has a different url
-        harriets_url = self.selenium.get_location()
+        harriets_url = self.browser.current_url
         self.assertFalse(harriets_url == harolds_url)
         self.wait_for_cell_value(2, 4, '25')
 
@@ -238,7 +238,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         )
         self.wait_for_grid_to_appear()
 
-        helgas_url = self.selenium.get_location()
+        helgas_url = self.browser.current_url
         self.assertFalse(helgas_url == harolds_url)
         self.assertFalse(helgas_url == harriets_url)
         self.wait_for_cell_value(2, 4, '25')

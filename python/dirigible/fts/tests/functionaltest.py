@@ -224,7 +224,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def assert_urls_are_same(self, actual, expected):
-        loc = self.selenium.get_location()
+        loc = self.browser.current_url
         canonicalised_actual = urljoin(loc, actual)
         canonicalised_expected = urljoin(loc, expected)
         self.assertEquals(canonicalised_actual, canonicalised_expected)
@@ -250,7 +250,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def assert_redirects(self, from_url, to_url):
         self.go_to_url(from_url)
         self.assert_urls_are_same(
-            urlunparse(urlparse(self.selenium.get_location())[:4] + ('', '')),
+            urlunparse(urlparse(self.browser.current_url)[:4] + ('', '')),
             to_url
         )
 
@@ -350,7 +350,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.click_link('id_create_new_sheet')
         self.wait_for_grid_to_appear()
 
-        location = self.selenium.get_location()
+        location = self.browser.current_url
         sheet_id = re.search('/sheet/([0-9]+)/', location).group(1)
         return sheet_id
 
@@ -439,7 +439,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def assert_page_title_contains(self, link_url, title):
-        original_page = self.selenium.get_location()
+        original_page = self.browser.current_url
         self.go_to_url(link_url)
         self.assertTrue(title in self.selenium.get_title())
         self.go_to_url(original_page)

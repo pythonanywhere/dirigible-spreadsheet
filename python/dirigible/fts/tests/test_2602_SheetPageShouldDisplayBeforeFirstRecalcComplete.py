@@ -12,7 +12,7 @@ class Test_2602_SheetPageShouldDisplayBeforeFirstRecalcComplete(FunctionalTest):
     def test_sheet_page_displays_fast(self):
         # * Harold logs in to Dirigible and creates a new sheet
         self.login_and_create_new_sheet()
-        sheet_page = self.selenium.get_location()
+        sheet_page = self.browser.current_url
 
         # * He sets it up so that it takes 30 seconds to recalc.
         self.enter_cell_text(1, 2, '=123')

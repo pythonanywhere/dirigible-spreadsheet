@@ -175,7 +175,7 @@ class Test_2712_ImportCSV(FunctionalTest):
 
         # * He logs in to Dirigible and creates a nice shiny new sheet
         self.login_and_create_new_sheet()
-        sheet_url = self.selenium.get_location()
+        sheet_url = self.browser.current_url
 
         # * He clicks the import toolbar button
         self.selenium.click('id=id_import_button')
@@ -211,5 +211,5 @@ class Test_2712_ImportCSV(FunctionalTest):
 
         # And finds himself back on his sheet page.
         self.wait_for_grid_to_appear()
-        self.assertEquals(self.selenium.get_location(), sheet_url)
+        self.assertEquals(self.browser.current_url, sheet_url)
 

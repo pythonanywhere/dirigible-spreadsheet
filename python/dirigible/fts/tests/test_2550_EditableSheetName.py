@@ -17,7 +17,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
 
         # * He notes that the sheet has a name of the form 'Sheet #xx'
         #   where xx is the sheet id
-        sheet_id = self.selenium.get_location().split(r'/')[-2]
+        sheet_id = self.browser.current_url.split(r'/')[-2]
         self.assertEquals(
             self.selenium.get_text('id=id_sheet_name'),
             'Sheet %s' % (sheet_id,))
