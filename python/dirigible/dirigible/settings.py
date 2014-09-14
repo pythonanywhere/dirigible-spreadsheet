@@ -2,7 +2,6 @@
 
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 
 # Debug settings, overridden on dev machines.
@@ -93,12 +92,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'registration',
-    'dirigible.featured_sheet',
-    'dirigible.feedback',
-    'dirigible.info_pages',
-    'dirigible.shared',
-    'dirigible.sheet',
-    'dirigible.user',
+    'featured_sheet',
+    'feedback',
+    'info_pages',
+    'shared',
+    'sheet',
+    'user',
 )
 
 ACCOUNT_ACTIVATION_DAYS = 14
