@@ -4,7 +4,7 @@
 
 from threading import Lock
 
-from sheet.errors import report_cell_error, CycleError
+from .errors import report_cell_error, CycleError
 
 
 class Node(object):

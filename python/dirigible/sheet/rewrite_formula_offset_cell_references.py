@@ -4,10 +4,10 @@
 
 from __future__ import division
 
-from sheet.parser import FormulaError
-from sheet.parser.parse_node import ParseNode
-from sheet.parser.parse_node_constructors import FLCellReference, FLCellRange
-from sheet.parser.parser import parse
+from .parser import FormulaError
+from .parser.parse_node import ParseNode
+from .parser.parse_node_constructors import FLCellReference, FLCellRange
+from .parser.parser import parse
 
 
 def rewrite_source_sheet_formulae_for_cut(worksheet, source_range, dest_col, dest_row):

@@ -19,14 +19,14 @@ NUM_THREADS = 10
 # API version used by internal calls
 CURRENT_API_VERSION = '0.1'
 
-from sheet.cell import undefined
-from sheet.dirigible_datetime import DateTime
-from sheet.dependency_graph import build_dependency_graph
-from sheet.eval_constant import eval_constant
-from sheet.parser import FormulaError
-from sheet.worksheet import CellRange, Worksheet
-from sheet.utils.cell_name_utils import coordinates_to_cell_name
-from sheet.utils.interruptable_thread import InterruptableThread
+from .cell import undefined
+from .dirigible_datetime import DateTime
+from .dependency_graph import build_dependency_graph
+from .eval_constant import eval_constant
+from .parser import FormulaError
+from .worksheet import CellRange, Worksheet
+from .utils.cell_name_utils import coordinates_to_cell_name
+from .utils.interruptable_thread import InterruptableThread
 
 
 INF = 1e9999

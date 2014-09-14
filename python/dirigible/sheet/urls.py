@@ -4,7 +4,7 @@
 
 from django.conf.urls.defaults import *
 
-from sheet.views import (
+from .views import (
     calculate, clear_cells, clipboard, copy_sheet, export_csv, get_json_grid_data_for_ui,
     get_json_meta_data_for_ui, import_csv, import_xls, page, set_cell_formula,
     set_column_widths, set_sheet_name, set_sheet_security_settings,

@@ -10,9 +10,9 @@ from StringIO import StringIO
 from threading import Lock
 from xlrd import error_text_from_code, xldate_as_tuple, XL_CELL_DATE, XL_CELL_ERROR
 
-from sheet.cell import Cell, undefined
-from sheet.cell_range import CellRange
-from sheet.utils.cell_name_utils import (
+from .cell import Cell, undefined
+from .cell_range import CellRange
+from .utils.cell_name_utils import (
     cell_name_to_coordinates, column_name_to_index,
     cell_range_as_string_to_coordinates
 )

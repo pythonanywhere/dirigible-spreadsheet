@@ -2,8 +2,8 @@
 # See LICENSE.md
 #
 
-from sheet.clipboard import Clipboard
-from sheet.sheet import Sheet
+from .clipboard import Clipboard
+from .sheet import Sheet
 from django.contrib.auth.models import User
 
 

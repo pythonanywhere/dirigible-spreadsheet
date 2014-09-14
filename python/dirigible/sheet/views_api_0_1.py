@@ -10,10 +10,10 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
-from sheet.cell import undefined
-from sheet.models import Sheet
-from sheet.utils.cell_name_utils import cell_ref_as_string_to_coordinates
-from sheet.views import rollback_on_exception
+from .cell import undefined
+from .models import Sheet
+from .utils.cell_name_utils import cell_ref_as_string_to_coordinates
+from .views import rollback_on_exception
 from user.models import OneTimePad
 
 

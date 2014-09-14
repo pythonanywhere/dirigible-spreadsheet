@@ -10,8 +10,8 @@ from django.db import models, transaction
 from django.contrib.auth.models import User
 
 from user.models import OneTimePad
-from sheet.calculate import calculate_with_timeout
-from sheet.worksheet import (
+from .calculate import calculate_with_timeout
+from .worksheet import (
     Worksheet, worksheet_from_json, worksheet_to_json
 )
 

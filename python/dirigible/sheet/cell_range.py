@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-from sheet.utils.cell_name_utils import coordinates_to_cell_name
+from .utils.cell_name_utils import coordinates_to_cell_name
 
 
 

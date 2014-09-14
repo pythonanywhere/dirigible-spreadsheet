@@ -2,8 +2,8 @@
 # See LICENSE.md
 #
 
-from sheet.cell import undefined
-from sheet.utils.cell_name_utils import coordinates_to_cell_name
+from .cell import undefined
+from .utils.cell_name_utils import coordinates_to_cell_name
 
 
 class CycleError(Exception):

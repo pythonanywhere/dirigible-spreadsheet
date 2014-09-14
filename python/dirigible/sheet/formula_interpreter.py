@@ -4,10 +4,10 @@
 
 import re
 
-from sheet.parser import FormulaError
-from sheet.parser.tokens import t_LITTLEARROW
-from sheet.parser.parse_node import ParseNode
-from sheet.parser.parse_node_constructors import (
+from .parser import FormulaError
+from .parser.tokens import t_LITTLEARROW
+from .parser.parse_node import ParseNode
+from .parser.parse_node_constructors import (
     Atom, ArgList, Name, Number, SubscriptList, Subscript, Trailer,
 )
 

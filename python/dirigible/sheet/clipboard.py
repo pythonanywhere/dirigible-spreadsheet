@@ -9,12 +9,12 @@ import StringIO
 from django.db import models
 from django.contrib.auth.models import User
 
-from sheet.cell import Cell
-from sheet.rewrite_formula_offset_cell_references import (
+from .cell import Cell
+from .rewrite_formula_offset_cell_references import (
     rewrite_formula, rewrite_source_sheet_formulae_for_cut
 )
-from sheet.sheet import Sheet
-from sheet.worksheet import (
+from .sheet import Sheet
+from .worksheet import (
     CellRange, dump_cell_to_json_stream,
 )
 
