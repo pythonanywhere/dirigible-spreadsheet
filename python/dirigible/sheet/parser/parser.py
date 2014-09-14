@@ -15,7 +15,7 @@ _parser = yacc.yacc(
     outputdir=os.path.dirname(__file__),
     method="LALR",
     debug=0,
-    tabmodule='dirigible.sheet.parser.parsetab'
+    tabmodule='sheet.parser.parsetab'
 )
 _lexer = lex.lex(tokens)
 
