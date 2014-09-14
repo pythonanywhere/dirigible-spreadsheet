@@ -2,13 +2,13 @@
 # See LICENSE.md
 #
 
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import include, patterns, url
 
 from user.views import change_password, redirect_to_front_page
 
 
-urlpatterns = patterns('',
-
+urlpatterns = patterns(
+    '',
     url(
         r'^[^/]+/$',
         redirect_to_front_page,

@@ -3,10 +3,10 @@
 #
 import os
 
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import include, patterns, url
 
 from django.contrib import admin
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 
 from settings import LOGIN_URL
 
@@ -17,8 +17,8 @@ from sheet.views import new_sheet
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
-
+urlpatterns = patterns(
+    '',
     url(
         r'^$',
         front_page_view,
@@ -36,13 +36,12 @@ urlpatterns = patterns('',
     url(
         r'^blog/$',
         redirect_to,
-        { 'url' : '/' }
+        {'url': '/'}
     ),
 
     url(
         r'^featured_sheets/$',
-        direct_to_template,
-        {'template': 'featured_sheets.html', 'extra_context': {'sheets': FeaturedSheet.objects.all}},
+        TemplateView.as_view(template_name='featured_sheets.html', extra_context={'sheets': FeaturedSheet.objects.all}),
         name='featured_sheets'
     ),
 
@@ -60,7 +59,7 @@ urlpatterns = patterns('',
     url(
         r'^logout$',
         'django.contrib.auth.views.logout',
-        { 'next_page' : LOGIN_URL },
+        {'next_page': LOGIN_URL},
         name="logout"
     ),
 
@@ -85,7 +84,8 @@ urlpatterns = patterns('',
         include('dirigible.feedback.urls')
     ),
 
-    url(r'^static/(?P<path>.*)$', 'django.views.static.serve',
+    url(
+        r'^static/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': os.path.join(os.path.dirname(__file__), '..', '..', 'static')}
     ),
 )

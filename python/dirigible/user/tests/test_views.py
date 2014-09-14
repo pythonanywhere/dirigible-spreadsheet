@@ -308,8 +308,8 @@ class RegistrationViewsTest(ResolverTestCase):
 
 
 
-    @patch('dirigible.user.views.direct_to_template')
-    def test_registration_complete_renders_template_with_email_address_from_session(self, mock_direct_to_template):
+    @patch('dirigible.user.views.render')
+    def test_registration_complete_renders_template_with_email_address_from_session(self, mock_render):
         """
         There seems to be no way of getting the user's details from the
         registration confirmation page in the default django-registration
@@ -317,19 +317,20 @@ class RegistrationViewsTest(ResolverTestCase):
         bits into the session.
         """
         mock_request = Mock()
-        mock_request.session = { 'email-address' : sentinel.email_address }
+        mock_request.session = {'email-address': sentinel.email_address}
         response = registration_complete(mock_request)
         self.assertCalledOnce(
-            mock_direct_to_template,
-            mock_request,  'registration/registration_complete.html',
-            extra_context={ 'email_address' : sentinel.email_address }
+            mock_render,
+            mock_request,
+            'registration/registration_complete.html',
+            {'email_address': sentinel.email_address}
         )
-        self.assertEquals(response, mock_direct_to_template.return_value)
+        self.assertEquals(response, mock_render.return_value)
 
 
 
-    @patch('dirigible.user.views.direct_to_template')
-    def test_registration_complete_renders_template_with_blank_email_address_if_none_in_session(self, mock_direct_to_template):
+    @patch('dirigible.user.views.render')
+    def test_registration_complete_renders_template_with_blank_email_address_if_none_in_session(self, mock_render):
         """
         There seems to be no way of getting the user's details from the
         registration confirmation page in the default django-registration
@@ -340,11 +341,12 @@ class RegistrationViewsTest(ResolverTestCase):
         mock_request.session = {}
         response = registration_complete(mock_request)
         self.assertCalledOnce(
-            mock_direct_to_template,
-            mock_request,  'registration/registration_complete.html',
-            extra_context={ 'email_address' : None }
+            mock_render,
+            mock_request,
+            'registration/registration_complete.html',
+            {'email_address': None}
         )
-        self.assertEquals(response, mock_direct_to_template.return_value)
+        self.assertEquals(response, mock_render.return_value)
 
 
 class MetaSecurityTest(django.test.TestCase):
