@@ -14,6 +14,13 @@ Installation instructions
 
 And visit http://localhost:8000
 
+Security
+--------
+
+This version of Dirigible has absolutely no security, so bewarned, before you put this on a public server -- anyone that logs in has the full access permissions of whichever user is running django, and you can use Python to do pretty much whatever you want!
+
+Check out the chroot_recalculation branch for a slightly more secure approach
+
 
 Some minimal context
 --------------------
