@@ -177,6 +177,52 @@ class FunctionalTest(StaticLiveServerTestCase):
             print "%s ##### Finished test %s" % (datetime.datetime.now(), self.id())
 
 
+    def login(self, username=None, password=USER_PASSWORD, already_on_login_page=False):
+        if username is None:
+            username = self.get_my_username()
+        if not already_on_login_page:
+            self.go_to_url(Url.LOGIN)
+        self.get_element('id=id_username').clear()
+        self.get_element('id=id_password').clear()
+        self.get_element('id=id_username').send_keys(username)
+        self.get_element('id=id_password').send_keys(password)
+        self.click_link('id_login')
+
+
+    def logout(self):
+        self.go_to_url(Url.LOGOUT)
+
+
+    def get_element(self, locator):
+        if locator.startswith('css='):
+            return self.browser.find_element_by_css_selector(locator[4:])
+        elif locator.startswith('id='):
+            return self.browser.find_element_by_id(locator[3:])
+
+
+
+    def is_element_focused(self, locator):
+        element = self.get_element(locator)
+        focused_element = self.browser.switch_to_active_element()
+        return element == focused_element
+
+
+    def is_element_present(self, locator):
+        try:
+            self.get_element(locator)
+            return True
+        except NoSuchElementException:
+            return False
+
+
+    def get_text(self, locator):
+        return self.get_element(locator).text
+
+
+    def get_value(self, locator):
+        return self.get_element(locator).get_attribute('value')
+
+
     @humanise_with_delay
     def human_key_press(self, key_code):
         self.selenium.key_press_native(key_code)
@@ -254,28 +300,6 @@ class FunctionalTest(StaticLiveServerTestCase):
             to_url
         )
 
-    def get_element(self, locator):
-        if locator.startswith('css='):
-            return self.browser.find_element_by_css_selector(locator[4:])
-        elif locator.startswith('id='):
-            return self.browser.find_element_by_id(locator[3:])
-
-
-
-    def is_element_focused(self, locator):
-        element = self.get_element(locator)
-        focused_element = self.browser.switch_to_active_element()
-        return element == focused_element
-
-
-    def get_text(self, locator):
-        return self.get_element(locator).text
-
-
-    def get_value(self, locator):
-        return self.get_element(locator).get_attribute('value')
-
-
     def is_element_enabled(self, element_id):
         #self.selenium.get_attribute is unreliable (Harry, Jonathan)
         disabled = self.selenium.get_eval('window.$("#%s").attr("disabled")' % (element_id,))
@@ -314,20 +338,6 @@ class FunctionalTest(StaticLiveServerTestCase):
             lambda : "Element %s to become%svisible" % (locator, visibility and ' ' or ' in'),
             timeout_seconds=timeout_seconds
         )
-
-
-    def login(self, username=None, password=USER_PASSWORD, already_on_login_page=False):
-        if username is None:
-            username = self.get_my_username()
-        if not already_on_login_page:
-            self.go_to_url(Url.LOGIN)
-        self.selenium.type('id=id_username', username)
-        self.selenium.type('id=id_password', password)
-        self.click_link('id_login')
-
-
-    def logout(self):
-        self.go_to_url(Url.LOGOUT)
 
 
     def get_url_with_session_cookie(self, url, data=None):

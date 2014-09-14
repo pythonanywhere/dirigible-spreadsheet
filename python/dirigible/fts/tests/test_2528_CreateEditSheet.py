@@ -4,8 +4,6 @@
 
 from urlparse import urlparse
 
-from browser_settings import SERVER_IP
-
 from functionaltest import FunctionalTest, snapshot_on_error, Url
 import key_codes
 
@@ -47,7 +45,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.assertRegexpMatches(path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
 
         # * The page has a grid.
-        self.assertTrue(self.selenium.is_element_present('id=id_grid'))
+        self.assertTrue(self.is_element_present('id=id_grid'))
 
         # * He sees that the grid is a usable size (at least 100x100)
         self.wait_for_grid_to_appear()
@@ -151,7 +149,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.login(already_on_login_page=True)
         # * ... and gets take to a new sheet
         url = urlparse(self.browser.current_url)
-        self.assertEquals(url.netloc, '%s' % (SERVER_IP,))
+        self.assertEquals(url.netloc, Url.ROOT)
         self.assertRegexpMatches(url.path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
 
 
