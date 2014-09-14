@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 from .views import (
     calculate, clear_cells, clipboard, copy_sheet, export_csv, get_json_grid_data_for_ui,

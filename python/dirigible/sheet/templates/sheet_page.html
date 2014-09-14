@@ -55,26 +55,26 @@
         }
 
         $.extend(urls, {
-            importXls: '{% url sheet_import_xls sheet.owner.username %}',
-            importCsv: '{% url sheet_import_csv sheet.owner.username sheet.id %}',
+            importXls: '{% url 'sheet_import_xls' sheet.owner.username %}',
+            importCsv: '{% url 'sheet_import_csv' sheet.owner.username sheet.id %}',
 
-            calculate: "{% url sheet_calculate sheet.owner.username sheet.id %}",
-            getJSONGridData: "{% url sheet_get_json_grid_data_for_ui sheet.owner.username sheet.id %}",
-            getJSONMetaData: "{% url sheet_get_json_meta_data_for_ui sheet.owner.username sheet.id %}",
+            calculate: "{% url 'sheet_calculate' sheet.owner.username sheet.id %}",
+            getJSONGridData: "{% url 'sheet_get_json_grid_data_for_ui' sheet.owner.username sheet.id %}",
+            getJSONMetaData: "{% url 'sheet_get_json_meta_data_for_ui' sheet.owner.username sheet.id %}",
 
-            setCellFormula: "{% url sheet_set_cell_formula sheet.owner.username sheet.id %}",
-            setColumnWidths: "{% url sheet_set_column_widths sheet.owner.username sheet.id %}",
-            setSecuritySettings: "{% url sheet_set_sheet_security_settings sheet.owner.username sheet.id %}",
+            setCellFormula: "{% url 'sheet_set_cell_formula' sheet.owner.username sheet.id %}",
+            setColumnWidths: "{% url 'sheet_set_column_widths' sheet.owner.username sheet.id %}",
+            setSecuritySettings: "{% url 'sheet_set_sheet_security_settings' sheet.owner.username sheet.id %}",
 
-            setSheetName: "{% url sheet_set_sheet_name sheet.owner.username sheet.id %}",
-            setSheetUsercode: "{% url sheet_set_sheet_usercode sheet.owner.username sheet.id %}",
+            setSheetName: "{% url 'sheet_set_sheet_name' sheet.owner.username sheet.id %}",
+            setSheetUsercode: "{% url 'sheet_set_sheet_usercode' sheet.owner.username sheet.id %}",
 
-            cut: "{% url sheet_cut sheet.owner.username sheet.id %}",
-            copy: "{% url sheet_copy sheet.owner.username sheet.id %}",
-            paste: "{% url sheet_paste sheet.owner.username sheet.id %}",
-            clearCells: "{% url sheet_clear_cells sheet.owner.username sheet.id %}",
+            cut: "{% url 'sheet_cut' sheet.owner.username sheet.id %}",
+            copy: "{% url 'sheet_copy' sheet.owner.username sheet.id %}",
+            paste: "{% url 'sheet_paste' sheet.owner.username sheet.id %}",
+            clearCells: "{% url 'sheet_clear_cells' sheet.owner.username sheet.id %}",
 
-            apiBase: "{% url api_v0.1_get_sheet_json sheet.owner.username sheet.id %}"
+            apiBase: "{% url 'api_v0.1_get_sheet_json' sheet.owner.username sheet.id %}"
         });
 
         var securitySettingsDialog = new Dirigible.SecuritySettings.Dialog($, urls);
@@ -197,12 +197,12 @@
         {% if sheet.public_view_mode %}
             {% if user.is_staff %}
                 <div id="id_copy_sheet_div">
-                    <a id="id_copy_sheet_link" href="{% url sheet_copy_sheet sheet.owner.username sheet.id %}">Click here to copy this sheet</a>.
+                    <a id="id_copy_sheet_link" href="{% url 'sheet_copy_sheet' sheet.owner.username sheet.id %}">Click here to copy this sheet</a>.
                 </div>
             {% else %}
                 <div id="id_copy_sheet_div">
                     This sheet is not editable because it belongs to someone else.<br/>
-                    <a id="id_copy_sheet_link" href="{% url sheet_copy_sheet sheet.owner.username sheet.id %}">Click here to get your own copy that you can change</a>.
+                    <a id="id_copy_sheet_link" href="{% url 'sheet_copy_sheet' sheet.owner.username sheet.id %}">Click here to get your own copy that you can change</a>.
                 </div>
             {% endif %}
         {% endif %}
@@ -287,6 +287,7 @@
     {% endif %}
     <div id="id_import_form" title="Select the file to import:" style="display: none">
         <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
             <p>
                 {% for field in import_form %}
                     {{field}}
@@ -309,12 +310,12 @@
     <div id="id_export_dialog" title="Choose CSV format:" style="display: none">
         <ul>
             <li>
-                <a id="id_export_csv_excel_version" href="{% url sheet_export_csv sheet.owner.username sheet.id 'excel' %}">
+                <a id="id_export_csv_excel_version" href="{% url 'sheet_export_csv' sheet.owner.username sheet.id 'excel' %}">
                     Download for Excel (default)
                 </a>
             </li>
             <li>
-                <a id="id_export_csv_unicode_version" href="{% url sheet_export_csv sheet.owner.username sheet.id 'unicode' %}">
+                <a id="id_export_csv_unicode_version" href="{% url 'sheet_export_csv' sheet.owner.username sheet.id 'unicode' %}">
                     Download as international (utf8-encoded) CSV
                 </a>
         </li>
@@ -330,6 +331,7 @@
     </div>
     <div id="id_security_form" title="Sheet Security Settings" style="display:none">
         <form action="">
+            {% csrf_token %}
             <p>
                 <div id="id_security_form_general_settings">
                     <input

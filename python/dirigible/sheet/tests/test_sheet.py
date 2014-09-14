@@ -8,7 +8,7 @@ from textwrap import dedent
 
 from django.contrib.auth.models import User
 
-from test_utils import ResolverDjangoTestCase
+from dirigible.test_utils import ResolverDjangoTestCase
 
 from sheet.models import copy_sheet_to_user, Sheet
 from user.models import OneTimePad

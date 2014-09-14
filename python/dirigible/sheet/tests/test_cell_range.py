@@ -14,7 +14,7 @@ from mock import Mock
 from sheet.cell import Cell, undefined
 from sheet.worksheet import Worksheet
 from sheet.cell_range import CellRange
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 
 
 

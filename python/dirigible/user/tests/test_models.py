@@ -2,11 +2,11 @@
 # See LICENSE.md
 #
 from mock import patch
-from datetime import datetime
+from django.utils import timezone
 
 from django.contrib.auth.models import AnonymousUser, User
 
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 from user.models import AnonymousProfile, OneTimePad, UserProfile
 
 
@@ -19,7 +19,7 @@ class TestOneTimePads(ResolverTestCase):
         otp = OneTimePad(user=user)
         otp.save()
         otp = OneTimePad.objects.get(pk=otp.id)
-        self.assertTrue( (datetime.now() - otp.creation_time).seconds < 1)
+        self.assertTrue((timezone.now() - otp.creation_time).seconds < 1)
         self.assertEquals(otp.user, user)
         self.assertEquals(otp.guid, unicode(mock_uuid4.return_value))
 

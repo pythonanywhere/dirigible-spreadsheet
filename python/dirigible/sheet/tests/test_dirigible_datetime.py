@@ -9,7 +9,7 @@ except ImportError:
 
 import datetime
 from sheet.dirigible_datetime import DateTime
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 
 class DateTimeTest(ResolverTestCase):
 

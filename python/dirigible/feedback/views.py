@@ -6,8 +6,8 @@ from textwrap import dedent
 
 from django.core.mail import send_mail
 from django.http import HttpResponse
+from django.conf import settings
 
-from settings import FEEDBACK_EMAIL, SERVER_EMAIL
 
 
 def submit(request):
@@ -24,7 +24,7 @@ def submit(request):
             request.POST["username"], request.POST["email_address"],
             request.META['HTTP_REFERER'], request.POST["message"]
         ),
-        SERVER_EMAIL,
-        [FEEDBACK_EMAIL]
+        settings.SERVER_EMAIL,
+        [settings.FEEDBACK_EMAIL]
     )
     return HttpResponse("OK")

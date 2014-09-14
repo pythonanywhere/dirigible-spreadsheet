@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from registration.views import activate
 
 from user.views import register, registration_complete

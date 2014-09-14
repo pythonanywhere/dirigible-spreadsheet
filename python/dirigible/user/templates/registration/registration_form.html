@@ -52,6 +52,7 @@ please do!</span></em></div>
 <![endif]-->
 
             <form action="{% url registration_register %}" method="POST">
+                {% csrf_token %}
                 {% if next %}
                 <input type="hidden" name="next" value="{{ next }}" />
                 {% endif %}

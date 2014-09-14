@@ -25,6 +25,7 @@
 
                 <div id="id_login_form">
                     <form action="{% url login %}" method="post">
+                        {% csrf_token %}
 
                         <div id="id_username_wrap">
                             <span id="id_username_label"><label for="id_username">Username</label>:</span>

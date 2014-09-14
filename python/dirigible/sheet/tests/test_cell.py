@@ -12,7 +12,7 @@ from mock import Mock, patch, sentinel
 
 from sheet.cell import Cell, undefined
 from sheet.worksheet import Worksheet
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 
 
 class TestUndefined(unittest.TestCase):

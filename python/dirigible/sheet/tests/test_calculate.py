@@ -14,7 +14,7 @@ from urllib import urlencode
 
 from mock import call, Mock, patch, sentinel
 
-from test_utils import die, ResolverTestCase
+from dirigible.test_utils import die, ResolverTestCase
 
 import sheet.calculate as calculate_module
 from sheet.calculate import (

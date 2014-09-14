@@ -22,9 +22,9 @@
                 <p id="id_login_signup_blurb">
                     Don't have a Dirigible account?
                     {% if next %}
-                        <a href="{% url registration_register %}?next={{ next }}" id="id_login_signup_link">Click here to sign up</a>.
+                        <a href="{% url 'registration_register' %}?next={{ next }}" id="id_login_signup_link">Click here to sign up</a>.
                     {% else %}
-                        <a href="{% url registration_register %}" id="id_login_signup_link">Click here to sign up</a>.
+                        <a href="{% url 'registration_register' %}" id="id_login_signup_link">Click here to sign up</a>.
                     {% endif %}
                 </p>
             </div>
@@ -36,7 +36,8 @@
             {% endif %}
             <div id="id_login_form">
 
-                <form action="{% url login %}" method="post">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
 
                     <div id="id_username_wrap">
                         <span id="id_username_label">{{ form.username.label_tag }}:</span>

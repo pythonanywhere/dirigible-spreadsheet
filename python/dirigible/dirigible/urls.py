@@ -1,24 +1,17 @@
-# Copyright (c) 2010 Resolver Systems Ltd, PythonAnywhere LLP
-# See LICENSE.md
-#
 import os
 
-from django.conf.urls.defaults import include, patterns, url
-
+from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.conf import settings
 from django.views.generic import TemplateView
 
-from settings import LOGIN_URL
-
 from info_pages.views import front_page_view, info_page_view
-from featured_sheet.models import FeaturedSheet
-from shared.views import redirect_to
 from sheet.views import new_sheet
 
-admin.autodiscover()
 
 urlpatterns = patterns(
     '',
+
     url(
         r'^$',
         front_page_view,
@@ -29,20 +22,6 @@ urlpatterns = patterns(
         r'^(?P<template_name>oss|video)/',
         info_page_view,
         name="info_page"
-    ),
-
-    url(r'^admin/', include(admin.site.urls)),
-
-    url(
-        r'^blog/$',
-        redirect_to,
-        {'url': '/'}
-    ),
-
-    url(
-        r'^featured_sheets/$',
-        TemplateView.as_view(template_name='featured_sheets.html', extra_context={'sheets': FeaturedSheet.objects.all}),
-        name='featured_sheets'
     ),
 
     url(
@@ -59,7 +38,7 @@ urlpatterns = patterns(
     url(
         r'^logout$',
         'django.contrib.auth.views.logout',
-        {'next_page': LOGIN_URL},
+        {'next_page': settings.LOGIN_URL},
         name="logout"
     ),
 
@@ -79,10 +58,20 @@ urlpatterns = patterns(
         include('user.signup_urls')
     ),
 
+
     url(
         r'^feedback/',
         include('feedback.urls')
     ),
+
+
+    url(
+        r'^featured_sheets/$',
+        TemplateView.as_view(template_name='featured_sheets.html'),#, context={'sheets': FeaturedSheet.objects.all}),
+        name='featured_sheets'
+    ),
+
+    url(r'^admin/', include(admin.site.urls)),
 
     url(
         r'^static/(?P<path>.*)$', 'django.views.static.serve',

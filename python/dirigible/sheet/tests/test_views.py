@@ -19,10 +19,10 @@ from django.http import (
 )
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.test.testcases import disable_transaction_methods, restore_transaction_methods
+from django.test.testcases import disable_transaction_methods, restore_transaction_methods, TransactionTestCase
 
-from test_utils import (
-    assert_security_classes_exist, die, ResolverDjangoTestCase
+from dirigible.test_utils import (
+    assert_security_classes_exist, die, ResolverTestCase, ResolverDjangoTestCase
 )
 
 from sheet.cell import Cell, undefined
@@ -37,7 +37,8 @@ from sheet.views import (
 from sheet.worksheet import Worksheet, worksheet_from_json
 from sheet.importer import DirigibleImportError
 
-class SheetViewTestCase(ResolverDjangoTestCase):
+class SheetViewTestCase(TransactionTestCase, ResolverTestCase):
+    maxDiff = None
 
     def assertMockUpdaterCalledOnceWithWorksheet(
             self, mock_update_sheet_with_version_check, sheet,
@@ -79,6 +80,8 @@ def create_view_security_test(
         def test_view_login_required(self):
             request = HttpRequest()
             request.user = AnonymousUser()
+            request.META['SERVER_NAME'] = 'servername'
+            request.META['SERVER_PORT'] = '80'
             actual = view(
                 request, self.user.username, self.sheet.id, *extra_view_args
             )
@@ -137,13 +140,15 @@ def create_view_security_test(
 
 
 class ImportXLSSecurityTest(SheetViewTestCase):
-    post_args = { "column": "1", "row" : "1"},{'file':'file'}
+    post_args = {"column": "1", "row": "1"}, {'file': 'file'}
     view = import_xls
     setUp = set_up_view_test
 
     def test_view_login_required(self):
         request = HttpRequest()
         request.user = AnonymousUser()
+        request.META['SERVER_NAME'] = 'servername'
+        request.META['SERVER_PORT'] = '80'
         actual = import_xls(request, self.user.username)
 
         self.assertTrue(isinstance(actual, HttpResponseRedirect))
@@ -604,6 +609,8 @@ class ExportCSVTest(SheetViewTestCase):
         self.sheet.jsonify_worksheet(worksheet)
         self.sheet.save()
         self.request.user = AnonymousUser()
+        self.request.META['SERVER_NAME'] = 'servername'
+        self.request.META['SERVER_PORT'] = '80'
 
         response = export_csv(self.request, self.user.username, self.sheet.id, 'excel')
 
@@ -648,8 +655,8 @@ class CopySheetTest(SheetViewTestCase):
             reverse(
                 'sheet_page',
                 kwargs={
-                    'username' : other_user.username,
-                    'sheet_id' : copied_sheet.id,
+                    'username': other_user.username,
+                    'sheet_id': copied_sheet.id,
                 }
             )
         )
@@ -662,7 +669,9 @@ class CopySheetTest(SheetViewTestCase):
         self.sheet.jsonify_worksheet(worksheet)
         self.sheet.save()
         self.request.user = AnonymousUser()
-        self.request.get_full_path = lambda : 'request-path'
+        self.request.META['SERVER_NAME'] = 'servername'
+        self.request.META['SERVER_PORT'] = '80'
+        self.request.get_full_path = lambda: 'request-path'
 
         response = copy_sheet(self.request, self.user.username, self.sheet.id)
 
@@ -765,6 +774,8 @@ class PageViewTest(SheetViewTestCase):
         self.sheet.is_public = True
         self.sheet.save()
         self.request.user = AnonymousUser()
+        self.request.META['SERVER_NAME'] = 'servername'
+        self.request.META['SERVER_PORT'] = '80'
 
         response = page(self.request, self.user.username, self.sheet.id)
 
@@ -1091,13 +1102,14 @@ class CalculateTest(SheetViewTestCase):
         mock_update_sheet_with_version_check.return_value = True
 
         worksheet_after_calculate = Worksheet()
+
         def mock_calculate(*_):
             worksheet_after_calculate[1, 1].formula = 'calculated'
             self.sheet.jsonify_worksheet(worksheet_after_calculate)
         self.sheet.calculate = mock_calculate
 
         def check_transaction_managed_and_return_patched_sheet(*args, **kwargs):
-            self.assertTrue(transaction.is_managed())
+            self.assertFalse(transaction.get_autocommit())
             return self.sheet
         mock_get_object_or_404.side_effect = check_transaction_managed_and_return_patched_sheet
 
@@ -1107,9 +1119,9 @@ class CalculateTest(SheetViewTestCase):
         self.assertEquals(response.content, 'OK')
 
         self.assertMockUpdaterCalledOnceWithWorksheet(
-                mock_update_sheet_with_version_check,
-                self.sheet,
-                worksheet_after_calculate
+            mock_update_sheet_with_version_check,
+            self.sheet,
+            worksheet_after_calculate
         )
 
 
@@ -1147,11 +1159,13 @@ class CalculateTest(SheetViewTestCase):
         calls = []
         self.sheet.calculate.side_effect = lambda *_, **__: calls.append("sheet.calculate")
         mock_commit.side_effect = lambda *_, **__: calls.append("commit")
+
         def mock_get_side_effect(*_, **__):
             calls.append("Sheet.get")
             return updated_sheet_from_db
         mock_sheet_get.side_effect = mock_get_side_effect
-        self.sheet.merge_non_calc_attrs.side_effect  = lambda *_, **__: calls.append("sheet.merge_non_calc_attrs")
+
+        self.sheet.merge_non_calc_attrs.side_effect = lambda *_, **__: calls.append("sheet.merge_non_calc_attrs")
         mock_update_sheet_with_version_check.side_effect = lambda *_, **__: calls.append("update_sheet_with_version_check")
 
         calculate(
@@ -1180,18 +1194,20 @@ class CalculateTest(SheetViewTestCase):
     def test_view_rolls_back_and_reraises_if_sheet_calculate_raises_with_uncommitted_changes(
         self, mock_get_object_or_404
     ):
+
+        # django.test.TestCase replaces the transaction management
+        # functions with nops, which is generally useful but breaks this
+        # test, as we're checking that the exception we raise isn't masked
+        # by one in the leave_transaction_management saying that there was
+        # a pending commit/rollback when the view returned.
+        restore_transaction_methods()
+
         try:
-            # django.test.TestCase replaces the transaction management functions with nops,
-            # which is generally useful but breaks this test, as we're checking that the
-            # exception we raise isn't masked by one in the leave_transaction_management
-            # saying that there was a pending commit/rollback when the view returned.
-            restore_transaction_methods()
             transaction.commit()
             mock_get_object_or_404.return_value = self.sheet
             original_sheet_version = self.sheet.version
-
-
             expected_exception = Exception("Expected exception")
+
             def mock_calculate(*_):
                 self.sheet.version += 5
                 self.sheet.save()
@@ -1222,10 +1238,12 @@ class CalculateTest(SheetViewTestCase):
         self, mock_get_object_or_404
     ):
         try:
-            # django.test.TestCase replaces the transaction management functions with nops,
-            # which is generally useful but breaks this test, as we're checking that the
-            # exception we raise isn't masked by one in the leave_transaction_management
-            # saying that there was a pending commit/rollback when the view returned.
+            # django.test.TestCase replaces the transaction management
+            # functions with nops, which is generally useful but breaks this
+            # test, as we're checking that the exception we raise isn't masked
+            # by one in the leave_transaction_management saying that there was
+            # a pending commit/rollback when the view returned.
+
             restore_transaction_methods()
             transaction.commit()
 
@@ -1301,6 +1319,8 @@ class GetJsonGridDataForUITest(SheetViewTestCase):
         self.sheet.is_public = True
         self.sheet.save()
         self.request.user = AnonymousUser()
+        self.request.META['SERVER_NAME'] = 'servername'
+        self.request.META['SERVER_PORT'] = '80'
         self.request.GET['range'] = '1, 2, 3, 4'
 
         response = get_json_grid_data_for_ui(self.request, self.user.username, self.sheet.id)
@@ -1357,6 +1377,8 @@ class GetJsonMetaDataForUITest(SheetViewTestCase):
         self.sheet.name = 'lemonparty.org'
         self.sheet.save()
         self.request.user = AnonymousUser()
+        self.request.META['SERVER_NAME'] = 'servername'
+        self.request.META['SERVER_PORT'] = '80'
 
         response = get_json_meta_data_for_ui(self.request, self.user.username, self.sheet.id)
 

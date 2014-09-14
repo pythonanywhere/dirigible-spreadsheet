@@ -53,6 +53,7 @@ class ResolverDjangoTestCase(django.test.TestCase, ResolverTestMixins):
 TEST_CLASSES = (
     unittest.TestCase,
     django.test.TestCase,
+    django.test.TransactionTestCase,
     ResolverTestCase,
     ResolverDjangoTestCase
 )

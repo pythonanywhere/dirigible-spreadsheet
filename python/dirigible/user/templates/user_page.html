@@ -36,7 +36,7 @@
             });
             $('#id_change_password_form').submit(function() {
                 $.post(
-                    '{% url change_password user.username %}',
+                    '{% url 'change_password' user.username %}',
                     $('#id_change_password_form').serialize(),
                     function(data) {
                         if (data == 'Your password has been changed.') {
@@ -70,14 +70,14 @@ please do!</span></em></div>
             <div id="id_sheets_header">
                 <h2 id="id_sheets_title" class="section-title">Sheets</h2>
 
-                <a id="id_create_new_sheet" href="{% url new_sheet %}">Create new sheet...</a>
+                <a id="id_create_new_sheet" href="{% url 'new_sheet' %}">Create new sheet...</a>
             </div>
 
             <div id="id_sheets_body">
                 {% if sheets %}
                     <ul id="id_sheets_list">
                         {% for s in sheets %}
-                            <li><a href="{% url sheet_page user.username s.id %}">{{s.name}}</a></li>
+                            <li><a href="{% url 'sheet_page' user.username s.id %}">{{s.name}}</a></li>
                         {% endfor %}
                     </ul>
                 {% else %}
@@ -93,6 +93,7 @@ please do!</span></em></div>
 
                 <a id="id_change_password_button"  href="#">Change password...</a>
                 <form id="id_change_password_form" method="POST">
+                    {% csrf_token %}
                     Current Password: <input id="id_change_password_current_password" name="id_change_password_current_password" type="password"><br />
                     New Password: <input id="id_change_password_new_password" name="id_change_password_new_password" type="password"><br />
                     Confirm Password: <input id="id_change_password_new_password_again" name="id_change_password_new_password_again" type="password"><br />
@@ -109,7 +110,7 @@ please do!</span></em></div>
 
             <div id="id_example_sheets">
             <h2 class="section-title">Example sheets</h2>
-            Here are some <a href="{% url featured_sheets %}">example spreadsheets</a> you can copy into your account to
+            Here are some <a href="{% url 'featured_sheets' %}">example spreadsheets</a> you can copy into your account to
             get you started.
             </div>
         </div>

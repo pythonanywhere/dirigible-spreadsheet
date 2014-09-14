@@ -2,14 +2,9 @@
 # See LICENSE.md
 #
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-
 from mock import patch, sentinel, Mock
 
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 
 from info_pages.views import front_page_view, info_page_view, non_logged_in_front_page_view
 

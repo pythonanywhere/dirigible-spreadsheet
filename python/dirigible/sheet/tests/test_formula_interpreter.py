@@ -19,7 +19,7 @@ from sheet.parser import FormulaError
 from sheet.parser.parse_node import ParseNode
 from sheet.parser.parse_node_constructors import FLCellReference
 from sheet.parser.parser import parse
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 
 
 class TestGetPythonFormulaFromParseTree(ResolverTestCase):

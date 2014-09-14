@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls import include, patterns, url
 
 from user.views import change_password, redirect_to_front_page
 

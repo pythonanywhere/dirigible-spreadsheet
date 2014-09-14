@@ -19,4 +19,6 @@ def non_logged_in_front_page_view(request):
 
 
 def info_page_view(request, template_name):
-    return render_to_response('%s.html' % (template_name,), { 'user': request.user })
+    return render_to_response(
+        '%s.html' % (template_name,), {'user': request.user}
+    )

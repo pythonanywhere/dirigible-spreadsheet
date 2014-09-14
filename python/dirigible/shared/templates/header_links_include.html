@@ -1,13 +1,13 @@
 <div id='id_header_links'>
     <span id="id_account_buttons_wrap">
         {% if user and user.username %}
-            <a id='id_account_link' href='{% url front_page %}'>My account</a>
+            <a id='id_account_link' href='{% url 'front_page' %}'>My account</a>
             <span class='separator'>|</span>
-            <a id='id_logout_link' href='{% url logout %}'>Log out</a>
+            <a id='id_logout_link' href='{% url 'logout' %}'>Log out</a>
         {% else %}
-            <a id='id_signup_link' href='{% url registration_register %}'>Sign up</a>
+            <a id='id_signup_link' href='{% url 'registration_register' %}'>Sign up</a>
             <span class='separator'>|</span>
-            <a id='id_login_link' href='{% url login %}'>Log in</a>
+            <a id='id_login_link' href='{% url 'login' %}'>Log in</a>
         {% endif %}
     </span>
     {% if sheet %}
@@ -24,7 +24,7 @@
             $.extend(
                 urls,
                 {
-                    feedback: '{% url feedback_submit %}'
+                    feedback: '{% url 'feedback_submit' %}'
                 }
             );
             {% if user and user.username %}

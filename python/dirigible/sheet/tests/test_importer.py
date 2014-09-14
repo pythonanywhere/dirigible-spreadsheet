@@ -13,7 +13,7 @@ from mock import Mock, patch
 from StringIO import StringIO
 import xlrd
 
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 from sheet.importer import (
         DirigibleImportError, worksheet_from_csv, worksheet_from_excel
 )

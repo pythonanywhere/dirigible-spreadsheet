@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 from .views_api_0_1 import calculate_and_get_json_for_api
 

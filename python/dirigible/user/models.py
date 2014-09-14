@@ -7,15 +7,18 @@ from uuid import uuid4
 from django.contrib.auth.models import AnonymousUser, User
 from django.db import models
 
+def get_uid():
+    return uuid4()
+
 class OneTimePad(models.Model):
     creation_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User)
-    guid = models.CharField(default=lambda: uuid4(), max_length=72)
+    guid = models.CharField(default=get_uid, max_length=72)
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, primary_key=True)
-    has_seen_sheet_page = models.BooleanField()
+    has_seen_sheet_page = models.BooleanField(default=False)
 
 AnonymousUser.email = None
 

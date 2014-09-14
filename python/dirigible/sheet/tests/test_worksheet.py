@@ -16,7 +16,7 @@ from StringIO import StringIO
 from mock import Mock, patch
 from threading import Thread
 
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 
 from sheet.cell import Cell, undefined
 

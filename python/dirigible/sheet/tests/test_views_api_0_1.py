@@ -27,7 +27,7 @@ from django.test.testcases import disable_transaction_methods, restore_transacti
 from sheet.models import Sheet
 from sheet.worksheet import Worksheet
 from sheet.tests.test_views import set_up_view_test
-from test_utils import ResolverTestMixins
+from dirigible.test_utils import ResolverTestMixins
 from user.models import OneTimePad
 
 from sheet.views_api_0_1 import calculate_and_get_json_for_api, _sheet_to_value_only_json

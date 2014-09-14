@@ -3,7 +3,7 @@
 #
 from django import forms
 
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 from sheet.forms import ImportCSVForm
 
 class TestImportCSVForm(ResolverTestCase):

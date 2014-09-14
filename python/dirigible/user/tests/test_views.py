@@ -12,13 +12,13 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 
-from test_utils import assert_security_classes_exist, ResolverTestCase
+from dirigible.test_utils import assert_security_classes_exist, ResolverTestCase
 
 from user.views import (
     change_password, copy_sheet_for_new_user_callback, redirect_to_front_page,
     register, registration_complete, user_dashboard
 )
-from sheet.models import copy_sheet_to_user, Sheet
+from sheet.models import Sheet
 
 
 def set_up_view_test(self):
@@ -27,7 +27,7 @@ def set_up_view_test(self):
     self.user.save()
     self.request = HttpRequest()
     self.request.user = self.user
-    self.request.META['SERVER_NAME'] = ''
+    self.request.META['SERVER_NAME'] = 'servername'
 
 
 class RedirectToFrontPageTest(django.test.TestCase):
@@ -50,8 +50,8 @@ class UserDashboardSecurityTest(django.test.TestCase):
     def test_view_login_required(self):
         request = HttpRequest()
         request.user = AnonymousUser()
-        request.META['SERVER_NAME'] = ''
-        request.META['SERVER_PORT'] = ''
+        request.META['SERVER_NAME'] = 'servername'
+        request.META['SERVER_PORT'] = '80'
         actual = user_dashboard(request)
 
         self.assertTrue(isinstance(actual, HttpResponseRedirect))
@@ -103,7 +103,7 @@ class ChangePasswordSecurityTest(django.test.TestCase):
         e1 = None
         try:
             change_password(self.request, "nonexistent_user")
-        except Http404, e1:
+        except Http404 as e1:
             pass
 
         existing_user = User(username='existing_user')
@@ -111,7 +111,7 @@ class ChangePasswordSecurityTest(django.test.TestCase):
         e2 = None
         try:
             change_password(self.request, existing_user.username)
-        except Http404, e2:
+        except Http404 as e2:
             pass
 
         self.assertEquals(str(e1), str(e2))
@@ -119,8 +119,8 @@ class ChangePasswordSecurityTest(django.test.TestCase):
 
     def test_view_login_required(self):
         request = HttpRequest()
-        request.META['SERVER_NAME'] = ''
-        request.META['SERVER_PORT'] = ''
+        request.META['SERVER_NAME'] = 'servername'
+        request.META['SERVER_PORT'] = '80'
         request.user = AnonymousUser()
         actual = change_password(request, self.user.username)
 
@@ -194,7 +194,7 @@ class RegistrationViewsTest(ResolverTestCase):
         """
         mock_form = mock_form_class.return_value
         mock_form.is_valid.return_value = True
-        mock_form.cleaned_data = { 'email' : sentinel.email }
+        mock_form.cleaned_data = {'email': sentinel.email}
 
         mock_request = Mock()
         mock_request.session = {}

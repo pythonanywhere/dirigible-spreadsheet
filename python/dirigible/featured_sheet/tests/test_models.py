@@ -3,7 +3,7 @@
 #
 from django.contrib.auth.models import User
 
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 from sheet.models import Sheet
 
 from featured_sheet.models import FeaturedSheet

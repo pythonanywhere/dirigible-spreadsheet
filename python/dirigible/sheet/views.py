@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.template.context import RequestContext
 from django.views.decorators.cache import never_cache
 from django.template.loader import get_template, render_to_string
@@ -29,7 +29,7 @@ from .ui_jsonifier import (
 )
 from .worksheet import worksheet_to_csv
 from .importer import (
-        DirigibleImportError, worksheet_from_csv, worksheet_from_excel
+    DirigibleImportError, worksheet_from_csv, worksheet_from_excel
 )
 from user.models import AnonymousUser
 
@@ -66,17 +66,21 @@ def fetch_users_or_public_sheet(view):
 def rollback_on_exception(view):
     @wraps(view)
     def _rollback_on_exception(*args, **kwargs):
+        transaction.set_autocommit(False)
         try:
             return view(*args, **kwargs)
-        except Exception:
+        except:
             transaction.rollback()
             raise
+        finally:
+            transaction.set_autocommit(True)
     return _rollback_on_exception
 
 
 def update_sheet_with_version_check(sheet, **kwargs):
-    return Sheet.objects.filter(Q(id=sheet.id) & Q(version=sheet.version))\
-                        .update(version=sheet.version+1, **kwargs) != 0
+    query = Q(id=sheet.id) & Q(version=sheet.version)
+    sheets_updated = Sheet.objects.filter(query).update(version=sheet.version + 1, **kwargs)
+    return sheets_updated != 0
 
 
 @login_required
@@ -104,7 +108,8 @@ def import_xls(request, username):
                     pass
 
     except Exception:
-        return render_to_response(
+        return render(
+            request,
             'import_xls_error.html',
             {},
             context_instance=RequestContext(request)
@@ -124,11 +129,12 @@ def export_csv(request, sheet, csv_format):
 
     try:
         content = worksheet_to_csv(
-                sheet.unjsonify_worksheet(),
-                encoding=encoding
+            sheet.unjsonify_worksheet(),
+            encoding=encoding
         )
     except UnicodeEncodeError:
-        return render_to_response(
+        return render(
+            request,
             'export_csv_error.html',
             {'sheet': sheet},
             context_instance=RequestContext(request)
@@ -144,7 +150,8 @@ def export_csv(request, sheet, csv_format):
 @fetch_users_sheet
 def import_csv(request, sheet):
     def error_response():
-        return render_to_response(
+        return render(
+            request,
             'import_csv_error.html',
             {'sheet': sheet},
             context_instance=RequestContext(request)
@@ -182,8 +189,8 @@ def import_csv(request, sheet):
 def copy_sheet(request, sheet):
     copied_sheet = copy_sheet_to_user(sheet, request.user)
     return HttpResponseRedirect(reverse('sheet_page', kwargs={
-            'username' : request.user.username,
-            'sheet_id' : copied_sheet.id
+        'username': request.user.username,
+        'sheet_id': copied_sheet.id
     }))
 
 
@@ -193,22 +200,23 @@ def new_sheet(request):
     sheet.save()
     # need response redirect in order to reset url
     return HttpResponseRedirect(reverse('sheet_page', kwargs={
-            'username' : request.user.username,
-            'sheet_id' : sheet.id
+        'username': request.user.username,
+        'sheet_id': sheet.id
     }))
 
 
 @fetch_users_or_public_sheet
 def page(request, sheet):
     profile = request.user.get_profile()
-    response = render_to_response(
-            'sheet_page.html',
-            {
-                'sheet': sheet,
-                'user': request.user,
-                'profile': profile,
-                'import_form': ImportCSVForm()
-            }
+    response = render(
+        request,
+        'sheet_page.html',
+        {
+            'sheet': sheet,
+            'user': request.user,
+            'profile': profile,
+            'import_form': ImportCSVForm()
+        }
     )
     if not profile.has_seen_sheet_page:
         profile.has_seen_sheet_page = True
@@ -217,11 +225,11 @@ def page(request, sheet):
         context = Context(dict(user=request.user))
         email_text = get_template('welcome_email.txt').render(context)
         send_mail(
-                'Welcome to Dirigible',
-                email_text,
-                '',
-                [request.user.email],
-                fail_silently=True
+            'Welcome to Dirigible',
+            email_text,
+            '',
+            [request.user.email],
+            fail_silently=True
         )
     return response
 
@@ -308,7 +316,6 @@ def get_json_meta_data_for_ui(request, sheet):
 @never_cache
 @login_required
 @fetch_users_sheet
-@transaction.commit_manually
 @rollback_on_exception
 def calculate(request, sheet):
     sheet.calculate()

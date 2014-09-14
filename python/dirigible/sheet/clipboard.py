@@ -3,7 +3,7 @@
 #
 
 
-import jsonlib
+import json
 import StringIO
 
 from django.db import models
@@ -22,7 +22,7 @@ from .worksheet import (
 class Clipboard(models.Model):
     owner = models.ForeignKey(User)
     contents_json = models.TextField(default='{}')
-    is_cut = models.BooleanField()
+    is_cut = models.BooleanField(default=False)
     source_left = models.IntegerField(null=True)
     source_top = models.IntegerField(null=True)
     source_right = models.IntegerField(null=True)
@@ -97,7 +97,7 @@ class Clipboard(models.Model):
         start_col, start_row = start
         end_col, end_row = end
 
-        strings_dict = jsonlib.loads(self.contents_json)
+        strings_dict = json.loads(self.contents_json)
 
         for col in xrange(0, end_col - start_col + 1):
             for row in xrange(0, end_row - start_row + 1):

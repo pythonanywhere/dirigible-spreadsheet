@@ -5,7 +5,7 @@
 
 from mock import call, Mock, patch, sentinel
 
-from test_utils import die, ResolverTestCase
+from dirigible.test_utils import die, ResolverTestCase
 
 from sheet.cell import Cell
 from sheet.dependency_graph import (
