@@ -5,10 +5,10 @@
 from mock import patch
 from textwrap import dedent
 
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
-from settings import FEEDBACK_EMAIL, SERVER_EMAIL
-from test_utils import ResolverTestCase
+from dirigible.test_utils import ResolverTestCase
 
 from feedback.views import submit
 
@@ -39,6 +39,6 @@ class SubmitTest(ResolverTestCase):
                 Message:
                 a test message
             """),
-            SERVER_EMAIL,
-            [FEEDBACK_EMAIL]
+            settings.SERVER_EMAIL,
+            [settings.FEEDBACK_EMAIL]
         )
