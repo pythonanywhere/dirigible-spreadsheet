@@ -18,6 +18,7 @@ from urlparse import urljoin, urlparse, urlunparse
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 
 # Only used on Windows for the test run, but we need to be able to
 # import the module on nell in order to create the users for the
@@ -33,8 +34,7 @@ IMAP_HOST = ""
 IMAP_USERNAME = ""
 IMAP_PASSWORD = ""
 
-PAGE_LOAD_TIMEOUT = 10000
-DEFAULT_WAIT_FOR_TIMEOUT = 10
+DEFAULT_WAIT_FOR_TIMEOUT = 3
 USER_PASSWORD = 'p4ssw0rd'
 
 CURRENT_API_VERSION = '0.1'
@@ -228,14 +228,22 @@ class FunctionalTest(StaticLiveServerTestCase):
             to_url
         )
 
+    def get_element(self, locator):
+        if locator.startswith('css='):
+            return self.browser.find_element_by_css_selector(locator[4:])
+        elif locator.startswith('id='):
+            return self.browser.find_element_by_id(locator[3:])
+
+
 
     def is_element_focused(self, locator):
-        if locator.startswith('css='):
-            return self.selenium.get_eval('window.document.activeElement == window.$("%s")[0]' % (locator[4:],)) == 'true'
-        elif locator.startswith('id='):
-            return self.selenium.get_eval('window.document.activeElement == window.document.getElementById("%s")' % (locator[3:],)) == 'true'
-        else:
-            raise ValueError('invalid locator')
+        element = self.get_element(locator)
+        focused_element = self.browser.switch_to_active_element()
+        return element == focused_element
+
+
+    def get_text(self, locator):
+        return self.get_element(locator).text
 
 
     def is_element_enabled(self, element_id):
@@ -364,29 +372,23 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def _check_page_link_home(self):
-
         if self.browser.current_url.startswith(Url.DOCUMENTATION):
             return
 
         link = None
-        for possible_link_image in ('id_big_logo', 'id_small_header_logo'):
+        for possible_id in ('id_big_logo', 'id_small_header_logo'):
             try:
                 link = self.browser.find_element_by_xpath(
-                    "//a[img[@id='{img_id}']]@href".format(
-                        img_id=possible_link_image
-                    )
+                    "//a[img[@id='{img_id}']]".format(img_id=possible_id)
                 )
-            except:
+            except NoSuchElementException:
                 pass
-            else:
-                break
+
         if link is None:
-            self.fail(
-                "Could not find a logo that is also a link on page {}".format(
-                    self.browser.current_url
-                )
-            )
-        self.assertTrue(link in ("/", Url.ROOT))
+            self.fail("Could not find a logo that is also a link on page {}".format(
+                self.browser.current_url
+            ))
+        self.assertEqual(link.get_attribute('href'), Url.ROOT)
 
 
     def check_page_load(self, link_destination=None):
@@ -405,9 +407,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def click_link(self, element_id):
-        self.selenium.click('id=%s' % (element_id,))
-        self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
-        self.check_page_load()
+        link = self.browser.find_element_by_id(element_id)
+        link.click()
 
 
     def set_sheet_name(self, name):
@@ -439,18 +440,9 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def assert_has_useful_information_links(self):
-        self.assert_page_title_contains(
-            self.selenium.get_attribute("xpath=//a[text() = 'Terms & Conditions']@href"),
-            'Terms and Conditions: Dirigible'
-        )
-        self.assert_page_title_contains(
-            self.selenium.get_attribute("xpath=//a[text() = 'Privacy Policy']@href"),
-            'Privacy: Dirigible'
-        )
-        self.assert_page_title_contains(
-            self.selenium.get_attribute("xpath=//a[text() = 'Contact Us']@href"),
-            'Contact: Dirigible'
-        )
+        self.browser.find_elements_by_link_text('Terms & Conditions')
+        self.browser.find_elements_by_link_text('Privacy Policy')
+        self.browser.find_elements_by_link_text('Contact Us')
 
 
     def get_cell_css(self, column, row, must_be_active=False):
