@@ -272,8 +272,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.browser.switch_to_active_element().send_keys(key_code)
         ActionChains(self.browser).key_down(key_code).perform()
         yield
-        _debug('key up %r' % (key_code,))
-        ActionChains(self.browser).key_up(key_code).perform()
+        # apparently there's no need for a key up??
+        # ActionChains(self.browser).key_up(key_code).perform()
 
 
     def click_to_and_blur_from(self, click_to_locator, blur_from_locator):
@@ -897,8 +897,10 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     @humanise_with_delay
     def enter_usercode(self, code, commit_change=True):
-        self.get_element('id=id_usercode').clear()
-        self.get_element('id=id_usercode').send_keys(code)
+        self.get_element('id=id_usercode').click()
+        editor = self.browser.switch_to_active_element()
+        editor.clear()
+        editor.send_keys(code)
         # self.browser.get_eval("window.editor.textInput.getElement().focus()")
         # self.selenium.get_eval("window.editor.session.setValue(%s)"
         #        % (repr(unicode(code))[1:], )

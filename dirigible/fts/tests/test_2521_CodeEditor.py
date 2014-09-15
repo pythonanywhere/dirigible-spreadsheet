@@ -52,7 +52,10 @@ class Test_2521_CodeEditor(FunctionalTest):
         # ... undo works
         with self.key_down(Keys.CONTROL):
             self.human_key_press('z')
+
+        with self.key_down(Keys.CONTROL):
             self.human_key_press('z')
+
         expected_code_after_undo = (
             '{original_code}a\n'
             '{four_spaces}b\n'
@@ -65,8 +68,17 @@ class Test_2521_CodeEditor(FunctionalTest):
         # ... and redo works
         with self.key_down(Keys.CONTROL):
             self.human_key_press('y')
+        with self.key_down(Keys.CONTROL):
             self.human_key_press('y')
         self.wait_for_usercode_editor_content(expected_code_after_typing)
+
+        # and typing normally again is fine
+        self.human_key_press('abcabc')
+        self.wait_for(
+            lambda: 'abcabc' in self.get_usercode(),
+            lambda: 'could not find abcabc in {}'.format(self.get_usercode()),
+        )
+
 
 
     @snapshot_on_error
@@ -132,22 +144,27 @@ class Test_2521_CodeEditor(FunctionalTest):
 
 
     def get_editor_selected_range(self):
-        return eval(
-            self.selenium.get_eval("""
-                (function() {
-                    var selection = window.editor.getSelectionRange();
-                    return (
-                        selection.start.column + ", " + selection.start.row + ", " +
-                        selection.end.column + ", " + selection.end.row
-                    );
-                })()
-            """)
-        )
+        returned_dict = self.browser.execute_script(dedent(
+            """
+            var selection = window.editor.getSelectionRange();
+            return (
+                selection.start.column + ", " + selection.start.row + ", " +
+                selection.end.column + ", " + selection.end.row
+            );
+            """
+        ))
+        return eval(returned_dict)
 
 
     def assert_editor_line_visible(self, line):
-        self.assertTrue(int(self.selenium.get_eval("window.editor.getFirstVisibleRow()")) < line)
-        self.assertTrue(int(self.selenium.get_eval("window.editor.getLastVisibleRow()")) > line)
+        first_visible_row = self.browser.execute_script(
+            "return window.editor.getFirstVisibleRow()"
+        )
+        last_visible_row = self.browser.execute_script(
+            "return window.editor.getLastVisibleRow()"
+        )
+        self.assertLess(int(first_visible_row), line)
+        self.assertGreater(int(last_visible_row), line)
 
 
     @snapshot_on_error
@@ -192,9 +209,11 @@ class Test_2521_CodeEditor(FunctionalTest):
         self.enter_usercode(code, commit_change=False)
 
         # He hits ^L, and types 100 into the resulting dialog.
-        self.selenium.answer_on_next_prompt("100")
-        with self.key_down(key_codes.CTRL):
-            self.human_key_press(key_codes.LETTER_L)
+        with self.key_down(Keys.CONTROL):
+            self.human_key_press('l')
+            alert = self.browser.switch_to_alert()
+            alert.send_keys(100)
+            alert.accept()
 
         # The editor jumps to line 100
         self.assertEquals(self.get_editor_selected_range(), (0, 99, 0, 99))
