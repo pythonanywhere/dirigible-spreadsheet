@@ -143,7 +143,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         exception_raised = False
         tries = 0
         while tries < 2 or time.time() < end:
-            _debug('Waiting for {}'.format(msg_function()))
+            _debug('Waiting for {}'.format(msg_function()[:30]))
             try:
                 tries += 1
                 if condition_function():
@@ -261,7 +261,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         return self.get_element(locator).get_attribute('value')
 
 
-    @humanise_with_delay
     def human_key_press(self, key_code):
         _debug('pressing key %r' % (key_code,))
         self.browser.switch_to_active_element().send_keys(key_code)
@@ -269,8 +268,11 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     @contextmanager
     def key_down(self, key_code):
+        _debug('key down %r' % (key_code,))
+        self.browser.switch_to_active_element().send_keys(key_code)
         ActionChains(self.browser).key_down(key_code).perform()
         yield
+        _debug('key up %r' % (key_code,))
         ActionChains(self.browser).key_up(key_code).perform()
 
 
@@ -895,15 +897,14 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     @humanise_with_delay
     def enter_usercode(self, code, commit_change=True):
-        self.selenium.get_eval("window.editor.textInput.getElement().focus()")
-        self.selenium.get_eval("window.editor.session.setValue(%s)"
-                % (repr(unicode(code))[1:], )
-        )
+        self.get_element('id=id_usercode').clear()
+        self.get_element('id=id_usercode').send_keys(code)
+        # self.browser.get_eval("window.editor.textInput.getElement().focus()")
+        # self.selenium.get_eval("window.editor.session.setValue(%s)"
+        #        % (repr(unicode(code))[1:], )
+        # )
         if commit_change:
-            ## We would just click away, but Selenium does not fire the full event stack
-            ## for clicks.
-            humanesque_delay()
-            self.selenium.get_eval("window.editor.blur()")
+            self.get_element('id=id_grid').click()
 
 
     def append_usercode(self, code):
