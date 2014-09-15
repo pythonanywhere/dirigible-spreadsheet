@@ -2,30 +2,19 @@
 # All Rights Reserved
 #
 
+from selenium.webdriver.common.keys import Keys
 from urlparse import urlparse
 
 from functionaltest import FunctionalTest, snapshot_on_error, Url
-import key_codes
 
 
 class Test_2528_CreateEditSheet(FunctionalTest):
     user_count = 2
 
-    def get_editing_cell(self):
-        colrow = self.selenium.get_eval(r'''
-        (function() {
-            var column = window.$(".editor-text")[0].parentNode;
-            var column_number = column.className.match(/\bc(\d*)\b/)[1];
-            var row = column.parentNode.attributes.getNamedItem('row');
-            var row_number = parseInt(row.nodeValue) + 1;
-            return [column_number, row_number];
-        })();
-        ''')
-        return map(int, colrow.split(','))
-
-
     def assert_editing_cell(self, column, row):
-        self.assertEquals(self.get_editing_cell(), [column, row])
+        self.assertTrue(self.is_element_present(
+            self.get_cell_editor_locator(column, row)
+        ))
 
 
     @snapshot_on_error
@@ -43,10 +32,13 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.assertRegexpMatches(path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
 
         # * The page has a grid.
+        print('check grid')
         self.assertTrue(self.is_element_present('id=id_grid'))
 
         # * He sees that the grid is a usable size (at least 100x100)
+        print('check grid 2')
         self.wait_for_grid_to_appear()
+        print('check width')
         self.assertTrue(self.get_element('id=id_grid').size['width'] >= 100)
         self.assertTrue(self.get_element('id=id_grid').size['height'] >= 100)
 
@@ -68,40 +60,51 @@ class Test_2528_CreateEditSheet(FunctionalTest):
             return self.browser.find_elements_by_css_selector(column_list_css)
 
         ## Check for 10 cols plus one header col
+        print('check num cols')
         self.wait_for(
             lambda: len(get_columns()) >= 11,
             lambda: 'column count to become >= 11, was {}'.format(len(get_columns())),
         )
-        col_header_vertical_positions = set()
-        for letter in 'ABCDEFGHI':
-            column = self.get_element("css=div.slick-header-column[title={}]".format(letter))
-            col_header_vertical_positions.add(column.location('y'))
-        self.assertEquals(len(col_header_vertical_positions), 1)
 
-        col_header_horizontal_positions = set()
-        for letter in 'ABCDEFGHI':
+        print('col positions')
+        col_header_vertical_positions = []
+        for letter in 'ABCDEFG':
             column = self.get_element("css=div.slick-header-column[title={}]".format(letter))
-            col_header_horizontal_positions.add(column.location('x'))
-        self.assertEquals(col_header_horizontal_positions, sorted(col_header_horizontal_positions))
+            col_header_vertical_positions.append(column.location['y'])
+        self.assertEquals(len(set(col_header_vertical_positions)), 1)
 
+        print('col positions horiz')
+        col_header_horizontal_positions = []
+        for letter in 'ABCDEFG':
+            column = self.get_element("css=div.slick-header-column[title={}]".format(letter))
+            col_header_horizontal_positions.append(column.location['x'])
+        self.assertEquals(
+            col_header_horizontal_positions, sorted(col_header_horizontal_positions)
+        )
+
+        print('col headers')
         column_headers = [c.text for c in get_columns()]
-        self.assertEquals(''.join(column_headers[:9]), "ABCDEFGHI")
+        print(column_headers)
+        self.assertEquals(''.join(column_headers[:8]), "ABCDEFG")  # starts with one blank
 
         ## Check for 10 rows plus one header row
+        print('rows')
         row_list_css = 'div.slick-row'
-        row_count = int(self.selenium.get_eval('window.$("%s").length' % (row_list_css,)))
+        rows = self.browser.find_elements_by_css_selector(row_list_css)
         ## SlickGrid handles the header row for us, so we don't have to check for it
-        self.assertTrue(row_count >= 10, msg='row count == %s' % (row_count,))
+        self.assertGreater(len(rows), 9)
+        row_header_vertical_positions = []
+        for row in rows:
+            row_header_vertical_positions.append(row.location['y'])
 
-        row_css = [("css=%s[row=%d]" % (row_list_css, i)) for i in range(1, 10)]
-
-        row_header_vertical_positions = map(self.selenium.get_element_position_top, row_css)
         self.assertEquals(row_header_vertical_positions, sorted(row_header_vertical_positions))
 
-        row_header_horizontal_positions = set(map(self.selenium.get_element_position_left, row_css))
+        row_header_horizontal_positions = set()
+        for row in rows:
+            row_header_horizontal_positions.add(row.location['x'])
         self.assertEquals(len(row_header_horizontal_positions), 1)
 
-        row_headers = self.selenium.get_eval('window.$("%s").text()' % (row_list_css,))
+        row_headers = ''.join(r.text for r in rows)
         self.assertEquals(row_headers[:9], "123456789")
 
         # * He enters "1" in A1.
@@ -126,13 +129,14 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.wait_for_cell_editor_content('=11+22')
 
         # He moves the cursor left and right while editing and the edited cell does not move
-        self.human_key_press(key_codes.LEFT)
-        self.human_key_press(key_codes.RIGHT)
+        print('checking arrow keys')
+        self.human_key_press(Keys.LEFT)
+        self.human_key_press(Keys.RIGHT)
         self.assert_editing_cell(1, 3)
 
         self.open_cell_for_editing(3, 3)
-        self.human_key_press(key_codes.LEFT)
-        self.human_key_press(key_codes.LEFT)
+        self.human_key_press(Keys.LEFT)
+        self.human_key_press(Keys.LEFT)
         self.assert_editing_cell(3, 3)
 
         # * He enters "=a1+A2" (NB case!) in A4.  When he moves away, he sees "3"

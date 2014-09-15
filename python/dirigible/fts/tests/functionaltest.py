@@ -19,22 +19,14 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-
-# Only used on Windows for the test run, but we need to be able to
-# import the module on nell in order to create the users for the
-# FTs.
-try:
-    import SendKeys
-except:
-    pass
-
-import key_codes
+from selenium.webdriver.common.action_chains import ActionChains
 
 IMAP_HOST = ""
 IMAP_USERNAME = ""
 IMAP_PASSWORD = ""
 
-DEFAULT_WAIT_FOR_TIMEOUT = 3
+DEFAULT_WAIT_FOR_TIMEOUT = 2
+DEFAULT_TYPING_WAIT = 0.1
 USER_PASSWORD = 'p4ssw0rd'
 
 CURRENT_API_VERSION = '0.1'
@@ -78,22 +70,23 @@ def snapshot_on_error(test):
             test_object = args[0]
 
             try:
-                timestamp = datetime.datetime.now().isoformat().replace(':', '.')[:19]
-                filename = '{folder}/{test_id}-{timestamp}.png'.format(
-                    folder=SCREEN_DUMP_LOCATION,
-                    test_id=test_object.id(),
-                    timestamp=timestamp
-                )
-                print('screenshot to {}'.format(filename))
-                test_object.browser.get_screenshot_as_file(filename)
+                filename = test_object.get_dump_filename()
+                print('screenshot to {}.png'.format(filename))
+                test_object.browser.get_screenshot_as_file(filename + '.png')
+                print('page source dump  to {}.html'.format(filename))
+                with open(filename + '.html', 'w') as f:
+                    f.write(test_object.browser.page_source.encode('utf8'))
+                print('page text dump  to {}.txt'.format(filename))
+                with open(filename + '.txt', 'w') as f:
+                    body_text = test_object.browser.find_element_by_tag_name('body').text
+                    f.write(body_text.encode('utf8'))
             except:
-                pass
-
+                print('Exception writing screenshots')
             raise
     return inner
 
 
-def humanesque_delay(length=0.2):
+def humanesque_delay(length=DEFAULT_TYPING_WAIT):
     time.sleep(length)
 
 
@@ -130,12 +123,16 @@ def convert_rgb_to_hex(value):
 class FunctionalTest(StaticLiveServerTestCase):
     user_count = 1
 
-    def wait_for(self, condition_function, msg_function, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT, allow_exceptions=False):
-        start = time.clock()
+    def wait_for(
+        self, condition_function, msg_function,
+        timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT, allow_exceptions=False
+    ):
+        start = time.time()
         end = start + timeout_seconds
         exception_raised = False
         tries = 0
-        while tries < 2 or time.clock() < end:
+        while tries < 2 or time.time() < end:
+            print('Waiting for {}'.format(msg_function()))
             try:
                 tries += 1
                 if condition_function():
@@ -150,6 +147,13 @@ class FunctionalTest(StaticLiveServerTestCase):
             raise
         self.fail("Timeout waiting for condition: %s" % (msg_function(),))
 
+    def get_dump_filename(self):
+        timestamp = datetime.datetime.now().isoformat().replace(':', '.')[:19]
+        return '{folder}/{test_id}-{timestamp}'.format(
+            folder=SCREEN_DUMP_LOCATION,
+            test_id=self.id(),
+            timestamp=timestamp
+        )
 
     def create_users(self):
         from django.contrib.auth.models import User
@@ -166,15 +170,14 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.create_users()
         print "%s ##### Running test %s" % (datetime.datetime.now(), self.id())
         self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(2)
+        self.browser.implicitly_wait(DEFAULT_WAIT_FOR_TIMEOUT)
+        self.browser.set_window_size(1024, 768)
 
 
     def tearDown(self):
-        try:
-            self.logout()
-        finally:
-            self.browser.quit()
-            print "%s ##### Finished test %s" % (datetime.datetime.now(), self.id())
+        print('quitting browser')
+        self.browser.quit()
+        print "%s ##### Finished test %s" % (datetime.datetime.now(), self.id())
 
 
     def login(self, username=None, password=USER_PASSWORD, already_on_login_page=False):
@@ -225,11 +228,13 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     @humanise_with_delay
     def human_key_press(self, key_code):
-        self.selenium.key_press_native(key_code)
+        print('pressing key %r' % (key_code,))
+        self.browser.switch_to_active_element().send_keys(key_code)
 
 
     def key_down(self, key_code):
         test = self
+
         class _Inner(object):
             @humanise_with_delay
             def __enter__(self):
@@ -238,6 +243,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             @humanise_with_delay
             def __exit__(self, exc_type, exc_value, exc_traceback):
                 test.selenium.key_up_native(key_code)
+
         return _Inner()
 
 
@@ -307,15 +313,15 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def wait_for_element_presence(
-           self, locator, present=True, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
+        self, locator, present=True, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
     ):
         if present:
             failure_message = "Element %s to be present" % (locator, ),
         else:
             failure_message = "Element %s to not exist" % (locator, ),
         self.wait_for(
-            lambda : present == self.is_element_present(locator),
-            lambda : failure_message,
+            lambda: self.is_element_present(locator) == present,
+            lambda: failure_message,
             timeout_seconds=timeout_seconds
         )
 
@@ -326,8 +332,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def wait_for_element_text(self, locator, text, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
         self.wait_for(
-            lambda : self.get_text(locator) == text,
-            lambda : "Element %s to contain text %r. Contained %r" % (locator, text, self.get_text(locator)),
+            lambda: self.get_text(locator) == text,
+            lambda: "Element %s to contain text %r. Contained %r" % (locator, text, self.get_text(locator)),
             timeout_seconds=timeout_seconds
         )
 
@@ -433,7 +439,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             lambda: self.is_element_present('id=edit-id_sheet_name'),
             lambda: 'editable sheetname to appear')
         self.selenium.type('id=edit-id_sheet_name', name)
-        self.human_key_press(key_codes.ENTER)
+        self.human_key_press('\n')
         self.wait_for(
             lambda: self.get_text('id=id_sheet_name') == name,
             lambda: 'sheet name to be updated'
@@ -465,8 +471,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         active_classes = ''
         if must_be_active:
             active_classes = '.active'
-        return 'div.slick-row[row=%d] div.slick-cell.c%d%s' % (
-            row - 1, column, active_classes)
+        return 'div.slick-row[row="%d"] div.slick-cell.c%d%s' % (
+            row - 1, column, active_classes
+        )
 
 
     def get_cell_locator(self, column, row, must_be_active=False):
@@ -484,18 +491,19 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
 
-    def get_cell_editor_css(self):
-        return 'input.editor-text'
-
+    cell_editor_css = 'input.editor-text'
 
     def get_active_cell_editor_locator(self):
-        return 'css=%s' % (self.get_cell_editor_css())
+        return 'css={}'.format(self.cell_editor_css)
 
 
     def get_cell_editor_locator(self, column, row):
         cell_css = self.get_cell_css(column, row)
-        editor_css = self.get_cell_editor_css()
-        return 'css=%s %s' % (cell_css, editor_css)
+        return 'css=%s %s' % (cell_css, self.cell_editor_css)
+
+
+    def get_cell_editor(self):
+        return self.get_element(self.get_active_cell_editor_locator())
 
 
     def is_cell_visible(self, column, row):
@@ -539,10 +547,12 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
-    def wait_for_cell_to_be_visible(self, column, row, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
+    def wait_for_cell_to_be_visible(
+        self, column, row, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
+    ):
         self.wait_for(
-            lambda : self.is_cell_visible(column, row),
-            lambda : "Cell at %s, %s to become visible" % (column, row),
+            lambda: self.is_cell_visible(column, row),
+            lambda: "Cell at %s, %s to become visible" % (column, row),
             allow_exceptions=True,
             timeout_seconds=timeout_seconds
         )
@@ -561,8 +571,9 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def scroll_cell_row_into_view(self, column, row):
-        self.selenium.get_eval(
-            'window.grid.scrollRowIntoView(%s, true)' % (row - 1,))
+        self.browser.execute_script(
+            'window.grid.scrollRowIntoView({row}, true);'.format(row=row - 1)
+        )
         self.wait_for_element_to_appear(self.get_cell_locator(column, row))
 
 
@@ -574,10 +585,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     @humanise_with_delay
     def click_on_cell(self, column, row):
-        self.go_to_cell(column, row)
-        self.selenium.click(self.get_cell_locator(column, row))
-        # We previously had code to focus() the cell here, please don't re-introduce
-        # -- it breaks test #2633 on IE.
+        self.scroll_cell_row_into_view(column, row)
+        self.get_element(self.get_cell_locator(column, row)).click()
 
 
     def select_range_with_shift_click(self, start, end):
@@ -620,21 +629,16 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.wait_for_element_to_appear(bottomright_locator)
 
 
-    @humanise_with_delay
     def open_cell_for_editing(self, column, row):
         self.scroll_cell_row_into_view(column, row)
-        self.wait_for_element_to_appear(self.get_cell_locator(column, row))
-        self.selenium.double_click(self.get_cell_locator(column, row))
-        self.selenium.focus(self.get_active_cell_editor_locator())
+        ActionChains(self.browser).double_click(
+            self.get_element(self.get_cell_locator(column, row))
+        ).perform()
+        self.wait_for_cell_to_enter_edit_mode(column, row)
 
 
     def type_into_cell_editor_unhumanized(self, text):
-        retries = 0
-        while self.get_cell_editor_content() != text:
-            if retries > 10:
-                self.fail("Selenium could not type something in to a text field, no matter how hard it tried")
-            self.selenium.type('css=input.editor-text', text)
-            retries += 1
+        self.get_cell_editor().send_keys(text)
 
 
     @humanise_with_delay
@@ -644,17 +648,17 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def enter_cell_text_unhumanized(self, col, row, text):
         self.open_cell_for_editing(col, row)
-        self.wait_for_cell_to_enter_edit_mode(col, row)
         self.type_into_cell_editor_unhumanized(text)
-        self.selenium.key_press_native(key_codes.ENTER)
+        self.type_into_cell_editor_unhumanized('\n')
+        # self.wait_for_cell_to_contain_formula(text)
 
 
     def get_current_cell(self):
-        row = int(self.selenium.get_eval(
-            'window.grid.getActiveCell().row')
+        row = int(self.browser.execute_script(
+            'return window.grid.getActiveCell().row;')
         ) + 1
-        column = int(self.selenium.get_eval(
-            'window.grid.getActiveCell().cell'
+        column = int(self.browser.execute_script(
+            'return window.grid.getActiveCell().cell;'
         ))
         return column, row
 
@@ -665,7 +669,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def get_cell_editor_content(self):
-        return self.selenium.get_value(self.get_active_cell_editor_locator())
+        return self.get_cell_editor().get_attribute('value')
 
 
     def get_cell_shown_formula_locator(self, column, row, raise_if_cell_missing=True):
@@ -708,7 +712,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def wait_for_cell_to_contain_formula(self, column, row, formula):
         self.open_cell_for_editing(column, row)
         self.wait_for_cell_editor_content(formula)
-        self.human_key_press(key_codes.ENTER)
+        self.get_cell_editor().send_keys('\n')
 
 
     def get_cell_error(self, column, row):
@@ -784,30 +788,37 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
-    def wait_for_cell_to_become_active(self, column, row, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
-        locator = self.get_cell_locator(column,row, must_be_active=True)
+    def wait_for_cell_to_become_active(
+        self, column, row, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
+    ):
+        locator = self.get_cell_locator(column, row, must_be_active=True)
         self.wait_for(
-            lambda : self.is_element_present(locator),
-            lambda : "Cell at (%s, %s) was not active. Selection is: %s" %
-                (column, row, self.get_current_cell()),
+            lambda: self.is_element_present(locator),
+            lambda: "Cell at (%s, %s) was not active. Selection is: %s" % (
+                column, row, self.get_current_cell()
+            ),
             timeout_seconds=timeout_seconds
         )
 
 
-    def wait_for_cell_to_enter_edit_mode(self, column, row, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
+    def wait_for_cell_to_enter_edit_mode(
+        self, column, row, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
+    ):
         self.wait_for_cell_to_become_active(column, row)
         full_editor_locator = self.get_cell_editor_locator(column, row)
         self.wait_for(
-            lambda : self.is_element_focused(full_editor_locator),
-            lambda : "Editor at (%s, %s) to get focus" % (column, row),
+            lambda: self.is_element_focused(full_editor_locator),
+            lambda: "Editor at (%s, %s) to get focus" % (column, row),
             timeout_seconds=timeout_seconds
         )
 
 
     def wait_for_cell_editor_content(self, content):
         self.wait_for(
-            lambda : self.get_cell_editor_content() == content,
-            lambda : "Cell editor to become %s (was '%s')" % (content, self.get_cell_editor_content()),
+            lambda: self.get_cell_editor_content() == content,
+            lambda: "Cell editor to become %s (was '%s')" % (
+                content, self.get_cell_editor_content()
+            ),
         )
 
 
