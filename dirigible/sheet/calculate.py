@@ -5,7 +5,7 @@
 from __future__ import division
 
 
-import jsonlib
+import json
 from Queue import Queue
 import sys
 from threading import Thread
@@ -224,7 +224,7 @@ def run_worksheet(worksheet_url, overrides, private_key):
 
 
 def api_json_to_worksheet(sheet_json):
-    sheet_values = jsonlib.loads(sheet_json)
+    sheet_values = json.loads(sheet_json)
     worksheet = Worksheet()
 
     worksheet.name = sheet_values.get('name', 'Untitled')

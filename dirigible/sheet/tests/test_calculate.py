@@ -777,9 +777,10 @@ class TestJsonToWorksheet(ResolverTestCase):
         expected[1, 2].value = 'abc'
         expected[1, 3].value = '123'
         expected[1, 4].value = 123
-        expected[1, 5].value = [1L, 2L, 3L, 4L]
+        expected[1, 5].value = [1, 2, 3, 4]
         expected[1, 6].value = u'unescaped & unicod\xe9'
 
+        self.assertEquals(dict(actual), dict(expected))
         self.assertEquals(actual, expected)
 
 

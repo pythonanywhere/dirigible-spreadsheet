@@ -3,6 +3,7 @@
 #
 from __future__ import print_function
 
+from contextlib import contextmanager
 from email.parser import Parser
 from functools import wraps
 from textwrap import dedent
@@ -266,19 +267,11 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.browser.switch_to_active_element().send_keys(key_code)
 
 
+    @contextmanager
     def key_down(self, key_code):
-        test = self
-
-        class _Inner(object):
-            @humanise_with_delay
-            def __enter__(self):
-                test.selenium.key_down_native(key_code)
-
-            @humanise_with_delay
-            def __exit__(self, exc_type, exc_value, exc_traceback):
-                test.selenium.key_up_native(key_code)
-
-        return _Inner()
+        ActionChains(self.browser).key_down(key_code).perform()
+        yield
+        ActionChains(self.browser).key_up(key_code).perform()
 
 
     def click_to_and_blur_from(self, click_to_locator, blur_from_locator):
@@ -895,7 +888,9 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def get_usercode(self):
-        return self.selenium.get_eval('window.editor.session.getValue()').replace('\r\n', '\n').strip()
+        return self.browser.execute_script(
+            'return window.editor.session.getValue();'
+        ).replace('\r\n', '\n')
 
 
     @humanise_with_delay
@@ -919,10 +914,17 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.enter_usercode("%s\n%s" % (code, self.get_usercode()))
 
 
-    def wait_for_usercode_editor_content(self, content, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
+    def wait_for_usercode_editor_content(
+        self, content, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
+    ):
         self.wait_for(
-            lambda : self.get_usercode() == content,
-            lambda : 'Usercode editor content to become \n"%s"\n(was \n"%s"\n)' % (content, self.get_usercode()),
+            lambda: self.get_usercode().strip() == content.strip(),
+            lambda: (
+                'Usercode editor content to become \n'
+                + content
+                + '\n' + '-=' * 10 + '\nwas:\n'
+                + self.get_usercode()
+            ),
             timeout_seconds=timeout_seconds
         )
 

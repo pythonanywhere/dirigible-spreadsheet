@@ -4,7 +4,7 @@
 
 from cgi import escape
 import csv
-import jsonlib
+import json
 import simplejson as json
 from StringIO import StringIO
 from threading import Lock
@@ -69,9 +69,9 @@ def worksheet_to_json(worksheet):
 
 
 def worksheet_from_json(json_string):
-    #use jsonlib for read ops because of better performance
+    #use json for read ops because of better performance
     #keep simplejson for write ops as it's more robust
-    worksheet_dict = jsonlib.read(json_string)
+    worksheet_dict = json.loads(json_string)
     worksheet = Worksheet()
     for (key, value) in worksheet_dict.iteritems():
         if key == "_console_text":

@@ -10,7 +10,7 @@ except ImportError:
     import unittest
 
 import codecs
-import jsonlib
+import json
 import simplejson as json
 from StringIO import StringIO
 from mock import Mock, patch
@@ -268,7 +268,7 @@ class WorksheetJSONificationTest(ResolverTestCase):
         worksheet.A3.value = float('-inf')
 
         worksheet_json = worksheet_to_json(worksheet)
-        roundtripped = jsonlib.read(worksheet_json)
+        roundtripped = json.loads(worksheet_json)
         self.assertEquals(roundtripped["1,1"]['formatted_value'], 'nan')
         self.assertEquals(roundtripped["1,2"]['formatted_value'], 'inf')
         self.assertEquals(roundtripped["1,3"]['formatted_value'], '-inf')
@@ -366,11 +366,11 @@ class WorksheetJSONificationTest(ResolverTestCase):
         self.assertIsNotNone(worksheet._console_lock)
 
 
-    @patch('sheet.worksheet.jsonlib')
-    def test_worksheet_from_json_uses_jsonlib(self, mock_jsonlib):
-        mock_jsonlib.read.return_value = {}
+    @patch('sheet.worksheet.json')
+    def test_worksheet_from_json_uses_json(self, mock_json):
+        mock_json.loads.return_value = {}
         worksheet_from_json('{}')
-        self.assertCalledOnce(mock_jsonlib.read, '{}')
+        self.assertCalledOnce(mock_json.loads, '{}')
 
 
 

@@ -141,24 +141,24 @@ class SheetModelTest(ResolverDjangoTestCase):
         self.assertEquals(sheet.contents_json, mock_worksheet_to_json.return_value)
 
 
-    @patch('sheet.sheet.jsonlib')
-    def test_roundtrip_column_widths_to_db(self, mock_jsonlib):
+    @patch('sheet.sheet.json')
+    def test_roundtrip_column_widths_to_db(self, mock_json):
         COLUMN_WIDTHS = {'1': 11, '2': 22, '3': 33}
-        mock_jsonlib.loads.return_value = COLUMN_WIDTHS
-        mock_jsonlib.dumps.return_value = sentinel.json
+        mock_json.loads.return_value = COLUMN_WIDTHS
+        mock_json.dumps.return_value = sentinel.json
         user = User(username='sheet_roundtrip_column_widths')
         user.save()
         sheet = Sheet(owner=user)
         DEFAULT_COLUMN_WIDTHS_JSON = '{}'
         self.assertEquals(
-            mock_jsonlib.loads.call_args,
+            mock_json.loads.call_args,
             ((DEFAULT_COLUMN_WIDTHS_JSON,), {})
         )
         sheet.column_widths = COLUMN_WIDTHS
 
         sheet.save()
         self.assertEqual(
-            mock_jsonlib.dumps.call_args,
+            mock_json.dumps.call_args,
             ((COLUMN_WIDTHS,), {})
         )
         pk = sheet.id

@@ -3,7 +3,7 @@
 #
 
 from functools import wraps
-import jsonlib
+import json
 import os
 from os.path import splitext
 from tempfile import mkstemp
@@ -287,7 +287,7 @@ def set_sheet_name(request, sheet):
 @login_required
 @fetch_users_sheet
 def set_column_widths(request, sheet):
-    sheet.column_widths.update(jsonlib.loads(request.POST['column_widths']))
+    sheet.column_widths.update(json.loads(request.POST['column_widths']))
     sheet.save()
     return HttpResponse('OK')
 

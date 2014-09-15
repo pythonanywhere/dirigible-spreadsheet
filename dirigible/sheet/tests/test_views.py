@@ -1462,7 +1462,7 @@ class VersionUpdatesTest(SheetViewTestCase):
             'HttpResponseRedirect',
             'ImportCSVForm',
             'get_object_or_404',
-            'jsonlib',
+            'json',
             'login_required',
             'mkstemp',
             'never_cache',

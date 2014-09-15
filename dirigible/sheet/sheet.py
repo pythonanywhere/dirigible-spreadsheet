@@ -2,7 +2,7 @@
 # See LICENSE.md
 #
 
-import jsonlib
+import json
 from textwrap import dedent
 from uuid import uuid4
 
@@ -54,7 +54,7 @@ class Sheet(models.Model):
 
     def __init__(self, *args, **kwargs):
         models.Model.__init__(self, *args, **kwargs)
-        self.column_widths = jsonlib.loads(self.column_widths_json)
+        self.column_widths = json.loads(self.column_widths_json)
         if not self.api_key:
             self.api_key = str(uuid4())
 
@@ -76,7 +76,7 @@ class Sheet(models.Model):
         if self.name == 'Untitled':
             models.Model.save(self, *args, **kwargs) # save to set self.id
             self.name = 'Sheet %d' % (self.id,)
-        self.column_widths_json = jsonlib.dumps(self.column_widths)
+        self.column_widths_json = json.dumps(self.column_widths)
         models.Model.save(self, *args, **kwargs)
 
 
