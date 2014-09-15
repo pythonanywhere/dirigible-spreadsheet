@@ -34,9 +34,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.login()
 
         # * On his dashboard, he notes an option to create a new spreadsheet.  He chooses it.
-        self.assertEquals(self.browser.title, "%s's Dashboard: Dirigible" % (self.get_my_username(),))
-        self.assertEquals(self.get_text('id=id_create_new_sheet'),
-            "Create new sheet...")
+        self.assertEquals(self.get_text('id=id_create_new_sheet'), "Create new sheet...")
         self.click_link('id_create_new_sheet')
 
         # * He is taken to a web page which has a URL like /user/XXXX/sheet/<num>
@@ -49,14 +47,16 @@ class Test_2528_CreateEditSheet(FunctionalTest):
 
         # * He sees that the grid is a usable size (at least 100x100)
         self.wait_for_grid_to_appear()
-        self.assertTrue(self.selenium.get_element_width('id=id_grid') >= 100)
-        self.assertTrue(self.selenium.get_element_height('id=id_grid') >= 100)
+        self.assertTrue(self.get_element('id=id_grid').size['width'] >= 100)
+        self.assertTrue(self.get_element('id=id_grid').size['height'] >= 100)
 
         # * Now that the grid is loaded (and so the sheet's name is too), he notices
         #   that the title is something like: XXXX's sheet_name: Dirigible
         sheet_name = self.get_text('id=id_sheet_name')
-        self.assertEquals(self.browser.title, "%s's %s: Dirigible" %
-           (self.get_my_username(), sheet_name))
+        self.assertEquals(
+            self.browser.title,
+            "%s's %s: Dirigible" % (self.get_my_username(), sheet_name)
+        )
 
 
         # * He sees that the grid is reasonably layed out, and it has a sensible
@@ -64,23 +64,28 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         #   headers A, B, C etc and the rows 1, 2, 3,...
         column_list_css = 'div.slick-header-column span.slick-column-name'
 
-        def get_column_count():
-            return int(self.selenium.get_eval('window.$("%s").length' % (column_list_css,)))
+        def get_columns():
+            return self.browser.find_elements_by_css_selector(column_list_css)
 
         ## Check for 10 cols plus one header col
         self.wait_for(
-            lambda: get_column_count() >= 11,
-            lambda: 'column count to become >= 11, was %s' % (get_column_count(),)
+            lambda: len(get_columns()) >= 11,
+            lambda: 'column count to become >= 11, was {}'.format(len(get_columns())),
         )
-        col_header_css = ["css=div.slick-header-column[title=%s]" % (h,) for h in 'ABCDEFGHI']
-        col_header_vertical_positions = set(map(self.selenium.get_element_position_top, col_header_css))
+        col_header_vertical_positions = set()
+        for letter in 'ABCDEFGHI':
+            column = self.get_element("css=div.slick-header-column[title={}]".format(letter))
+            col_header_vertical_positions.add(column.location('y'))
         self.assertEquals(len(col_header_vertical_positions), 1)
 
-        col_header_horizontal_positions = map(self.selenium.get_element_position_left, col_header_css)
+        col_header_horizontal_positions = set()
+        for letter in 'ABCDEFGHI':
+            column = self.get_element("css=div.slick-header-column[title={}]".format(letter))
+            col_header_horizontal_positions.add(column.location('x'))
         self.assertEquals(col_header_horizontal_positions, sorted(col_header_horizontal_positions))
 
-        column_headers = self.selenium.get_eval('window.$("%s").text()' % (column_list_css,))
-        self.assertEquals(column_headers[:9], "ABCDEFGHI")
+        column_headers = [c.text for c in get_columns()]
+        self.assertEquals(''.join(column_headers[:9]), "ABCDEFGHI")
 
         ## Check for 10 rows plus one header row
         row_list_css = 'div.slick-row'
