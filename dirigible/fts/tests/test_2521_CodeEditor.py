@@ -90,11 +90,10 @@ class Test_2521_CodeEditor(FunctionalTest):
 
         def assert_error(line, message):
             self.wait_for_element_to_appear(error_locator)
-            self.assertEquals(self.get_text(error_locator), str(line))
-            self.assertEquals(
-                self.selenium.get_attribute('%s@title' % error_locator),
-                message
-            )
+            error = self.get_element(error_locator)
+            self.assertEquals(error.text, str(line))
+            self.assertEquals(error.get_attribute('title'), message)
+
 
         # * He logs in and creates a new sheet
         self.login_and_create_new_sheet()
@@ -184,9 +183,12 @@ class Test_2521_CodeEditor(FunctionalTest):
         self.enter_usercode(code, commit_change=False)
 
         # He hits ^F, and types 123 into the resulting dialog.
-        self.selenium.answer_on_next_prompt("123")
-        with self.key_down(key_codes.CTRL):
-            self.human_key_press(key_codes.LETTER_F)
+        self.get_element('id=id_usercode').click()
+        with self.key_down(Keys.CONTROL):
+            self.human_key_press('f')
+        alert = self.browser.switch_to_alert()
+        alert.send_keys(123)
+        alert.accept()
 
         # The editor jumps to the "123" bit and selects it.
         self.assertEquals(self.get_editor_selected_range(), (3, 100, 6, 100))
@@ -209,11 +211,12 @@ class Test_2521_CodeEditor(FunctionalTest):
         self.enter_usercode(code, commit_change=False)
 
         # He hits ^L, and types 100 into the resulting dialog.
+        self.get_element('id=id_usercode').click()
         with self.key_down(Keys.CONTROL):
             self.human_key_press('l')
-            alert = self.browser.switch_to_alert()
-            alert.send_keys(100)
-            alert.accept()
+        alert = self.browser.switch_to_alert()
+        alert.send_keys(100)
+        alert.accept()
 
         # The editor jumps to line 100
         self.assertEquals(self.get_editor_selected_range(), (0, 99, 0, 99))

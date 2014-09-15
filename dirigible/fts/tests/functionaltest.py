@@ -26,6 +26,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
 from sheet.sheet import Sheet
 
@@ -444,8 +445,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def refresh_sheet_page(self):
-        self.selenium.refresh()
-        self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
+        self.browser.refresh()
         self.wait_for_grid_to_appear()
 
 
@@ -896,16 +896,13 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     @humanise_with_delay
     def enter_usercode(self, code, commit_change=True):
-        self.get_element('id=id_usercode').click()
-        editor = self.browser.switch_to_active_element()
-        editor.clear()
-        editor.send_keys(code)
-        # self.browser.get_eval("window.editor.textInput.getElement().focus()")
-        # self.selenium.get_eval("window.editor.session.setValue(%s)"
-        #        % (repr(unicode(code))[1:], )
-        # )
+        self.browser.execute_script(
+            "window.editor.session.setValue(%s);" % (
+                repr(unicode(code))[1:],
+            )
+        )
         if commit_change:
-            self.get_element('id=id_grid').click()
+            self.human_key_press(Keys.F9)
 
 
     def append_usercode(self, code):
