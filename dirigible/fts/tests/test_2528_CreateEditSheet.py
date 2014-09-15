@@ -109,16 +109,31 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.assertEquals(row_headers[:9], "123456789")
 
         # * He enters "1" in A1.
+        print('enter text')
         self.enter_cell_text(1, 1, '1')
+        print('text entered')
 
         # * When he moves away from the cell, "1" is there
+        print('clicking cell')
         self.click_on_cell(2, 2)
+        print('cell clicked')
+
+        print('wait for value')
         self.wait_for_cell_value(1, 1, '1')
+        print('value waited')
 
         # * He enters "2" in A2.  Similarly, this persists when he moves away.
+        print('enter text')
         self.enter_cell_text(1, 2, '2')
+        print('text entered')
+
+        print('clicking cell')
         self.click_on_cell(2, 3)
+        print('cell clicked')
+
+        print('wait for value')
         self.wait_for_cell_value(1, 2, '2')
+        print('value waited')
 
         # * He enters "=a1+A2" in A3.  When he moves away, he sees "3"
         self.enter_cell_text(1, 3, '=11+22')

@@ -41,8 +41,9 @@ IMAP_PASSWORD = ""
 
 
 def _debug(text):
-    # print(text, file=sys.stderr)
-    print(text)
+    msg = '{}   {}'.format(round(time.time(), 2), text)
+    print(msg)
+    # print(msg, file=sys.stderr)
 
 
 class Url(object):
@@ -443,7 +444,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def go_to_url(self, url):
-        print('going to url ' + url)
+        _debug('going to url ' + url)
         self.browser.get(url)
         self.check_page_load(url)
 
@@ -691,7 +692,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_text(self, column, row):
         self.scroll_cell_row_into_view(column, row)
-        return self.get_text(self.get_cell_locator(column, row))
+        text = self.get_text(self.get_cell_locator(column, row))
+        return text
 
 
     def get_cell_editor_content(self):
@@ -709,11 +711,14 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def get_cell_shown_formula(self, column, row, raise_if_cell_missing=True):
-        formula_locator = self.get_cell_shown_formula_locator(column, row, raise_if_cell_missing)
+        formula_locator = self.get_cell_shown_formula_locator(
+            column, row, raise_if_cell_missing
+        )
         if not self.is_element_present(formula_locator):
             return None
 
-        return self.get_text(formula_locator)
+        formula = self.get_text(formula_locator)
+        return formula
 
 
     def assert_cell_shown_formula(self, column, row, formula):
@@ -773,7 +778,14 @@ class FunctionalTest(StaticLiveServerTestCase):
         )
 
 
-    def wait_for_cell_value(self, column, row, value_or_regex, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
+    def wait_for_cell_value(
+        self, column, row, value_or_regex,
+        timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
+    ):
+        _debug('waiting for cell {},{} value {}'.format(
+            column, row, value_or_regex,
+        ))
+
         def match(text):
             if hasattr(value_or_regex, 'match'):
                 return value_or_regex.match(text)
@@ -806,12 +818,15 @@ class FunctionalTest(StaticLiveServerTestCase):
             )
 
         self.last_found_value = None
-        self.wait_for(
-            cell_shows_value,
-            generate_failure_message,
-            timeout_seconds=timeout_seconds,
-            allow_exceptions=True
-        )
+        try:
+            self.wait_for(
+                cell_shows_value,
+                generate_failure_message,
+                timeout_seconds=timeout_seconds,
+                allow_exceptions=True
+            )
+        finally:
+            _debug('finished waiting for cell value')
 
 
     def wait_for_cell_to_become_active(
