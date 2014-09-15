@@ -22,7 +22,8 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         # * Harold logs in to Dirigible.
         self.login()
 
-        # * On his dashboard, he notes an option to create a new spreadsheet.  He chooses it.
+        # * On his dashboard, he notes an option to create a new spreadsheet.
+        # He chooses it.
         self.assertEquals(self.get_text('id=id_create_new_sheet'), "Create new sheet...")
         self.click_link('id_create_new_sheet')
 
@@ -155,10 +156,11 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         self.assert_sends_to_login_page(Url.NEW_SHEET)
 
         # * He logs in
-        self.login(already_on_login_page=True)
+        self.login(manually=True)
+
         # * ... and gets take to a new sheet
         url = urlparse(self.browser.current_url)
-        self.assertEquals(url.netloc, Url.ROOT)
+        self.assertEquals(url.netloc, urlparse(Url.ROOT).netloc)
         self.assertRegexpMatches(url.path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
 
 
@@ -169,7 +171,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         harold = self.get_my_username()
         sheet_id = self.login_and_create_new_sheet(username=harriet)
         self.logout()
-        harolds_broken_sheet_url = '/user/%s/sheet/%s' % (harold, sheet_id)
+        harolds_broken_sheet_url = Url.sheet_page(harold, sheet_id)
 
         # Before logging in, Harold tries to access one of Harriet's sheets
         # using the wrong direct URL, with his username but the correct sheet ID.

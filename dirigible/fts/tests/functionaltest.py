@@ -16,6 +16,10 @@ import time
 import urllib
 import urllib2
 
+from django.conf import settings
+from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, HASH_SESSION_KEY
+from django.contrib.auth.models import User
+from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
@@ -160,8 +164,9 @@ class FunctionalTest(StaticLiveServerTestCase):
             timestamp=timestamp
         )
 
+    session_keys = {}
+
     def create_users(self):
-        from django.contrib.auth.models import User
         for username in self.get_my_usernames():
             user = User.objects.create(username=username)
             user.set_password('p4ssw0rd')
@@ -169,6 +174,15 @@ class FunctionalTest(StaticLiveServerTestCase):
             profile = user.get_profile()
             profile.has_seen_sheet_page = True
             profile.save()
+
+            # create sessions we can use for login too
+            session = SessionStore()
+            session[SESSION_KEY] = user.pk
+            session[BACKEND_SESSION_KEY] = settings.AUTHENTICATION_BACKENDS[0]
+            session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+            session.save()
+            self.session_keys[username] = session.session_key
+
 
 
     def setUp(self):
@@ -185,16 +199,30 @@ class FunctionalTest(StaticLiveServerTestCase):
         _debug("%s ##### Finished test %s" % (datetime.datetime.now(), self.id()))
 
 
-    def login(self, username=None, password=USER_PASSWORD, already_on_login_page=False):
+    def login(
+        self, username=None, password=USER_PASSWORD, manually=False
+    ):
         if username is None:
             username = self.get_my_username()
-        if not already_on_login_page:
-            self.go_to_url(Url.LOGIN)
-        self.get_element('id=id_username').clear()
-        self.get_element('id=id_password').clear()
-        self.get_element('id=id_username').send_keys(username)
-        self.get_element('id=id_password').send_keys(password)
-        self.click_link('id_login')
+
+        if manually:
+            self.get_element('id=id_username').clear()
+            self.get_element('id=id_password').clear()
+            self.get_element('id=id_username').send_keys(username)
+            self.get_element('id=id_password').send_keys(password)
+            self.click_link('id_login')
+            return
+
+        session_key = self.session_keys[username]
+        ## to set a cookie we need to first visit the domain.
+        ## 404 pages load the quickest!
+        self.browser.get(urljoin(Url.ROOT, "/404_no_such_url/"))
+        self.browser.add_cookie(dict(
+            name=settings.SESSION_COOKIE_NAME,
+            value=session_key,
+            path='/',
+        ))
+        self.go_to_url(Url.ROOT)
 
 
     def logout(self):
@@ -288,20 +316,12 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def assert_HTTP_error(self, url, error_code):
-        try:
-            self.selenium.open(url)
-        except Exception, e:
-            if ('Response_Code = %d' % (error_code,)) in str(e):
-                self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
-            else:
-                raise e
-        else:
-            self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
-            possible_error_locators = ('id=summary', 'id=id_server_error_title')
-            for error_locator in possible_error_locators:
-                if self.is_element_present(error_locator) and str(error_code) in self.get_text(error_locator):
-                    return
-            self.fail('%d not raised, got: %s' % (error_code, self.browser.title))
+        self.browser.get(url)
+        possible_error_locators = ('id=summary', 'id=id_server_error_title')
+        for error_locator in possible_error_locators:
+            if self.is_element_present(error_locator) and str(error_code) in self.get_text(error_locator):
+                return
+        self.fail('%d not raised, got: %s' % (error_code, self.browser.title))
 
 
     def assert_redirects(self, from_url, to_url):
@@ -423,6 +443,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def go_to_url(self, url):
+        print('going to url ' + url)
         self.browser.get(url)
         self.check_page_load(url)
 
