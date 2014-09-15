@@ -7,8 +7,8 @@ This is the source code from the end-of-lifed https://www.projectdirigible.com p
 Installation instructions
 -------------------------
 
-    cd python/dirigible
     pip install -r requirements.txt
+    cd dirigible
     python manage.py syncdb
     python manage.py runserver
 
