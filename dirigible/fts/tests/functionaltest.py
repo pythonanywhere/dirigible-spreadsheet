@@ -27,6 +27,8 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 
+from sheet.sheet import Sheet
+
 USER_PASSWORD = 'p4ssw0rd'
 
 DEFAULT_WAIT_FOR_TIMEOUT = 2
@@ -378,18 +380,15 @@ class FunctionalTest(StaticLiveServerTestCase):
             return opener.open(url, encoded_data)
 
 
-    def create_new_sheet(self, username=None, already_on_dashboard=False):
+    def create_new_sheet(self, username=None, manually=False):
         if username is None:
             username = self.get_my_username()
-        if not already_on_dashboard:
-            self.go_to_url(Url.user_page(username))
+        user = User.objects.get(username=username)
+        sheet = Sheet(owner=user)
+        sheet.save()
+        self.browser.get(Url.sheet_page(username, sheet.id))
+        return sheet.id
 
-        self.click_link('id_create_new_sheet')
-        self.wait_for_grid_to_appear()
-
-        location = self.browser.current_url
-        sheet_id = re.search('/sheet/([0-9]+)/', location).group(1)
-        return sheet_id
 
 
     def login_and_create_new_sheet(self, username=None):
