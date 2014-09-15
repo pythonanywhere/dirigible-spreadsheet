@@ -2,35 +2,37 @@
 # All Rights Reserved
 #
 
-from __future__ import with_statement
-
-import datetime
 from email.parser import Parser
 from functools import wraps
-import hashlib
-import re
 from textwrap import dedent
 from threading import Thread
+from urlparse import urljoin, urlparse, urlunparse
+import datetime
+import hashlib
+import os
+import re
 import time
 import urllib
 import urllib2
-from urlparse import urljoin, urlparse, urlunparse
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 
-IMAP_HOST = ""
-IMAP_USERNAME = ""
-IMAP_PASSWORD = ""
+USER_PASSWORD = 'p4ssw0rd'
 
 DEFAULT_WAIT_FOR_TIMEOUT = 2
 DEFAULT_TYPING_WAIT = 0.1
-USER_PASSWORD = 'p4ssw0rd'
 
 CURRENT_API_VERSION = '0.1'
-
+SCREEN_DUMP_LOCATION = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'screendumps')
+)
+IMAP_HOST = ""
+IMAP_USERNAME = ""
+IMAP_PASSWORD = ""
 
 class Url(object):
     ROOT = 'http://localhost:8081/'
@@ -55,10 +57,6 @@ class Url(object):
         return urljoin(cls.sheet_page(username, sheet_id), 'v%s/json/' % (CURRENT_API_VERSION,))
 
 
-import os
-SCREEN_DUMP_LOCATION = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), 'screendumps')
-)
 
 def snapshot_on_error(test):
 
