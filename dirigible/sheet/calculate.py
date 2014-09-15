@@ -153,6 +153,7 @@ def _calculate(worksheet, usercode, private_key):
     }
     context['run_worksheet'] = lambda url, overrides=None: run_worksheet(url, overrides, private_key)
     context['evaluate_formulae'] = lambda worksheet: evaluate_formulae_in_context(worksheet, context)
+    old_stdout = sys.stdout
     sys.stdout = MyStdout(worksheet)
 
     try:
@@ -168,6 +169,8 @@ def _calculate(worksheet, usercode, private_key):
             line_no = traceback.extract_tb(tb)[-1][1]
             worksheet.add_console_text("%s\n%s\n" % (error, format_traceback(traceback.extract_tb(tb))))
         worksheet._usercode_error = {"message": error, "line": line_no}
+    finally:
+        sys.stdout = old_stdout
 
 
 def format_traceback(frames):

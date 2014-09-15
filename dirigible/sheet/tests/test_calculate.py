@@ -365,15 +365,19 @@ class TestCalculate(ResolverTestCase):
         )
 
     @patch('sheet.calculate.execute_usercode')
-    def test_calculate_patches_sys_stdout(
+    def test_calculate_patches_sys_stdout_in_context(
         self, mock_execute_usercode
     ):
         worksheet = Worksheet()
+
+        def check_stdout(_, context):
+            self.assertEquals(type(context['sys'].stdout), MyStdout)
+            self.assertEquals(context['sys'].stdout.worksheet, worksheet)
+        mock_execute_usercode.side_effect = check_stdout
+
         calculate(worksheet, sentinel.usercode, sentinel.private_key)
-        context = mock_execute_usercode.call_args[0][1]
-        self.assertEquals(type(context['sys'].stdout),
-                          MyStdout)
-        self.assertEquals(context['sys'].stdout.worksheet, worksheet)
+
+        self.assertNotEqual(type(sys.stdout), MyStdout)
 
 
     def test_mystdout_pushes_print_commands_to_worksheet(self):

@@ -1,6 +1,7 @@
 # Copyright (c) 2010 Resolver Systems Ltd.
 # All Rights Reserved
 #
+from __future__ import print_function
 
 from email.parser import Parser
 from functools import wraps
@@ -33,6 +34,12 @@ SCREEN_DUMP_LOCATION = os.path.abspath(
 IMAP_HOST = ""
 IMAP_USERNAME = ""
 IMAP_PASSWORD = ""
+
+
+def _debug(text):
+    # print(text, file=sys.stderr)
+    print(text)
+
 
 class Url(object):
     ROOT = 'http://localhost:8081/'
@@ -69,17 +76,17 @@ def snapshot_on_error(test):
 
             try:
                 filename = test_object.get_dump_filename()
-                print('screenshot to {}.png'.format(filename))
+                _debug('screenshot to {}.png'.format(filename))
                 test_object.browser.get_screenshot_as_file(filename + '.png')
-                print('page source dump  to {}.html'.format(filename))
+                _debug('page source dump  to {}.html'.format(filename))
                 with open(filename + '.html', 'w') as f:
                     f.write(test_object.browser.page_source.encode('utf8'))
-                print('page text dump  to {}.txt'.format(filename))
+                _debug('page text dump  to {}.txt'.format(filename))
                 with open(filename + '.txt', 'w') as f:
                     body_text = test_object.browser.find_element_by_tag_name('body').text
                     f.write(body_text.encode('utf8'))
             except:
-                print('Exception writing screenshots')
+                _debug('Exception writing screenshots')
             raise
     return inner
 
@@ -130,7 +137,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         exception_raised = False
         tries = 0
         while tries < 2 or time.time() < end:
-            print('Waiting for {}'.format(msg_function()))
+            _debug('Waiting for {}'.format(msg_function()))
             try:
                 tries += 1
                 if condition_function():
@@ -166,16 +173,16 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self):
         self.create_users()
-        print "%s ##### Running test %s" % (datetime.datetime.now(), self.id())
+        _debug("%s ##### Running test %s" % (datetime.datetime.now(), self.id()))
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(DEFAULT_WAIT_FOR_TIMEOUT)
         self.browser.set_window_size(1024, 768)
 
 
     def tearDown(self):
-        print('quitting browser')
+        _debug('quitting browser')
         self.browser.quit()
-        print "%s ##### Finished test %s" % (datetime.datetime.now(), self.id())
+        _debug("%s ##### Finished test %s" % (datetime.datetime.now(), self.id()))
 
 
     def login(self, username=None, password=USER_PASSWORD, already_on_login_page=False):
@@ -226,7 +233,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     @humanise_with_delay
     def human_key_press(self, key_code):
-        print('pressing key %r' % (key_code,))
+        _debug('pressing key %r' % (key_code,))
         self.browser.switch_to_active_element().send_keys(key_code)
 
 
