@@ -70,7 +70,7 @@ class Test_2521_CodeEditor(FunctionalTest):
 
 
     @snapshot_on_error
-    def DONTtest_code_editor_shows_errors(self):
+    def test_code_editor_shows_errors(self):
         # * Harold makes mistakes when writing Python and wants Dirigible to
         #   tell him about them so he can fix them
 
@@ -151,7 +151,7 @@ class Test_2521_CodeEditor(FunctionalTest):
 
 
     @snapshot_on_error
-    def DONTtest_code_editor_find_function(self):
+    def test_code_editor_find_function(self):
         # * Harold logs in and creates a new sheet
         self.login_and_create_new_sheet()
 
@@ -180,7 +180,7 @@ class Test_2521_CodeEditor(FunctionalTest):
 
 
     @snapshot_on_error
-    def DONTtest_code_editor_go_to_line_function(self):
+    def test_code_editor_go_to_line_function(self):
         # * Harold logs in and creates a new sheet
         self.login_and_create_new_sheet()
 
