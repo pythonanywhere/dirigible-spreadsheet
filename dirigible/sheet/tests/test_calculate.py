@@ -571,10 +571,12 @@ class TestCalculate(ResolverTestCase):
 
 
     def test_format_traceback_filters_frames_that_are_dirigible_code(self):
+        import sheet.worksheet as worksheet_module
+
         frames = [
-            ("/home/username/wherever/dirigible-spreadsheet/python/dirigible/sheet/calculate.py", 83,
+            (calculate_module.__file__, 83,
                 'calculate', 'execute_usercode(usercode, context)'),
-            ("/home/username/wherever/dirigible-spreadsheet/python/dirigible/sheet/calculate.py", 71,
+            (calculate_module.__file__, 71,
                 'execute_usercode', 'exec(usercode, context)'),
             ("<string>", 14,
                 '<module>', None),
@@ -584,7 +586,7 @@ class TestCalculate(ResolverTestCase):
                 'loads', None),
             ("build/bdist.linux-i686/egg/simplejson/decoder.py", 402,
                 'decode', 'obj, end = self.raw_decode(s, idx=_w(s, 0).end())'),
-            ("/home/username/wherever/dirigible-spreadsheet/python/dirigible/../dirigible/sheet/worksheet.py", 25,
+            (worksheet_module.__file__, 25,
                 "__setitem__", 'raise TypeError("Worksheet locations must be Cell objects")'),
         ]
 

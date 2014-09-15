@@ -14,10 +14,7 @@ import traceback
 from urllib import urlencode
 import urllib2
 
-NUM_THREADS = 10
-
-# API version used by internal calls
-CURRENT_API_VERSION = '0.1'
+from django.conf import settings
 
 from .cell import undefined
 from .dirigible_datetime import DateTime
@@ -29,6 +26,9 @@ from .utils.cell_name_utils import coordinates_to_cell_name
 from .utils.interruptable_thread import InterruptableThread
 
 
+# API version used by internal calls
+CURRENT_API_VERSION = '0.1'
+NUM_THREADS = 10
 INF = 1e9999
 NEG_INF = -INF
 
@@ -174,7 +174,7 @@ def format_traceback(frames):
 
     def frame_is_visible_to_user(frame):
         filename, _, function, __ = frame
-        return not '/python/dirigible/' in filename
+        return not filename.startswith(settings.BASE_DIR)
 
 
     def format_frame(frame):
