@@ -16,7 +16,7 @@ worksheet[row_no, coll_no] = cell_object
 * the formula/value distinction
 
 ```python
-class Cell(object):
+class Cell:
     def __init__(self):
         self.formula = ''
         self.value = ''
@@ -25,19 +25,24 @@ class Cell(object):
 
 def calculate(worksheet):
     for cell in worksheet.values():
-        cell.value = eval(cell.formula)
+        if cell.formula.startswith('=')
+            cell.value = eval(cell.formula)
+        else:
+            cell.value = cell.formula
 ```
+
 
 # exceptions:
 
 ```python
-    for cell in worksheet:
-        try:
-            cell.value = eval(cell.formula)
-        except Exception as e:
-            cell.value = UNDEFINED
-            cell.error = str(e)
+    try:
+        cell.value = eval(cell.formula)
+    except Exception as e:
+        cell.value = UNDEFINED
+        cell.error = str(e)
+    # ...
 ```
+
 
 
 # References
@@ -51,14 +56,12 @@ We want to change this so that A1 and A2 become references to worksheet cells:
 
 ```python
 def calculate(worksheet):
-
-    for cell in worksheet.values():
-        try:
+        #...
             cell.value = eval(cell._python_formula)
         #...
 
 
-class Cell(object):
+class Cell:
     def __init__(self):
         self.value = ''
         self._formula = ''
@@ -66,13 +69,12 @@ class Cell(object):
         self.error = None
 
     def _set_formula(self, user_input):
+        self._formula = user_input
         self._python_formula = None
         if user_input.startswith('='):
-            self._formula = user_input
             try:
-                parsed_formula = parser.parse(user_input)
                 self._python_formula = get_python_formula_from_parse_tree(
-                    parsed_formula
+                    parser.parse(user_input)
                 )
 
             except FormulaError as e:
@@ -82,34 +84,10 @@ class Cell(object):
         return self._formula
 ```
 
-```python
-def get_python_formula_from_parse_tree(parse_node):
-    return rewrite(parse_node).flatten()[1:]
 
-def rewrite(parse_node):
-    if isinstance(parse_node, ParseNode):
-        if parse_node.type == ParseNode.FL_CELL_RANGE:
-            return rewrite_cell_range(parse_node)
+Let the recursive fun begin!
 
-        elif parse_node.type in CELL_REFERENCES:
-            return rewrite_cell_reference(parse_node)
-
-        elif parse_node.type in CONTAIN_COLONS:
-            parse_node.children = map(
-                rewrite,
-                [transform_arrow(child) for child in parse_node.children]
-            )
-
-        else:
-            parse_node.children = map(rewrite, parse_node.children)
-
-    return parse_node
-
-def rewrite_cell_reference(cell_reference_node):
-    # essentially, transform "A1" into "worksheet[1, 1].value"
-```
-
-Tests, if you're curious:
+Test-first:
 
 ```python
 def test_converts_formula_starting_with_equals(self):
@@ -134,7 +112,36 @@ def test_produces_correct_python(self):
 ```
 
 
+```python
+def get_python_formula_from_parse_tree(parse_node):
+    return rewrite(parse_node).flatten()[1:]
+
+def rewrite(parse_node):
+    if parse_node.type == ParseNode.FL_CELL_RANGE:
+        return rewrite_cell_range(parse_node)
+
+    elif parse_node.type in CELL_REFERENCES:
+        return rewrite_cell_reference(parse_node)
+
+    elif parse_node.type in CONTAIN_COLONS:
+        parse_node.children = map(
+            rewrite,
+            [transform_arrow(child) for child in parse_node.children]
+        )
+
+    else:
+        parse_node.children = map(rewrite, parse_node.children)
+
+    return parse_node
+
+def rewrite_cell_reference(cell_reference_node):
+    # essentially, transform "A1" into "worksheet[1, 1].value"
+```
+
+
 OK, but now I can't calculate A3 until I know the values of A2 and A1!
+
+
 
 # Dependencies
 
@@ -147,22 +154,81 @@ OK, but now I can't calculate A3 until I know the values of A2 and A1!
 ```
 
 ```python
+
+def calculate_cell(cell):
+    if cell._python_formula:
+        try:
+            cell.value = eval(cell._python_forumla)
+        #...
+    else:
+        cell.value = cell.formula
+
+
 def calculate(worksheet):
-    graph, leaves = build_dependency_graph(worksheet)
+    leaves = build_dependency_graph(worksheet)
     while leaves:
         leaf = leaves.pop()
         cell = worksheet[leaf.location]
-        try:
-            cell.value = eval(cell.python_formula)
-        #...
+
+        calculate_cell(cell)
 
         for parent in leaf.parents:
-            parent.dependencies.remove(cell)
-            if not parent.dependencies:
+            parent.children.remove(cell)
+            if not parent.children:
                 leaves.append(parent)
 ```
 
 (and you can parallelise this stuff too)
+
+
+# Building the dependency graph
+
+two-way graph...
+
+```python
+def build_dependency_graph(worksheet):
+    graph = {}
+    visited = set()
+    for loc in worksheet.keys():
+        _generate_cell_subgraph(worksheet, graph, loc, visited, [])
+
+
+def _generate_cell_subgraph(worksheet, graph, loc, completed, path):
+    cell = worksheet[loc]
+    if loc in completed:
+        return
+
+    if loc in path:
+        raise CycleError(path[path.index(loc):] + [loc])
+
+    if cell._python_formula:
+        valid_dependencies = set()
+        for dep_loc in cell.dependencies:
+            try:
+                _generate_cell_subgraph(
+                    worksheet, graph, dep_loc, completed, path + [loc]
+                )
+                dep_cell = worksheet[dep_loc]
+
+            except CycleError as cycle_error:
+                if loc in cycle_error.path:
+                    completed.add(loc)
+                    raise cycle_error
+
+        _add_location_dependencies(graph, loc, cell.dependencies)
+    completed.add(loc)
+
+def _add_location_dependencies(graph, location, dependencies):
+    if location not in graph:
+        graph[location] = Node(location)
+
+    graph[location].children.add(dependencies)
+
+    for dependency in dependencies:
+        if dependency not in graph:
+            graph[dependency] = Node(dependency)
+        graph[dependency].parents.add(location)
+```
 
 
 # Custom functions
