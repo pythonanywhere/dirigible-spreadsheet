@@ -740,22 +740,23 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.get_cell_editor().send_keys('\n')
 
 
+    error_img_locator = 'id=id_{col}_{row}_error'
+
     def get_cell_error(self, column, row):
-        error_img_id = 'id_%d_%d_error' % (column, row)
-        if self.is_element_present('id=%s' % (error_img_id,)):
-            return self.selenium.get_attribute('id=%s@title' % (error_img_id,))
+        if self.is_element_present(self.error_img_locator.format(col=column, row=row)):
+            return self.get_element(self.error_img_locator.format(col=column, row=row)).get_attribute('title')
 
 
     def assert_cell_has_error(self, column, row, error_text):
-        error_img_id = 'id_%d_%d_error' % (column, row)
-        self.wait_for_element_to_appear('id=%s' % (error_img_id,) )
+        self.wait_for_element_to_appear(self.error_img_locator.format(col=column, row=row))
         self.assertEquals(self.get_cell_error(column, row), error_text)
 
 
     def assert_cell_has_no_error(self, column, row):
-        error_img_id = 'id_%d_%d_error' % (column, row)
-        self.assertFalse(self.is_element_present('id=%s' % (error_img_id,)),
-                         'Error present for (%d, %d)' % (column, row))
+        self.assertFalse(
+            self.is_element_present(self.error_img_locator.format(col=column, row=row)),
+            'Error present for (%d, %d)' % (column, row)
+        )
 
 
     def assert_cell_is_current_but_not_editing(self, col, row):
