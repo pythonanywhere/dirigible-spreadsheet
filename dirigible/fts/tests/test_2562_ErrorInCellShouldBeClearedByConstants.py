@@ -13,7 +13,7 @@ class test_2562_ErrorInCellShouldBeClearedByConstants(FunctionalTest):
 
         # * He enters and error in A1.
         self.enter_cell_text(1, 1, '=1/0')
-        self.assert_cell_has_error(1, 1, "ZeroDivisionError: float division")
+        self.assert_cell_has_error(1, 1, "ZeroDivisionError: division by zero")
 
         # * when he overwrites the cell content with a constant
         #   the error disappears
