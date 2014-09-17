@@ -19,8 +19,7 @@ worksheet[row_no, coll_no] = cell_object
 class Cell:
     def __init__(self):
         self.formula = ''
-        self.value = ''
-        self.error = None
+        self.value = undefined
 
 
 def calculate(worksheet):
@@ -38,7 +37,7 @@ def calculate(worksheet):
     try:
         cell.value = eval(cell.formula)
     except Exception as e:
-        cell.value = UNDEFINED
+        cell.value = undefined
         cell.error = str(e)
     # ...
 ```
@@ -53,6 +52,8 @@ We want to change this so that A1 and A2 become references to worksheet cells:
 
 = worksheet[1, 1].value + worksheet[1, 2].value
 
+ie excel formula -> python formula
+
 
 ```python
 def calculate(worksheet):
@@ -63,7 +64,7 @@ def calculate(worksheet):
 
 class Cell:
     def __init__(self):
-        self.value = ''
+        self.value = undefined
         self._formula = ''
         self._python_formula = ''
         self.error = None
@@ -82,6 +83,8 @@ class Cell:
 
     def _get_formula(self):
         return self._formula
+
+    formula = property(_get_forumla, _set_formula)
 ```
 
 
@@ -111,6 +114,7 @@ def test_produces_correct_python(self):
     )
 ```
 
+And it looks like this:
 
 ```python
 def get_python_formula_from_parse_tree(parse_node):
@@ -153,29 +157,47 @@ OK, but now I can't calculate A3 until I know the values of A2 and A1!
         self._python_formula = get_python_formula_from_parse_tree(parsed_formula)
 ```
 
+find and load constants first...
+
 ```python
 
 def calculate_cell(cell):
-    if cell._python_formula:
-        try:
-            cell.value = eval(cell._python_forumla)
-        #...
-    else:
-        cell.value = cell.formula
+    try:
+        cell.value = eval(cell._python_forumla)
+    #...
 
 
+
+def load_constants(worksheet):
+    for loc, cell in worksheet.items():
+        if not cell._python_formula:
+            cell.value = cell._formula
+```
+
+
+Now we build a graph and calculate them, starting from "leaves"
+
+
+```python
 def calculate(worksheet):
+    load_constants(worksheet)
+
     leaves = build_dependency_graph(worksheet)
+
     while leaves:
         leaf = leaves.pop()
         cell = worksheet[leaf.location]
 
         calculate_cell(cell)
+        
+        remove_from_parents(node, leaves) 
 
-        for parent in leaf.parents:
-            parent.children.remove(cell)
-            if not parent.children:
-                leaves.append(parent)
+
+def remove_from_parents(node, leaves):
+    for parent in node.parents:
+        parent.children.remove(node)
+        if not parent.children:
+            leaves.append(parent)
 ```
 
 (and you can parallelise this stuff too)
@@ -188,35 +210,24 @@ two-way graph...
 ```python
 def build_dependency_graph(worksheet):
     graph = {}
-    visited = set()
-    for loc in worksheet.keys():
-        _generate_cell_subgraph(worksheet, graph, loc, visited, [])
+    completed = set()
+    for location in worksheet.keys():
+        _generate_cell_subgraph(worksheet, graph, location, completed, path=[])
 
 
-def _generate_cell_subgraph(worksheet, graph, loc, completed, path):
-    cell = worksheet[loc]
-    if loc in completed:
+def _generate_cell_subgraph(worksheet, graph, location, completed, path):
+    if location in completed:
         return
 
-    if loc in path:
-        raise CycleError(path[path.index(loc):] + [loc])
+    cell = worksheet[location]
+    for dependency_location in cell.dependencies:
+        _generate_cell_subgraph(
+            worksheet, graph, dependency_location, completed, path + [location]
+        )
 
-    if cell._python_formula:
-        valid_dependencies = set()
-        for dep_loc in cell.dependencies:
-            try:
-                _generate_cell_subgraph(
-                    worksheet, graph, dep_loc, completed, path + [loc]
-                )
-                dep_cell = worksheet[dep_loc]
+    _add_location_dependencies(graph, location, cell.dependencies)
+    completed.add(location)
 
-            except CycleError as cycle_error:
-                if loc in cycle_error.path:
-                    completed.add(loc)
-                    raise cycle_error
-
-        _add_location_dependencies(graph, loc, cell.dependencies)
-    completed.add(loc)
 
 def _add_location_dependencies(graph, location, dependencies):
     if location not in graph:
@@ -231,10 +242,42 @@ def _add_location_dependencies(graph, location, dependencies):
 ```
 
 
+## Detecting cycles
+
+
+```python
+def _generate_cell_subgraph(worksheet, graph, location, completed, path):
+    if location in completed:
+        return
+
+    if location in path:
+        raise CycleError(path[path.index(location):] + [location])
+
+    cell = worksheet[location]
+    for dependency_location in cell.dependencies:
+        try:
+            _generate_cell_subgraph(
+                worksheet, graph, dependency_location, completed, path + [location]
+            )
+
+        except CycleError as cycle_error:
+            cell.error = cycle_error
+            if location in cycle_error.path:
+                completed.add(location)
+                raise cycle_error
+
+    _add_location_dependencies(graph, location, cell.dependencies)
+    completed.add(location)
+```
+
+
 # Custom functions
 
-def foo(x):
-    return x + 2
+    def foo(x):
+        return x + 2
+
+
+time to isolate our evals from the global context a little...
 
 ```python
 
@@ -249,11 +292,13 @@ def calculate(worksheet, usercode):
 ```
 
 
-# OK, but what if the user wants to programatically generate some formulae?
+# OK, but what if the user wants to programmatically generate some formulae?
 
 ```python
 
 def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
+    load_constants(worksheet)
+
     context = {}
     context['worksheet'] = worksheet
 
@@ -265,7 +310,9 @@ def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
     eval(usercode_post_formula_eval, context)
 ```
 
+
 # And now, time for some real fun
 
 the usercode *is* the spreadsheet!
+
 
