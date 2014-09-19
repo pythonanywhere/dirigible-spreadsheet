@@ -158,7 +158,7 @@ def _calculate(worksheet, usercode, private_key):
 
     try:
         execute_usercode(usercode, context)
-    except Exception, e:
+    except Exception as e:
         if isinstance(e, SyntaxError):
             error = 'Syntax error at character %d' % (e.offset,)
             line_no = e.lineno

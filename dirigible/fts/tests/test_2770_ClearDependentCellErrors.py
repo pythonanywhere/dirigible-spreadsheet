@@ -22,17 +22,19 @@ class Test_2770_ClearDependentCellErrors(FunctionalTest):
         self.wait_for_spinner_to_stop()
 
         # * He confirms that both A1 and A2 have errors
-        self.assert_cell_has_error(1, 1, 'ZeroDivisionError: float division')
-        self.assert_cell_has_error(1, 2,
+        self.assert_cell_has_error(1, 1, 'ZeroDivisionError: division by zero')
+        self.assert_cell_has_error(
+            1, 2,
             "TypeError: unsupported operand type(s) for +: 'Undefined' and 'int'"
         )
-        self.assert_cell_has_error(1, 3,
+        self.assert_cell_has_error(
+            1, 3,
             "TypeError: unsupported operand type(s) for +: 'Undefined' and 'int'"
         )
 
         # * He changes A1 to "=1"
         self.enter_cell_text(1, 1, '=1')
-        
+
         # * A1's error will clear.
         self.wait_for_cell_value(1, 1, '1')
         # * A2's should too
