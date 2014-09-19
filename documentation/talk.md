@@ -2,7 +2,7 @@
 
 ```python
 worksheet = {}
-worksheet[row_no, coll_no] = cell_object
+worksheet[row_no, col_no] = cell_object
 ```
 
 
@@ -212,20 +212,21 @@ def build_dependency_graph(worksheet):
     graph = {}
     completed = set()
     for location in worksheet.keys():
-        _generate_cell_subgraph(worksheet, graph, location, completed, path=[])
+        _generate_cell_subgraph(worksheet, graph, location, completed)
 
 
-def _generate_cell_subgraph(worksheet, graph, location, completed, path):
+def _generate_cell_subgraph(worksheet, graph, location, completed):
     if location in completed:
         return
 
     cell = worksheet[location]
+    _add_location_dependencies(graph, location, cell.dependencies)
+
     for dependency_location in cell.dependencies:
         _generate_cell_subgraph(
-            worksheet, graph, dependency_location, completed, path + [location]
+            worksheet, graph, dependency_location, completed 
         )
 
-    _add_location_dependencies(graph, location, cell.dependencies)
     completed.add(location)
 
 
@@ -245,7 +246,14 @@ def _add_location_dependencies(graph, location, dependencies):
 ## Detecting cycles
 
 
+
 ```python
+def build_dependency_graph(worksheet):
+    graph = {}
+    completed = set()
+    for location in worksheet.keys():
+        _generate_cell_subgraph(worksheet, graph, location, completed, path=[])
+
 def _generate_cell_subgraph(worksheet, graph, location, completed, path):
     if location in completed:
         return
@@ -292,7 +300,42 @@ def calculate(worksheet, usercode):
 ```
 
 
-# OK, but what if the user wants to programmatically generate some formulae?
+# OK, but what if we want to access to some spreadsheet values?
+
+
+* introducing `load_constants` and `evaluate_formulae`:
+
+```python
+
+def calculate(worksheet, usercode):
+    load_constants(worksheet)
+
+    context = {}
+    context['worksheet'] = worksheet
+
+    load_constants(worksheet, context)
+
+    eval(usercode, context)
+
+    evaluate_formulae(worksheet, context)
+
+
+def load_constants(worksheet):
+    for cell in worksheet.values():
+        if not cell.startswith('='):
+            cell.value = cell.formula
+
+def evaluate_formulae(worksheet, context):
+    leaves = build_dependency_graph(worksheet)
+    while leaves:
+        #...
+        calculate_cell(cell)
+```
+
+
+# OK, but what if the user wants access formula results?
+
+
 
 ```python
 
@@ -302,22 +345,46 @@ def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
     context = {}
     context['worksheet'] = worksheet
 
+    load_constants(worksheet, context)
+
     eval(usercode_pre_formula_eval, context)
 
     evaluate_formulae(worksheet, context)
 
     eval(usercode_post_formula_eval, context)
-
-
-
-def evaluate_formulae(
-    leaves = build_dependency_graph(worksheet)
-    while leaves:
-        #etc
 ```
 
 
+# notice we can now programatically generate formulae...
+
+```python
+
+worksheet[1, 3].formula = "=A1+ A2"
+```
+
+First mwahahaha moment.
+
+But wait, there's more.
+
+
 # And now, time for some real fun
+```python
+
+def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
+    load_constants(worksheet)
+
+    context = {}
+    context['worksheet'] = worksheet
+
+    load_constants(worksheet, context)
+
+    eval(usercode_pre_formula_eval, context)
+
+    evaluate_formulae(worksheet, context)
+
+    eval(usercode_post_formula_eval, context)
+```
+
 
 the usercode *is* the spreadsheet!
 
@@ -326,7 +393,8 @@ the usercode *is* the spreadsheet!
 def load_constants(worksheet):
     #...
 
-def evaluate_formulae(worksheet):
+def evaluate_formulae(worksheet, context):
+    #...
 
 def calculate(worksheet, usercode, private_key):
     evaluate_formulae_in_context = lambda worksheet: \
