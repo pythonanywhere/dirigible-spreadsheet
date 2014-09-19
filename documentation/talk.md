@@ -304,10 +304,16 @@ def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
 
     eval(usercode_pre_formula_eval, context)
 
-    #.... loop thru graph
-        cell.value = eval(cell.python_formula, context)
+    evaluate_formulae(worksheet, context)
 
     eval(usercode_post_formula_eval, context)
+
+
+
+def evaluate_formulae(
+    leaves = build_dependency_graph(worksheet)
+    while leaves:
+        #etc
 ```
 
 
@@ -315,4 +321,24 @@ def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
 
 the usercode *is* the spreadsheet!
 
+```python
 
+def load_constants(worksheet):
+    #...
+
+def evaluate_formulae(worksheet):
+
+def calculate(worksheet, usercode, private_key):
+    evaluate_formulae_in_context = lambda worksheet: \
+        evaluate_formulae(worksheet, context)
+    context = {
+        'worksheet': worksheet,
+        'load_constants': load_constants,
+        'evaluate_formulae': evaluate_formulae_in_context,
+        'undefined': undefined,
+    }
+    try:
+        exec(usercode, context)
+    except Exception as e:
+        add_to_console(e)
+```
