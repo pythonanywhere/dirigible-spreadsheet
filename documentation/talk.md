@@ -1,3 +1,43 @@
+# How does a spreadsheet work?
+
+    @hjwp
+
+    www.pythonanywhere.com
+    www.obeythetestinggoat.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Data structure
 
 ```python
@@ -6,14 +46,42 @@ worksheet[row_no, col_no] = cell_object
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # The most basic calculation:
 
 = 1 + 1
-
 --> should give 2
-
-
 * the formula/value distinction
+
 
 ```python
 class Cell:
@@ -31,7 +99,37 @@ def calculate(worksheet):
 ```
 
 
-# exceptions:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Exceptions:
 
 ```python
     try:
@@ -44,14 +142,41 @@ def calculate(worksheet):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # References
 
 = A1 + A2
-
 We want to change this so that A1 and A2 become references to worksheet cells:
-
 = worksheet[1, 1].value + worksheet[1, 2].value
-
 ie excel formula -> python formula
 
 
@@ -88,6 +213,36 @@ class Cell:
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Let the recursive fun begin!
 
 Test-first:
@@ -112,7 +267,37 @@ def test_produces_correct_python(self):
         )),
         '[x * worksheet[(1,1)].value for x in range(5)]'
     )
-```
+``
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`
 
 And it looks like this:
 
@@ -147,12 +332,43 @@ OK, but now I can't calculate A3 until I know the values of A2 and A1!
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Dependencies
 
 ```python
     def _set_formula(self, value):
         #...
         parsed_formula = parser.parse(value)
+
         self.dependencies = get_dependencies_from_parse_tree(parsed_formula)
         self._python_formula = get_python_formula_from_parse_tree(parsed_formula)
 ```
@@ -173,6 +389,36 @@ def load_constants(worksheet):
         if not cell._python_formula:
             cell.value = cell._formula
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Now we build a graph and calculate them, starting from "leaves"
@@ -201,6 +447,36 @@ def remove_from_parents(node, leaves):
 ```
 
 (and you can parallelise this stuff too)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Building the dependency graph
@@ -243,6 +519,36 @@ def _add_location_dependencies(graph, location, dependencies):
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Detecting cycles
 
 
@@ -276,6 +582,36 @@ def _generate_cell_subgraph(worksheet, graph, location, completed, path):
 
     _add_location_dependencies(graph, location, cell.dependencies)
     completed.add(location)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```
 
 
@@ -298,6 +634,36 @@ def calculate(worksheet, usercode):
     #.... loop thru graph
         cell.value = eval(cell.python_formula, context)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # OK, but what if we want to access to some spreadsheet values?
@@ -333,6 +699,36 @@ def evaluate_formulae(worksheet, context):
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # OK, but what if the user wants access formula results?
 
 
@@ -355,6 +751,36 @@ def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # notice we can now programatically generate formulae...
 
 ```python
@@ -364,10 +790,43 @@ worksheet[1, 3].formula = "=A1+ A2"
 
 First mwahahaha moment.
 
-But wait, there's more.
+But wait, there's more!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # And now, time for some real fun
+
+Reminder of what we're doing at the moment...
+
 ```python
 
 def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
@@ -384,6 +843,50 @@ def calculate(worksheet, usercode_pre_formula_eval, usercode_post_formula_eval):
 
     eval(usercode_post_formula_eval, context)
 ```
+
+
+This is what the user sees:
+
+
+```python
+load_constants(worksheet)
+
+# Put code here if it needs to access constants in the spreadsheet
+# and to be accessed by the formulae.  Examples: imports,
+# user-defined functions and classes you want to use in cells.
+
+evaluate_formulae(worksheet)
+
+# Put code here if it needs to access the results of the formulae.
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 the usercode *is* the spreadsheet!
@@ -410,3 +913,9 @@ def calculate(worksheet, usercode, private_key):
     except Exception as e:
         add_to_console(e)
 ```
+
+
+
+
+so an example, a retirement calculator
+
