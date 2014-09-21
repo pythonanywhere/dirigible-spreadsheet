@@ -9,7 +9,8 @@ Installation instructions
 
     cd python/dirigible
     pip install -r requirements.txt
-    python manage.py syncdb
+    python manage.py migrate
+    python manage.py createsuperuser  # make yourself a user account.
     python manage.py runserver
 
 And visit http://localhost:8000
@@ -59,7 +60,7 @@ If it's a real formula, then it will be evaluated as part of `evaluate_formulae(
 Cell formulae can also use any user-defined functions from the usercode.
 
 
-Everything else is fairly peripheral.  There is some monkeying around with json, some infrastructure to allow parallelised recalculation of separate branches of the dependency graph on different machines, and some basic sandboxing code that makes sure the users's code is run in a `chroot`, which provides some minimal protection against the user writing nefarious code.
+Everything else is fairly peripheral.  There is some monkeying around with json, some stuff with threads that's a throwback to some parallelisation features that I haven't finished removing.
 
-Questions and requests for clarification are solicited, as are any pull requests for documentation, bugfixes, fixes to tests (of which all but three were passing in this modified version of our codebase, at the time of writing)
+Questions and requests for clarification are solicited, as are any pull requests for documentation, bugfixes, fixes to unit tests (of which all but three were passing in this modified version of our codebase, at the time of writing), or FTs (half-ported from old selenium)
 
