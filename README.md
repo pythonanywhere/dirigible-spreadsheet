@@ -7,7 +7,7 @@ This is the source code from the end-of-lifed https://www.projectdirigible.com p
 Installation instructions
 -------------------------
 
-    cd python/dirigible
+    cd dirigible
     pip install -r requirements.txt
     python manage.py migrate
     python manage.py createsuperuser  # make yourself a user account.

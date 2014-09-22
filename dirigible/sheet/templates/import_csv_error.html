@@ -1,0 +1,15 @@
+{% extends "error_page.html" %}
+
+{% block title %}
+    CSV Import Error: Dirigible
+{% endblock %}
+
+{% block error_title %}Could not import CSV file{% endblock %}
+{% block error_text %}
+    Sorry, the file you uploaded was not in a recognised CSV format
+{% endblock %}
+
+
+{% block error_recovery_link %}
+<a id="id_sheet_link" href="{% url 'sheet_page' sheet.owner.username sheet.id %}">Return to your sheet ({{sheet.name}})</a>
+{% endblock %}

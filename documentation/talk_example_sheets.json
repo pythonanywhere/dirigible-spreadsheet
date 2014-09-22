@@ -1,0 +1,116 @@
+[
+{
+  "fields": {
+    "column_widths_json": "{}",
+    "api_key": "81776bcb-700f-46fa-ba49-cea77b5a84f2",
+    "version": 148,
+    "usercode": "worksheet[\"A4\"].formula = \"=A1+A3\"\n\ndef foo(something):\n    return something * 3\n\nload_constants(worksheet)\n\ndef add_a1(something):\n    a = worksheet[\"A1\"]\n    return something + a1.value\n\nevaluate_formulae(worksheet)\n\nprint sum(\n    worksheet[1, r].value\n    for r in range(1,5)\n)\n\n\n\n\n\n\n\n",
+    "contents_json": "{ \"_console_text\": \"<span class=\\\"console_output_text\\\">13</span><span class=\\\"console_output_text\\\">\\n</span><span class=\\\"console_system_text\\\">Took 0.01s</span>\", \"_usercode_error\": null ,\"1,2\": { \"formula\": \"=foo(A1)\", \"formatted_value\": \"3\" , \"python_formula\": \"foo(worksheet[(1,1)].value )\" , \"dependencies\": [[1, 1]] , \"value\": 3 },\"1,3\": { \"formula\": \"=A1 + A2\", \"formatted_value\": \"4\" , \"python_formula\": \"worksheet[(1,1)].value + worksheet[(1,2)].value \" , \"dependencies\": [[1, 1], [1, 2]] , \"value\": 4 },\"1,1\": { \"formula\": \"1\", \"formatted_value\": \"1\" , \"value\": 1 },\"1,4\": { \"formula\": \"=A1+A3\", \"formatted_value\": \"5\" , \"python_formula\": \"worksheet[(1,1)].value +worksheet[(1,3)].value \" , \"dependencies\": [[1, 1], [1, 3]] , \"value\": 5 } }",
+    "timeout_seconds": 55,
+    "height": 1000,
+    "width": 52,
+    "last_modified": "2014-09-19T09:19:57.211",
+    "owner": 1,
+    "is_public": false,
+    "allow_json_api_access": false,
+    "name": "complete usercode"
+  },
+  "model": "sheet.sheet",
+  "pk": 1
+},
+{
+  "fields": {
+    "column_widths_json": "{}",
+    "api_key": "43043429-d103-4823-bc7c-c66f38c5429e",
+    "version": 0,
+    "usercode": "\nload_constants(worksheet)\n\n# Put code here if it needs to access constants in the spreadsheet\n# and to be accessed by the formulae.  Examples: imports,\n# user-defined functions and classes you want to use in cells.\n\nevaluate_formulae(worksheet)\n\n# Put code here if it needs to access the results of the formulae.\n",
+    "contents_json": "{ \"_console_text\": \"\", \"_usercode_error\": null  }",
+    "timeout_seconds": 55,
+    "height": 1000,
+    "width": 52,
+    "last_modified": "2014-09-19T09:19:40.446",
+    "owner": 1,
+    "is_public": false,
+    "allow_json_api_access": false,
+    "name": "usercode welcome"
+  },
+  "model": "sheet.sheet",
+  "pk": 2
+},
+{
+  "fields": {
+    "column_widths_json": "{}",
+    "api_key": "40738830-f386-4fac-b3cf-13ca63fb6cf6",
+    "version": 8,
+    "usercode": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nload_constants(worksheet)\n\n# Put code here if it needs to access constants in the spreadsheet\n# and to be accessed by the formulae.  Examples: imports,\n# user-defined functions and classes you want to use in cells.\n\nevaluate_formulae(worksheet)\n\n# Put code here if it needs to access the results of the formulae.\n",
+    "contents_json": "{ \"_console_text\": \"<span class=\\\"console_system_text\\\">Took 0.00s</span>\", \"_usercode_error\": null  }",
+    "timeout_seconds": 55,
+    "height": 1000,
+    "width": 52,
+    "last_modified": "2014-09-19T09:20:24.857",
+    "owner": 1,
+    "is_public": false,
+    "allow_json_api_access": false,
+    "name": "custom function"
+  },
+  "model": "sheet.sheet",
+  "pk": 3
+},
+{
+  "fields": {
+    "column_widths_json": "{}",
+    "api_key": "d4ed8e02-0356-4288-a223-c2b5696f68b8",
+    "version": 14,
+    "usercode": "if True:\n                                            load_constants(worksheet)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndef sum_as():\n    pass\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nif True:\n                                            evaluate_formulae(worksheet)\n",
+    "contents_json": "{ \"_console_text\": \"<span class=\\\"console_system_text\\\">Took 0.00s</span>\", \"_usercode_error\": null ,\"1,2\": { \"formula\": \"2\", \"formatted_value\": \"2\" , \"value\": 2 },\"1,3\": { \"formula\": \"=sum_as()\", \"formatted_value\": \"None\" , \"python_formula\": \"sum_as()\" , \"value\": null },\"1,1\": { \"formula\": \"1\", \"formatted_value\": \"1\" , \"value\": 1 } }",
+    "timeout_seconds": 55,
+    "height": 1000,
+    "width": 52,
+    "last_modified": "2014-09-19T09:21:32.516",
+    "owner": 1,
+    "is_public": false,
+    "allow_json_api_access": false,
+    "name": "usercode accesses values"
+  },
+  "model": "sheet.sheet",
+  "pk": 4
+},
+{
+  "fields": {
+    "column_widths_json": "{}",
+    "api_key": "9d30f966-14c7-4b8a-b259-13672dbc503d",
+    "version": 12,
+    "usercode": "if True:\n                                        load_constants(worksheet)\nif True:\n                                        evaluate_formulae(worksheet)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nprint(sum([]\n))\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+    "contents_json": "{ \"_console_text\": \"<span class=\\\"console_output_text\\\">0</span><span class=\\\"console_output_text\\\">\\n</span><span class=\\\"console_system_text\\\">Took 0.01s</span>\", \"_usercode_error\": null ,\"1,2\": { \"formula\": \"2\", \"formatted_value\": \"2\" , \"value\": 2 },\"1,3\": { \"formula\": \"=A1 + A2\", \"formatted_value\": \"3\" , \"python_formula\": \"worksheet[(1,1)].value + worksheet[(1,2)].value \" , \"dependencies\": [[1, 1], [1, 2]] , \"value\": 3 },\"1,1\": { \"formula\": \"1\", \"formatted_value\": \"1\" , \"value\": 1 } }",
+    "timeout_seconds": 55,
+    "height": 1000,
+    "width": 52,
+    "last_modified": "2014-09-19T09:24:55.911",
+    "owner": 1,
+    "is_public": false,
+    "allow_json_api_access": false,
+    "name": "usercode access formula results"
+  },
+  "model": "sheet.sheet",
+  "pk": 5
+},
+{
+  "fields": {
+    "column_widths_json": "{}",
+    "api_key": "35dd4be2-f8dd-4113-9c26-0149418a5b6d",
+    "version": 4,
+    "usercode": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nif True:\n                                        load_constants(worksheet)\n                                        \nif True:\n                                        evaluate_formulae(worksheet)\n\n",
+    "contents_json": "{ \"_console_text\": \"<span class=\\\"console_system_text\\\">Took 0.00s</span>\", \"_usercode_error\": null  }",
+    "timeout_seconds": 55,
+    "height": 1000,
+    "width": 52,
+    "last_modified": "2014-09-19T09:27:51.238",
+    "owner": 1,
+    "is_public": false,
+    "allow_json_api_access": false,
+    "name": "Basic demo sheet"
+  },
+  "model": "sheet.sheet",
+  "pk": 6
+}
+]

@@ -1,0 +1,7 @@
+,,,,
+,"Data at A2, from a constant",4,,
+,"Data at A3, with a \n that might need escaping",,,
+,"Data at A4, with 'single quotes'",,,hellooooo there!
+,"Data at A5, with ""double quotes""",,,"[u'list item 1', u'list item 2', 3]"
+,"Data at A6, with some unicode: Sacré bleu! The £ is expensive, compared to the €!",,,"{u'oats': u'a cereal which in England is fed to horses, but in Scotland forms the sustenance of the nation'}"
+,,,,

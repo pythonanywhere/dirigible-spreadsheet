@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Welcome to Dirigible, a programmable cloud spreadsheet
+{% endblock %}
+
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/non_sheet_page.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="/static/dirigible/styles/registration.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="/static/dirigible/styles/index.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+
+{% block body %}
+    <div id="id_container">
+        <div id="id_content">
+
+            <div id="id_header" class="centered-block">
+                {% include "header_links_include.html" %}
+            </div>
+
+
+            <div id="id_big_logo_wrap" class="centered-block">
+                <a href="/">
+                    <img id="id_big_logo" src="/static/dirigible/images/logo_transparent_490x112.png" alt="Dirigible Logo" title="Dirigible Logo" />
+                </a>
+            </div>
+
+            <div id="id_grey_stripe_hwrap">
+                <div id="id_grey_stripe_vwrap" class="centered-block">
+
+                    <div class="id_dirigible_tagline">
+                        Dirigible is a programmable cloud spreadsheet.
+                    </div>
+
+                    <div id="id_more_info_buttons">
+                        <!-- NB the images/links below must be run together as otherwise we get excess space between them -->
+                           href='{% url 'info_page' "video" %}'><img id="id_watch_a_video"
+                                                                    src="/static/dirigible/images/watch-a-video.png"
+                                                                    alt="Watch a video"
+                                                                    title="Watch a video" /></a>
+                    </div>
+
+                    <div class="id_dirigible_tagline" id="id_featured_sheets_front_page">
+                        See some <a href="{% url 'featured_sheets' %}">example spreadsheets</a>.
+                    </div>
+
+                </div>
+            </div>
+
+            <a id="id_signup_call_to_action" href="{% url 'registration_register' %}">
+                <div id="id_signup_call_to_action_div" class="centered-block grey_rounded_corner_box">
+
+                    Sign up now!
+
+                </div>
+            </a>
+
+            {% include "footer_links_include.html" %}
+
+        </div>
+
+    </div>
+
+{% endblock %}

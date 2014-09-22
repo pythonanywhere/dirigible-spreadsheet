@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="/static/dirigible/styles/sheet_page.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="/static/slickgrid/slick.grid.css" type="text/css" media="screen" charset="utf-8" />
+
+    <script type="text/javascript" src="/static/json/json2.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.event.drag-2.0.min.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.ajaxq-0.0.1.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/static/jquery/jeip.js"></script>
+    <script type="text/javascript" src="/static/jquery/jquery.caret.1.02.min.js"></script>
+
+    <script type="text/javascript" src="/static/slickgrid/slick.core.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.grid.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.editors.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.cellrangeselector.js"></script>
+    <script type="text/javascript" src="/static/slickgrid/slick.cellrangedecorator.js"></script>
+
+    <script src="/static/ace/ace-uncompressed.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/ace/mode-python.js" type="text/javascript" charset="utf-8"></script>
+
+    <script type="text/javascript" src="/static/splitter/splitter.js"></script>
+
+    <script type="text/javascript" src="/static/dirigible/scripts/cell_editor.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/console_view.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/dialogs.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/editor_commands.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/grid_commands.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/grid_content_converter.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/grid_interaction_handler.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/grid_remote_model.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/grid_view.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/htmlescape.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/keyboard_cellrange_selector.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/page_interaction_handler.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/page_view.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/page_commands.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/security_settings.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/selection_model.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/sheet_page_utils.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/toolbar_interaction_handler.js"></script>
+    <script type="text/javascript" src="/static/dirigible/scripts/usercode_view.js"></script>
+
+    <script type="text/javascript">
+        // Replace console.log with something that does nothing
+        // to prevent a stray console.log from killing everything
+        if (!window.console || !window.console.log) {
+            window.console = {};
+            window.console.log = function() {};
+        }
+
+        $.extend(urls, {
+            importXls: '{% url 'sheet_import_xls' sheet.owner.username %}',
+            importCsv: '{% url 'sheet_import_csv' sheet.owner.username sheet.id %}',
+
+            calculate: "{% url 'sheet_calculate' sheet.owner.username sheet.id %}",
+            getJSONGridData: "{% url 'sheet_get_json_grid_data_for_ui' sheet.owner.username sheet.id %}",
+            getJSONMetaData: "{% url 'sheet_get_json_meta_data_for_ui' sheet.owner.username sheet.id %}",
+
+            setCellFormula: "{% url 'sheet_set_cell_formula' sheet.owner.username sheet.id %}",
+            setColumnWidths: "{% url 'sheet_set_column_widths' sheet.owner.username sheet.id %}",
+            setSecuritySettings: "{% url 'sheet_set_sheet_security_settings' sheet.owner.username sheet.id %}",
+
+            setSheetName: "{% url 'sheet_set_sheet_name' sheet.owner.username sheet.id %}",
+            setSheetUsercode: "{% url 'sheet_set_sheet_usercode' sheet.owner.username sheet.id %}",
+
+            cut: "{% url 'sheet_cut' sheet.owner.username sheet.id %}",
+            copy: "{% url 'sheet_copy' sheet.owner.username sheet.id %}",
+            paste: "{% url 'sheet_paste' sheet.owner.username sheet.id %}",
+            clearCells: "{% url 'sheet_clear_cells' sheet.owner.username sheet.id %}",
+
+            apiBase: "{% url 'api_v0.1_get_sheet_json' sheet.owner.username sheet.id %}"
+        });
+
+        var securitySettingsDialog = new Dirigible.SecuritySettings.Dialog($, urls);
+        var securitySettingsModel = new Dirigible.SecuritySettings.Model($, urls);
+        securitySettingsModel.apiKey = "{{ sheet.api_key }}";
+        securitySettingsModel.enabled = "{{ sheet.allow_json_api_access }}" === "True";
+        securitySettingsModel.isPublic = "{{ sheet.is_public }}" === "True";
+
+        var grid = null;
+        var editor = null;
+
+        $(function()
+        {
+            var editable = (
+                "{{ sheet.public_view_mode }}" === "False" ||
+                "{{ user.is_staff }}" === "True"
+            );
+            securitySettingsModel.updatePageUI();
+
+            editor = ace.edit("id_usercode");
+            var usercodeView = new Dirigible.UsercodeView(editor);
+            usercodeView.initialiseComponents(editable);
+            var editorCommands = new Dirigible.EditorCommands(urls, editor);
+
+            var CellEditor = CellEditorFactory($('#id_formula_bar'));
+
+            var grid_options = {
+                enableColumnReorder: false,
+                enableCellNavigation: true,
+                shiftKeyPreventsNavigation: false,
+                editable: editable,
+                autoEdit: false,
+                alwaysNavigateDownOnCommit: true,
+                editorFactory: { getEditor : function(_) { return CellEditor; } }
+            };
+
+            var gridRemoteModel = new Dirigible.GridRemoteModel(urls);
+            grid = new Slick.Grid($("#id_grid"), gridRemoteModel, [], grid_options);
+            grid.setSelectionModel(new Dirigible.SelectionModel());
+            grid.getCellFormula = function (slickCellLocation) {
+                return getGridCellFormula(grid, slickCellLocation);
+            };
+            var consoleView = new Dirigible.ConsoleView($('#id_console'));
+            var gridView = new Dirigible.GridView(grid, gridRemoteModel);
+            var pageView = new Dirigible.PageView(
+                '{{sheet.owner.username}}', consoleView, usercodeView, gridView
+            );
+            Dirigible.SheetUtils.Initialise(urls, pageView);
+            Dirigible.Dialogs.Initialise(grid, urls);
+
+            var gridCommands = new Dirigible.GridCommands(urls, grid);
+            var pageCommands = new Dirigible.PageCommands(gridCommands, editorCommands);
+
+            var toolbarIH = new Dirigible.ToolbarInteractionHandler(
+                gridCommands, pageCommands
+            );
+
+            var pageIH = new Dirigible.PageInteractionHandler(
+                $, pageView, pageCommands, editor, editorCommands, grid, gridCommands
+            );
+            pageIH.initialiseComponents(urls, editable);
+
+            var gridIH = new Dirigible.GridInteractionHandler(
+                $, grid, gridCommands
+            );
+
+            toolbarIH.bind();
+            pageIH.bind();
+            gridIH.bind();
+
+            $.getJSON(urls.getJSONMetaData, firstTimeUIInitialisation);
+
+            function firstTimeUIInitialisation(sheetMetaData) {
+                pageIH.resizeComponents();
+                pageView.updateMetaData(sheetMetaData);
+                var columns = Dirigible.GridView.jsonToSlickGridColumnHeaders(sheetMetaData);
+                self.grid.setColumns(columns);
+
+                if (window.document.activeElement !== $('#id_tutorial_promo_dialog_close')[0]) {
+                    grid.setActiveCell(0, 1);
+                }
+            }
+
+            /***** End definitions *****/
+
+            $('#id_spinner_image').ajaxStart(
+                function() { $(this).removeClass('hidden'); }
+            );
+            $('#id_spinner_image').ajaxStop(
+                function() { $(this).addClass('hidden'); }
+            );
+
+            $('#id_security_button').click(function() {
+                securitySettingsDialog.show(securitySettingsModel);
+            });
+
+            securitySettingsDialog.bind(securitySettingsModel);
+
+            {% if not profile.has_seen_sheet_page %}
+                $('#id_tutorial_promo_dialog_close').click( function() {
+                    $('#id_tutorial_promo_dialog').dialog("close");
+                });
+                $('#id_tutorial_promo_dialog').dialog({ width: 533 });
+                $('#id_tutorial_promo_dialog_close').focus();
+            {% endif %}
+        });
+
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div id="id_header_and_toolbar">
+        <div id='id_header'>
+            <a href="/">
+                <img id="id_small_header_logo" src="/static/dirigible/images/logo_transparent_289x66.png" alt="Dirigible logo" title="Dirigible logo" />
+            </a>
+            {% include "header_links_include.html" %}
+        </div>
+
+        {% if sheet.public_view_mode %}
+            {% if user.is_staff %}
+                <div id="id_copy_sheet_div">
+                    <a id="id_copy_sheet_link" href="{% url 'sheet_copy_sheet' sheet.owner.username sheet.id %}">Click here to copy this sheet</a>.
+                </div>
+            {% else %}
+                <div id="id_copy_sheet_div">
+                    This sheet is not editable because it belongs to someone else.<br/>
+                    <a id="id_copy_sheet_link" href="{% url 'sheet_copy_sheet' sheet.owner.username sheet.id %}">Click here to get your own copy that you can change</a>.
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <div class="clear"></div>
+
+        <div id="id_sheet_name_and_toolbar">
+            <div id="id_sheet_name_wrap">
+                <div id="id_sheet_name"></div>
+            </div>
+            <div id="id_toolbar_wrap">
+                <div id='id_toolbar'>
+                    <div id='id_toolbar_buttons'>
+                    {% if sheet.public_view_mode and not user.is_staff %}
+                        <img id='id_export_button' alt="Download as CSV file" title="Download as CSV file" src='/static/dirigible/images/toolbar/export_button.png' />
+                    {% else %}
+                        <img id='id_import_button' alt="Import a file" title="Import a file" src='/static/dirigible/images/toolbar/import_button.png' />
+                        <img id='id_export_button' alt="Download as CSV file" title="Download as CSV file" src='/static/dirigible/images/toolbar/export_button.png' />
+                        <img id='id_cut_button' alt="Cut" title="Cut" src='/static/dirigible/images/toolbar/cut_button.png' />
+                        <img id='id_copy_button' alt="Copy" title="Copy" src='/static/dirigible/images/toolbar/copy_button.png' />
+                        <img id='id_paste_button' alt="Paste" title="Paste" src='/static/dirigible/images/toolbar/paste_button.png' />
+                        <img id='id_security_button' src='/static/dirigible/images/toolbar/security_button.png' />
+                        <img id='id_recalc_button' alt="Recalculate sheet (F9)" title="Recalculate sheet (F9)" src='/static/dirigible/images/toolbar/recalc_button.png' />
+                    {% endif %}
+
+                    </div>
+                    <img src="/static/dirigible/images/spinner.gif" alt="spinner" id="id_spinner_image" class="hidden" />
+                    <div id="id_buffering_message" class="hidden">buffering ...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="clear"></div>
+    </div>
+    <div id="id_grid_and_code">
+        <div id='id_left_column'>
+            <div id="id_grid_and_formula_bar">
+                {% if sheet.public_view_mode and not user.is_staff %}
+                    <input id="id_formula_bar" type="text" readonly />
+                {% else %}
+                    <input id="id_formula_bar" type="text" />
+                {% endif %}
+                <div id='id_grid'> </div>
+            </div>
+        </div>
+        <div id='id_right_column'>
+            <div id='id_usercode_wrap'>
+                <pre id='id_usercode' class='user_code'>{{sheet.usercode}}</pre>
+            </div>
+            <div id="id_console_wrap">
+                <div id='id_console'></div>
+            </div>
+        </div>
+    </div>
+    {% if not profile.has_seen_sheet_page %}
+        <div id="id_tutorial_promo_dialog" title="Welcome to Dirigible!" style="display: none">
+            <p>
+                Hi, thanks for trying out Dirigible.
+            </p>
+            <p>
+                We really, really recommend you <strong>
+                    <a href="/documentation/tutorial01.html" id="id_tutorial_link">check out our tutorial</a>
+                </strong>.
+                It'll only take you about ten minutes, and it will show you how to use all the AWESOME
+                Dirigible features, like scripting your spreadsheet in Python, using lists and objects
+                in cells, and defining your own functions.
+            </p>
+            <p>
+                Alternatively, if you're an expert Python hacker
+                and want to have a go at writing usercode right away, you may find the
+                <a href="/documentation/overview.html">Technical Overview</a> the best place to start.
+            </p>
+            <p>
+                We won't bug you with this popup again (nary a paperclip in sight...)
+                At any time, you can get to all of the documentation by clicking the <strong>Help</strong>
+                link at the top right of the page.
+            </p>
+            <div class="dialog_buttons">
+                <input type="button" value="OK" id="id_tutorial_promo_dialog_close" />
+            </div>
+        </div>
+    {% endif %}
+    <div id="id_import_form" title="Select the file to import:" style="display: none">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p>
+                {% for field in import_form %}
+                    {{field}}
+                {% endfor %}
+            </p>
+            <span class="import_form_radio_button" title="For csv files generated by, or for Excel (windows-1252 encoded)">
+                Excel encoding<input type="radio" name="csv_encoding" value="excel" checked />
+            </span>
+            <br />
+            <span class="import_form_radio_button" title="For any other csv files, utf-8/unicode. Try this if the other doesn't work">
+                Auto-detect other<input type="radio" name="csv_encoding" value="other" />
+            </span>
+            <br />
+            <a href="/documentation/import_export.html" target="_new">Help</a>
+            <input type="submit" value="Upload CSV" id="id_import_form_upload_csv_button" />
+            <input type="submit" value="Upload Excel Values" id="id_import_form_upload_xls_values_button" />
+            <input type="button" value="Cancel" id="id_import_form_cancel_button" />
+        </form>
+    </div>
+    <div id="id_export_dialog" title="Choose CSV format:" style="display: none">
+        <ul>
+            <li>
+                <a id="id_export_csv_excel_version" href="{% url 'sheet_export_csv' sheet.owner.username sheet.id 'excel' %}">
+                    Download for Excel (default)
+                </a>
+            </li>
+            <li>
+                <a id="id_export_csv_unicode_version" href="{% url 'sheet_export_csv' sheet.owner.username sheet.id 'unicode' %}">
+                    Download as international (utf8-encoded) CSV
+                </a>
+        </li>
+        </ul>
+        <p>
+            You may need to use the international version if your sheet contains
+            non-western characters, but it may not import into Excel as easily.
+            See the <a href="/documentation/import_export.html" target="_new">documentation</a> for more info.
+        </p>
+        <div class="dialog_buttons">
+            <input type="button" value="Close" id="id_export_dialog_close_button" />
+        </div>
+    </div>
+    <div id="id_security_form" title="Sheet Security Settings" style="display:none">
+        <form action="">
+            {% csrf_token %}
+            <p>
+                <div id="id_security_form_general_settings">
+                    <input
+                        type="checkbox"
+                        id="id_security_form_public_sheet_checkbox"
+                        name="public_sheet"
+                        title="Make sheet publicly-visible"
+                    />
+                    <label for="id_security_form_public_sheet_checkbox">Make sheet public</label><br/>
+                    <a href='/documentation/public_sheets.html' target='_blank' id='id_security_form_public_sheet_help'>[What is this?]</a>
+                </div>
+
+                <div id="id_security_form_api_settings">
+                    <input
+                        type="checkbox"
+                        id="id_security_form_json_enabled_checkbox"
+                        name="allow_api_access"
+                        title="Allow JSON API Access"
+                    />
+                    <label for="id_security_form_json_enabled_checkbox">Allow JSON API access</label><br/>
+                    <a href='/documentation/json_api.html' target='_blank' id='id_security_form_json_help'>[What is this?]</a>
+                    <div id="id_security_form_api_subsettings">
+                        <table>
+                            <tr>
+                                <td class="label">Sheet API key:</td>
+                                <td><input id="id_security_form_json_api_key" /></td>
+                            </tr>
+                            <tr class="label">
+                                <td>Sheet API URL:</td>
+                                <td><input id="id_security_form_json_api_url" readonly /></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="clear" />
+            </p>
+            <br />
+
+            <div class="clear" />
+
+            <div class="dialog_buttons">
+                <input type="button" value="OK" id="id_security_form_ok_button" />
+                <input type="button" value="Cancel" id="id_security_form_cancel_button" />
+            </div>
+
+            <div class="clear" />
+
+            <div id="id_security_form_save_error">
+                Could not save security settings to server, please try again in a few moments...
+            </div>
+        </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,11 @@
+Django==1.7
+argparse==1.2.1
+chardet==2.2.1
+mock==1.0.1
+# numpy==1.8.1
+pexpect==3.2
+ply==3.4
+simplejson==3.5.2
+wsgiref==0.1.2
+xlrd==0.9.3
+selenium

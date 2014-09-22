@@ -1,0 +1,67 @@
+{% extends "non_sheet_page_small_logo.html" %}
+
+{% block title %}
+    Login: Dirigible
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dirigible/styles/login.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="clear"> </div>
+
+        <div id="id_login_form_wrap" class="grey_rounded_corner_box">
+
+            <div id="id_login_form_header">
+                <h1>Log in</h1>
+
+                <p id="id_login_signup_blurb">
+                    Don't have a Dirigible account?
+                    {% if next %}
+                        <a href="{% url 'registration_register' %}?next={{ next }}" id="id_login_signup_link">Click here to sign up</a>.
+                    {% else %}
+                        <a href="{% url 'registration_register' %}" id="id_login_signup_link">Click here to sign up</a>.
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="clear"></div>
+
+            {% if form.errors %}
+            <p id="id_login_error">The user name or password is incorrect. Please try again.</p>
+            {% endif %}
+            <div id="id_login_form">
+
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+
+                    <div id="id_username_wrap">
+                        <span id="id_username_label">{{ form.username.label_tag }}:</span>
+                        {{ form.username }}
+                    </div>
+                    <div id="id_password_wrap">
+                        <span id="id_password_label">{{ form.password.label_tag }}:</span>
+                        {{ form.password }}
+                    </div>
+
+                    <input type="hidden" name="next" value="{{ next }}" />
+
+                    <div class="clear"> </div>
+
+                    <input type="submit" class="blue_button" id="id_login" value="Login" />
+
+                </form>
+
+                <div class="clear"> </div>
+
+            </div>
+        </div>
+
+    <script type="text/javascript">
+        document.getElementById('id_username').focus();
+    </script>
+{% endblock %}
