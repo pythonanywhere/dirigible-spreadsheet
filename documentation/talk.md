@@ -7,8 +7,18 @@
 
 
 
+# this talk
+
+https://github.com/pythonanywhere/dirigible-spreadsheet
+
+"slides": in repo, documentation/talk.md
 
 
+
+
+
+
+good colourschemes:  nightsky, pspad, sea
 
 
 
@@ -76,7 +86,44 @@ worksheet[row_no, col_no] = cell_object
 
 
 
-# The most basic calculation:
+# The most basic calculation... how?
+
+= 1 + 1
+--> should give 2
+* the formula/value distinction
+
+
+```python
+class Cell:
+    def __init__(self):
+        self.formula = ''
+        self.value = undefined
+
+
+def calculate(worksheet):
+    for cell in worksheet.values():
+        if cell.formula.startswith('=')
+            cell.value = ???
+        else:
+            cell.value = cell.formula
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# The most basic calculation - answered
 
 = 1 + 1
 --> should give 2
@@ -97,18 +144,6 @@ def calculate(worksheet):
         else:
             cell.value = cell.formula
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
