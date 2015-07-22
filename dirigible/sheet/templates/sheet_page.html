@@ -186,7 +186,7 @@
     <div id="id_header_and_toolbar">
         <div id='id_header'>
             <a href="/">
-                <img id="id_small_header_logo" src="/static/dirigible/images/logo_transparent_289x66.png" alt="Dirigible logo" title="Dirigible logo" />
+                <img id="id_small_header_logo" src="/static/dirigible/images/logo_transparent_289x66.png" width="30%" alt="Dirigible logo" title="Dirigible logo" />
             </a>
             {% include "header_links_include.html" %}
         </div>
@@ -212,6 +212,7 @@
             </div>
             <div id="id_toolbar_wrap">
                 <div id='id_toolbar'>
+                    <img src="/static/dirigible/images/spinner.gif" alt="spinner" id="id_spinner_image" class="hidden" />
                     <div id='id_toolbar_buttons'>
                     {% if sheet.public_view_mode and not user.is_staff %}
                         <img id='id_export_button' alt="Download as CSV file" title="Download as CSV file" src='/static/dirigible/images/toolbar/export_button.png' />
@@ -221,13 +222,11 @@
                         <img id='id_cut_button' alt="Cut" title="Cut" src='/static/dirigible/images/toolbar/cut_button.png' />
                         <img id='id_copy_button' alt="Copy" title="Copy" src='/static/dirigible/images/toolbar/copy_button.png' />
                         <img id='id_paste_button' alt="Paste" title="Paste" src='/static/dirigible/images/toolbar/paste_button.png' />
-                        <img id='id_security_button' src='/static/dirigible/images/toolbar/security_button.png' />
                         <img id='id_recalc_button' alt="Recalculate sheet (F9)" title="Recalculate sheet (F9)" src='/static/dirigible/images/toolbar/recalc_button.png' />
                     {% endif %}
 
+                        <div id="id_buffering_message" class="hidden">buffering ...</div>
                     </div>
-                    <img src="/static/dirigible/images/spinner.gif" alt="spinner" id="id_spinner_image" class="hidden" />
-                    <div id="id_buffering_message" class="hidden">buffering ...</div>
                 </div>
             </div>
         </div>

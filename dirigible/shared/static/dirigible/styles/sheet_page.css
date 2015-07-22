@@ -10,7 +10,6 @@ body {
     /* We explicitly set the header height here so that Chrome
        doesn't miscalculate the height and cause the bottom
        of the grid to fall off the window */
-    height: 160px;
 }
 
 #id_ie_warning {
@@ -37,25 +36,23 @@ body {
 
 
 #id_sheet_name_wrap {
-    width: 60%;
+    width: 50%;
     float: left;
 }
 
 #id_sheet_name {
     margin-left: 10px;
-    font-size: 28pt;
+    font-size: 20pt;
     margin-right: 10px;
-    margin-top: 20px;
     overflow: hidden;
-    height: 32pt;
+    height: 2ex;
 }
 
 
 #edit-id_sheet_name {
     margin-left: 6px;
     margin-right: 10px;
-    margin-top: 17px;
-    font-size: 28pt;
+    font-size: 20pt;
     width: 97%;
 }
 
@@ -66,7 +63,7 @@ body {
 
 /* The icon toolbar */
 #id_toolbar_wrap {
-    width: 40%;
+    width: 50%;
     float: right;
 }
 
@@ -86,12 +83,12 @@ body {
 }
 
 #id_toolbar_buttons {
-    float: left;
-    margin-top: 32px;
+    float: right;
 }
 
 #id_spinner_image {
-    float: right;
+    float: left;
+    height: 32px;
 }
 
 #id_buffering_message {
