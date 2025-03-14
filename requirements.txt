@@ -1,4 +1,4 @@
-Django==1.7
+Django==4.2.20
 argparse==1.2.1
 chardet==2.2.1
 mock==1.0.1
